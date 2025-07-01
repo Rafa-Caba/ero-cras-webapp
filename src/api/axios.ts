@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:3001/api', // Cámbialo al pasar a producción
+    baseURL: import.meta.env.VITE_API_URL + '/api',
     headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -9,10 +9,9 @@ const api = axios.create({
     timeout: 10000 // tiempo máximo de espera (opcional)
 });
 
-
 api.interceptors.response.use(
-    res => res,
-    async err => {
+    (res: any) => res,
+    async (err: any) => {
         const originalRequest = err.config;
         if (err.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
@@ -24,7 +23,6 @@ api.interceptors.response.use(
                 originalRequest.headers['Authorization'] = `Bearer ${res.data.accessToken}`;
                 return api(originalRequest);
             } catch (e) {
-                // Redirige a login o borra tokens
                 return Promise.reject(e);
             }
         }

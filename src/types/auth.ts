@@ -12,9 +12,14 @@ export interface LoginForm {
 
 export interface AuthUsuario {
     _id: string;
+
     nombre: string;
     username: string;
     correo: string;
+    password: string;
+    password2?: string;
+    rol: 'admin' | 'editor' | 'viewer';
+    fotoPerfil: File | null;
     fotoPerfilUrl?: string;
 }
 
