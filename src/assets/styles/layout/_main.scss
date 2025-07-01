@@ -1,0 +1,101 @@
+main {
+    .sidebar {
+        background: #EAD4FF;
+    }
+
+    .meaning {
+        background: rgb(245, 236, 255);
+        border: 2px solid #CFAEF9;
+    }
+
+    .logo {
+        background: #EAD4FF;
+
+    }
+
+    .canto {
+        background: #EAD4FF;
+
+    }
+
+    .logo {
+        background: #EAD4FF;
+
+    }
+
+    .galeria {
+        background: #EAD4FF;
+
+    }
+
+    .botones-titulo {
+        background: #CFAEF9;
+
+    }
+
+    .icono {
+        color: black;
+
+    }
+
+    .canto-single-link {
+        color: #000;
+
+        &:hover {
+            color: #8a36f8;
+        }
+    }
+
+    .codigo_login {
+        background: #EAD4FF;
+
+    }
+
+    .form-contenedor {
+        background: #EAD4FF;
+        border: 2px solid #CFAEF9;
+
+    }
+
+    .form-contenedor {
+        border: 2px solid #CFAEF9;
+        background: #EAD4FF;
+
+        .icono {
+            cursor: pointer;
+        }
+
+        &hover {
+            background: #b68fe6;
+        }
+
+    }
+
+    .izquierda,
+    .derecha {
+        color: #000;
+
+        &:hover {
+            color: #8a36f8;
+
+        }
+    }
+
+    .images-carousel {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+
+        .carousel,
+        .carousel-inner,
+        .carousel-item,
+        img {
+            width: 100%;
+        }
+    }
+
+    h2 {
+        overflow: hidden;
+        resize: none;
+    }
+}

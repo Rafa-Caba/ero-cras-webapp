@@ -1,0 +1,145 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #CFAEF9;
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+
+    a {
+        color: #fff;
+    }
+
+    p {
+        padding: 5px 5px;
+        text-align: center;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        overflow: hidden;
+        resize: none;
+    }
+}
+
+.login_btn {
+    color: #fff;
+    font-size: 1rem;
+    padding: 5px 20px;
+    background: #A966FF;
+    border-radius: 10px;
+}
+
+.login_btn:hover {
+    background: #8a36f8;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.general_btn {
+    color: #fff;
+    font-size: 1rem;
+    padding: 5px 20px;
+    background: #A966FF;
+    border-radius: 10px;
+}
+
+.general_btn:hover {
+    background: #8a36f8;
+    color: #fff;
+}
+
+.destacar_btn {
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 4px 15px;
+    background: #A966FF;
+    border-radius: 10px;
+}
+
+.destacar_btn:hover {
+    background: #8a36f8;
+    color: #fff;
+}
+
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.table-responsive,
+.galeria {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.texto-scrollable {
+    max-height: 52vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.usuarios-contenedor {
+    min-height: 55vh;
+    max-height: 55vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.cantos-contenedor {
+    min-height: 77vh;
+    max-height: 77vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.canto-contenedor {
+    min-height: 52vh;
+    max-height: 52vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.imagen-fija {
+    width: 100%;
+    max-width: 650px;
+    height: 350px;
+    object-fit: cover;
+    /* otras opciones: contain, fill */
+    border-radius: 10px;
+}
+
+.galeria-img {
+    width: 200px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.galeria-img:hover {
+    transform: scale(1.05);
+}
