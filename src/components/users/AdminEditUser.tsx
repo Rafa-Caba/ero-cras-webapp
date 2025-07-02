@@ -103,7 +103,7 @@ export const AdminEditUser = () => {
     };
 
     return (
-        <Container className="my-4 col-md-6">
+        <Container className="my-4">
             <h3>Editar Usuario</h3>
 
             <Form onSubmit={handleSubmit} encType="multipart/form-data">

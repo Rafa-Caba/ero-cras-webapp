@@ -95,113 +95,111 @@ export const AdminNewUser = () => {
     }, [previewUrl]);
 
     return (
-        <section className="center col-12 col-md-8 d-flex flex-column align-items-center order-0 order-md-1 my-3">
-            <article className="m-3 col-md-6">
-                <div className="form-canto">
-                    <h3>Nuevo Usuario</h3>
+        <article className="m-3 col-md-6">
+            <div className="form-canto">
+                <h3>Nuevo Usuario</h3>
 
-                    <Form onSubmit={handleSubmit} encType="multipart/form-data">
-                        <Form.Group className="mb-3" controlId="formNombre">
-                            <Form.Label>Nombre</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="nombre"
-                                placeholder="Nombre Completo"
-                                value={formData.nombre}
-                                onChange={handleChange}
-                                required
+                <Form onSubmit={handleSubmit} encType="multipart/form-data">
+                    <Form.Group className="mb-3" controlId="formNombre">
+                        <Form.Label>Nombre</Form.Label>
+                        <Form.Control
+                            type="text"
+                            name="nombre"
+                            placeholder="Nombre Completo"
+                            value={formData.nombre}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="formUsername">
+                        <Form.Label>Username</Form.Label>
+                        <Form.Control
+                            type="text"
+                            name="username"
+                            placeholder="Nombre de usuario"
+                            value={formData.username}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="formCorreo">
+                        <Form.Label>Correo</Form.Label>
+                        <Form.Control
+                            type="email"
+                            name="correo"
+                            placeholder="Correo electrónico"
+                            value={formData.correo}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="formPassword">
+                        <Form.Label>Contraseña</Form.Label>
+                        <Form.Control
+                            type="password"
+                            name="password"
+                            placeholder="Contraseña"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="formPassword2">
+                        <Form.Label>Repetir Contraseña</Form.Label>
+                        <Form.Control
+                            type="password"
+                            name="password2"
+                            placeholder="Repite la contraseña"
+                            value={formData.password2}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="formFile">
+                        <Form.Label>Foto de perfil</Form.Label>
+                        <Form.Control
+                            type="file"
+                            name="fotoPerfil"
+                            accept="image/*"
+                            onChange={handleChange}
+                        />
+                    </Form.Group>
+
+                    {previewUrl && (
+                        <div className="text-center mb-4">
+                            <p className="fw-bold mb-2">Vista previa:</p>
+                            <img
+                                src={previewUrl}
+                                alt="Vista previa"
+                                className="img-fluid rounded"
+                                style={{ maxHeight: '150px' }}
                             />
-                        </Form.Group>
+                        </div>
+                    )}
 
-                        <Form.Group className="mb-3" controlId="formUsername">
-                            <Form.Label>Username</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="username"
-                                placeholder="Nombre de usuario"
-                                value={formData.username}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Form.Group>
+                    {errores.length > 0 && (
+                        <div className="alert alert-danger">
+                            <ul className="mb-0">
+                                {errores.map((error, i) => (
+                                    <li key={i}>{error}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
-                        <Form.Group className="mb-3" controlId="formCorreo">
-                            <Form.Label>Correo</Form.Label>
-                            <Form.Control
-                                type="email"
-                                name="correo"
-                                placeholder="Correo electrónico"
-                                value={formData.correo}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="formPassword">
-                            <Form.Label>Contraseña</Form.Label>
-                            <Form.Control
-                                type="password"
-                                name="password"
-                                placeholder="Contraseña"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="formPassword2">
-                            <Form.Label>Repetir Contraseña</Form.Label>
-                            <Form.Control
-                                type="password"
-                                name="password2"
-                                placeholder="Repite la contraseña"
-                                value={formData.password2}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="formFile">
-                            <Form.Label>Foto de perfil</Form.Label>
-                            <Form.Control
-                                type="file"
-                                name="fotoPerfil"
-                                accept="image/*"
-                                onChange={handleChange}
-                            />
-                        </Form.Group>
-
-                        {previewUrl && (
-                            <div className="text-center mb-4">
-                                <p className="fw-bold mb-2">Vista previa:</p>
-                                <img
-                                    src={previewUrl}
-                                    alt="Vista previa"
-                                    className="img-fluid rounded"
-                                    style={{ maxHeight: '150px' }}
-                                />
-                            </div>
-                        )}
-
-                        {errores.length > 0 && (
-                            <div className="alert alert-danger">
-                                <ul className="mb-0">
-                                    {errores.map((error, i) => (
-                                        <li key={i}>{error}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        <Button type="submit" className="general_btn">
-                            Crear usuario
-                        </Button>
-                        <Button className='ms-2' variant="secondary" onClick={() => navigate("/admin/users")}>
-                            Cancelar
-                        </Button>
-                    </Form>
-                </div>
-            </article>
-        </section>
+                    <Button type="submit" className="general_btn">
+                        Crear usuario
+                    </Button>
+                    <Button className='ms-2' variant="secondary" onClick={() => navigate("/admin/users")}>
+                        Cancelar
+                    </Button>
+                </Form>
+            </div>
+        </article>
     );
 };

@@ -1,9 +1,9 @@
 import jesusito from '/images/jesusito.jpg';
 
-const SidebarLeft = () => {
+export const SidebarLeft = () => {
     return (
-        <section className="sidebar col-12 col-md-2 d-flex flex-column align-items-center order-2 order-md-0">
-            <div className="col-9 my-5">
+        <aside className="layout-menu-izquierdo d-flex flex-column align-items-center order-2 order-md-0">
+            <div className="my-5">
                 <img src={jesusito} className="img-fluid fade-in" alt="Jesusito" />
                 <div className='mt-4'>
                     <h3 className='fw-bold'>Noticias</h3>
@@ -15,8 +15,6 @@ const SidebarLeft = () => {
 
                 </div>
             </div>
-        </section>
+        </aside>
     );
 };
-
-export default SidebarLeft;

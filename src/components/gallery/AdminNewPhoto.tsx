@@ -61,59 +61,57 @@ export const AdminNewPhoto = () => {
     };
 
     return (
-        <section className="center col-12 col-md-8 d-flex flex-column align-items-center order-0 order-md-1">
-            <article className="container col-md-8 p-4">
-                <div className="form-photo">
-                    <h2 className="titulo mb-4">Nueva Imagen</h2>
-                    <Form className="w-100 px-4" onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Título</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="titulo"
-                                value={formData.titulo}
-                                onChange={handleChange}
-                                placeholder="Título de la imagen"
-                            />
-                        </Form.Group>
+        <article className="container col-md-8 p-4">
+            <div className="form-photo">
+                <h2 className="titulo mb-4">Nueva Imagen</h2>
+                <Form className="w-100 px-4" onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Título</Form.Label>
+                        <Form.Control
+                            type="text"
+                            name="titulo"
+                            value={formData.titulo}
+                            onChange={handleChange}
+                            placeholder="Título de la imagen"
+                        />
+                    </Form.Group>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Descripción</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                name="descripcion"
-                                value={formData.descripcion}
-                                onChange={handleChange}
-                                rows={3}
-                                placeholder="Breve descripción"
-                            />
-                        </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Descripción</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            name="descripcion"
+                            value={formData.descripcion}
+                            onChange={handleChange}
+                            rows={3}
+                            placeholder="Breve descripción"
+                        />
+                    </Form.Group>
 
-                        {previewUrl && (
-                            <div className="text-center mb-2">
-                                <p className="text-muted mt-2 mb-2">Previsualización</p>
-                                <Image src={previewUrl} thumbnail fluid style={{ maxHeight: '200px' }} />
-                            </div>
-                        )}
+                    {previewUrl && (
+                        <div className="text-center mb-2">
+                            <p className="text-muted mt-2 mb-2">Previsualización</p>
+                            <Image src={previewUrl} thumbnail fluid style={{ maxHeight: '200px' }} />
+                        </div>
+                    )}
 
-                        <Form.Group className="mb-4">
-                            <Form.Label>Archivo de imagen</Form.Label>
-                            <Form.Control
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                            />
-                        </Form.Group>
+                    <Form.Group className="mb-4">
+                        <Form.Label>Archivo de imagen</Form.Label>
+                        <Form.Control
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                        />
+                    </Form.Group>
 
-                        <Button className="btn general_btn mt-3" type="submit" disabled={cargando}>
-                            {cargando ? <Spinner animation="border" size="sm" /> : 'Subir Imagen'}
-                        </Button>
-                        <Link className="btn btn-secondary mt-3 ms-2" type="submit" to='/admin/gallery'>
-                            Cancelar
-                        </Link>
-                    </Form>
-                </div>
-            </article>
-        </section>
+                    <Button className="btn general_btn mt-3" type="submit" disabled={cargando}>
+                        {cargando ? <Spinner animation="border" size="sm" /> : 'Subir Imagen'}
+                    </Button>
+                    <Link className="btn btn-secondary mt-3 ms-2" type="submit" to='/admin/gallery'>
+                        Cancelar
+                    </Link>
+                </Form>
+            </div>
+        </article>
     );
 };

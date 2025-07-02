@@ -1,9 +1,6 @@
 import { useState } from "react";
 
-import ContactSection from "../../components-public/ContactSection"
-import SidebarLeft from "../../components-public/SidebarLeft"
-import SidebarRight from "../../components-public/SidebarRight"
-
+import ContactSection from "../../components-public/ContactSection";
 
 const Contact = () => {
 
@@ -24,20 +21,14 @@ const Contact = () => {
     };
 
     return (
-        <main className="main row d-flex">
-            <SidebarLeft />
-            <section className="center col-12 col-md-8 mt-5 d-flex flex-column align-items-center order-0 order-md-1">
-                <ContactSection
-                    email={email}
-                    setEmail={setEmail}
-                    emailMessage={emailMessage}
-                    setEmailMessage={setEmailMessage}
-                    handleSubmit={handleSubmit}
-                />
-            </section>
-            <SidebarRight />
-        </main>
-    )
+        <ContactSection
+            email={email}
+            setEmail={setEmail}
+            emailMessage={emailMessage}
+            setEmailMessage={setEmailMessage}
+            handleSubmit={handleSubmit}
+        />
+    );
 }
 
 export default Contact

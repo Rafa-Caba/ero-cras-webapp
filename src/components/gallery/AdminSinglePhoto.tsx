@@ -50,44 +50,42 @@ export const AdminSinglePhoto = ({ photoId }: Props) => {
     if (!imagen) return <p className="text-center mt-5">Cargando imagen...</p>;
 
     return (
-        <section className="col-12 col-md-8 d-flex flex-column align-items-center order-0 order-md-1 my-3">
-            <div className="galeria d-flex flex-column px-3 align-items-center w-100">
-                <div className="contenedor d-flex justify-content-center pt-3 mb-3">
-                    <h2 className="titulo">
-                        Imagen: {imagen.titulo}
-                    </h2>
-                </div>
-                <div className="contenedor" style={{ minHeight: '65vh' }}>
-                    <div className="d-flex flex-column mb-3" style={{ minWidth: '30vw' }}>
-                        <img
-                            className="img-fluid"
-                            src={imagen.imagenUrl}
-                            alt={imagen.titulo}
-                        />
-                        <div className="imagen_options d-flex justify-content-center mt-3">
-                            <Link
-                                to={`/admin/edit_imagen/${imagen._id}`}
-                                className="mt-3 me-3 btn general_btn">
-                                Editar
-                            </Link>
-                            <Link
-                                className="mt-3 me-3 btn general_btn"
-                                onClick={() => navigate('/admin/gallery')}
-                                to='/admin/gallery'
-                            >
-                                Regresar
-                            </Link>
-                            <Button
-                                variant="danger"
-                                className="mt-3 px-4"
-                                onClick={handleDelete}
-                            >
-                                Borrar
-                            </Button>
-                        </div>
+        <div className="d-flex flex-column px-3 align-items-center w-100">
+            <div className="contenedor d-flex justify-content-center pt-3 mb-3">
+                <h2 className="titulo">
+                    Imagen: {imagen.titulo}
+                </h2>
+            </div>
+            <div className="contenedor" style={{ minHeight: '65vh' }}>
+                <div className="d-flex flex-column mb-3" style={{ minWidth: '30vw' }}>
+                    <img
+                        className="img-fluid"
+                        src={imagen.imagenUrl}
+                        alt={imagen.titulo}
+                    />
+                    <div className="imagen_options d-flex justify-content-center mt-3">
+                        <Link
+                            to={`/admin/edit_imagen/${imagen._id}`}
+                            className="mt-3 me-3 btn general_btn">
+                            Editar
+                        </Link>
+                        <Link
+                            className="mt-3 me-3 btn general_btn"
+                            onClick={() => navigate('/admin/gallery')}
+                            to='/admin/gallery'
+                        >
+                            Regresar
+                        </Link>
+                        <Button
+                            variant="danger"
+                            className="mt-3 px-4"
+                            onClick={handleDelete}
+                        >
+                            Borrar
+                        </Button>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     );
 };

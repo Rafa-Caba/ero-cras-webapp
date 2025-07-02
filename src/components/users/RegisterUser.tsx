@@ -89,108 +89,112 @@ export const RegisterUser = () => {
     }, [formData.fotoPerfil]);
 
     return (
-        <Container className="mt-4 col-md-6" style={{ minHeight: '82vh' }}>
-            <h3>Registrar Usuario</h3>
+        <main className='layout-main mx-3'>
+            <Container className="mt-4 d-flex flex-column justify-content-center col-12 col-md-6">
+                <h3>Registrar Usuario</h3>
 
-            <Form onSubmit={handleSubmit} encType="multipart/form-data">
-                <Form.Group className="mb-3" controlId="formNombre">
-                    <Form.Label>Nombre</Form.Label>
-                    <Form.Control
-                        type="text"
-                        name="nombre"
-                        placeholder="Nombre Completo"
-                        value={formData.nombre}
-                        onChange={handleChange}
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="formNombre">
-                    <Form.Label>Usuario</Form.Label>
-                    <Form.Control
-                        type="text"
-                        name="username"
-                        placeholder="Username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="formCorreo">
-                    <Form.Label>Correo</Form.Label>
-                    <Form.Control
-                        type="email"
-                        name="correo"
-                        placeholder="Correo electrónico"
-                        value={formData.correo}
-                        onChange={handleChange}
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="formPassword">
-                    <Form.Label>Contraseña</Form.Label>
-                    <Form.Control
-                        type="password"
-                        name="password"
-                        placeholder="Contraseña"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="formPassword2">
-                    <Form.Label>Repetir Contraseña</Form.Label>
-                    <Form.Control
-                        type="password"
-                        name="password2"
-                        placeholder="Repetir Contraseña"
-                        value={formData.password2}
-                        onChange={handleChange}
-                        required
-                    />
-                </Form.Group>
-
-                {previewUrl && (
-                    <div className="mt-3 text-center">
-                        <p className="mb-2 fw-bold">Vista previa:</p>
-                        <img
-                            src={previewUrl}
-                            alt={`Vista previa de la imagen: ${formData.username || "sin título"}`}
-                            className="img-fluid rounded"
-                            style={{ maxHeight: "250px" }}
+                <Form onSubmit={handleSubmit} encType="multipart/form-data">
+                    <Form.Group className="mb-3" controlId="formNombre">
+                        <Form.Label>Nombre</Form.Label>
+                        <Form.Control
+                            type="text"
+                            name="nombre"
+                            placeholder="Nombre Completo"
+                            value={formData.nombre}
+                            onChange={handleChange}
+                            required
                         />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="formNombre">
+                        <Form.Label>Usuario</Form.Label>
+                        <Form.Control
+                            type="text"
+                            name="username"
+                            placeholder="Username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="formCorreo">
+                        <Form.Label>Correo</Form.Label>
+                        <Form.Control
+                            type="email"
+                            name="correo"
+                            placeholder="Correo electrónico"
+                            value={formData.correo}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="formPassword">
+                        <Form.Label>Contraseña</Form.Label>
+                        <Form.Control
+                            type="password"
+                            name="password"
+                            placeholder="Contraseña"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="formPassword2">
+                        <Form.Label>Repetir Contraseña</Form.Label>
+                        <Form.Control
+                            type="password"
+                            name="password2"
+                            placeholder="Repetir Contraseña"
+                            value={formData.password2}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
+
+                    {previewUrl && (
+                        <div className="mt-3 text-center">
+                            <p className="mb-2 fw-bold">Vista previa:</p>
+                            <img
+                                src={previewUrl}
+                                alt={`Vista previa de la imagen: ${formData.username || "sin título"}`}
+                                className="img-fluid rounded"
+                                style={{ maxHeight: "250px" }}
+                            />
+                        </div>
+                    )}
+                    <Form.Group className="mb-3" controlId="formFile">
+                        <Form.Label>Foto de perfil</Form.Label>
+                        <Form.Control
+                            type="file"
+                            name="fotoPerfil"
+                            accept="image/*"
+                            onChange={handleChange}
+                        />
+                    </Form.Group>
+
+                    <div className='text-center mb-3'>
+                        <Button type="submit" className="general_btn">Registrar</Button>
                     </div>
-                )}
-                <Form.Group className="mb-3" controlId="formFile">
-                    <Form.Label>Foto de perfil</Form.Label>
-                    <Form.Control
-                        type="file"
-                        name="fotoPerfil"
-                        accept="image/*"
-                        onChange={handleChange}
-                    />
-                </Form.Group>
 
-                <Button type="submit" className="general_btn" variant="">Registrar</Button>
+                    {errores.length > 0 && (
+                        <div className="alert alert-danger">
+                            <ul className="mb-0">
+                                {errores.map((error, i) => (
+                                    <li key={i}>{error}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
-                {errores.length > 0 && (
-                    <div className="alert alert-danger">
-                        <ul className="mb-0">
-                            {errores.map((error, i) => (
-                                <li key={i}>{error}</li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-
-                <p className="d-flex flex-column">
-                    ¿Ya tienes cuenta?
-                    <a className="derecha" href="/admin/login">Iniciar Sesión</a>
-                </p>
-            </Form>
-        </Container>
+                    <p className="d-flex flex-column">
+                        ¿Ya tienes cuenta?
+                        <a className="derecha" href="/admin/login">Iniciar Sesión</a>
+                    </p>
+                </Form>
+            </Container>
+        </main>
     );
 };

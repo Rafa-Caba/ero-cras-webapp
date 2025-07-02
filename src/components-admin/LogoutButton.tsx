@@ -11,7 +11,7 @@ const LogoutButton = () => {
     };
 
     return (
-        <div className='d-flex justify-content-center mt-3'>
+        <div className='d-flex justify-content-center mt-0'>
             <button onClick={handleLogout} className="btn general_btn py-1 px-3">
                 Cerrar Sesión
             </button>

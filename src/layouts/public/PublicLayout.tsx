@@ -1,13 +1,26 @@
 import { Outlet } from 'react-router-dom';
-import Header from '../../components-public/Header';
-import Footer from '../../components-public/Footer';
+
+import { Header } from '../../components-public/Header';
+import { NavBar } from '../../components-public/NavBar';
+import { SidebarLeft } from '../../components-public/SidebarLeft';
+import { SidebarRight } from '../../components-public/SidebarRight';
+import { Footer } from '../../components-public/Footer';
 
 const PublicLayout = () => (
-    <div className="d-flex flex-column min-vh-100 w-100"> {/* Forza 100% alto y ancho */}
+    <div className="layout-container">
         <Header />
-        <main className="flex-grow-1"> {/* Ocupa todo el espacio restante */}
-            <Outlet />
+        <NavBar />
+
+        <main className="layout-main">
+            <SidebarLeft />
+
+            <section className="layout-content">
+                <Outlet />
+            </section>
+
+            <SidebarRight />
         </main>
+
         <Footer />
     </div>
 );

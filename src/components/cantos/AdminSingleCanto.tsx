@@ -64,43 +64,41 @@ const AdminSingleCanto = ({ cantoId }: Props) => {
     });
 
     return (
-        <section className="center col-12 col-md-8 d-flex flex-column align-items-center order-0 order-md-1">
-            <div className="canto p-3 w-100 text-center my-3">
-                <div>
-                    <h2 className="titulo">{canto.titulo}</h2>
-                    <p className="fst-italic">{canto.tipo}</p>
+        <div className="canto p-3 w-100 text-center my-3">
+            <div>
+                <h2 className="titulo">{canto.titulo}</h2>
+                <p className="fst-italic">{canto.tipo}</p>
 
-                    <div className=".texto-scrollable">
-                        {/* Responsive canto texto */}
-                        <p className="d-block d-md-none text-start mb-3 lh-base fs-6 texto-scrollable">
-                            {canto.texto.split("\n").map((line, i) => (
-                                <span key={i}>{line}<br /></span>
-                            ))}
-                        </p>
-                        <p className="d-none d-md-block text-center mb-3 fs-4 texto-scrollable">
-                            {canto.texto.split("\n").map((line, i) => (
-                                <span key={i}>{line}<br /></span>
-                            ))}
-                        </p>
+                <div className=".texto-scrollable">
+                    {/* Responsive canto texto */}
+                    <p className="d-block d-md-none text-start mb-3 lh-base fs-6 texto-scrollable">
+                        {canto.texto.split("\n").map((line, i) => (
+                            <span key={i}>{line}<br /></span>
+                        ))}
+                    </p>
+                    <p className="d-none d-md-block text-center mb-3 fs-4 texto-scrollable">
+                        {canto.texto.split("\n").map((line, i) => (
+                            <span key={i}>{line}<br /></span>
+                        ))}
+                    </p>
 
-                    </div>
+                </div>
 
-                    <p className="fst-italic mb-4 fw-bold">{canto.compositor}</p>
+                <p className="fst-italic mb-4 fw-bold">{canto.compositor}</p>
 
-                    <div className="m-0">
-                        <Link to={`/admin/edit_canto/${canto._id}`} className="btn general_btn me-2">
-                            Editar
-                        </Link>
-                        <Link to="/admin/cantos" className="btn general_btn me-2">
-                            Volver
-                        </Link>
-                        <Button variant="danger" onClick={handleDelete}>
-                            Borrar
-                        </Button>
-                    </div>
+                <div className="m-0">
+                    <Link to={`/admin/edit_canto/${canto._id}`} className="btn general_btn me-2">
+                        Editar
+                    </Link>
+                    <Link to="/admin/cantos" className="btn general_btn me-2">
+                        Volver
+                    </Link>
+                    <Button variant="danger" onClick={handleDelete}>
+                        Borrar
+                    </Button>
                 </div>
             </div>
-        </section>
+        </div>
     );
 };
 

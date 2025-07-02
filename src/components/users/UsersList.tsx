@@ -66,160 +66,158 @@ export const UsersList = () => {
     };
 
     return (
-        <section className="galeria col-12 d-flex flex-column align-items-center order-0 order-md-1 p-4 mb-2 w-100">
-            <div className="table-responsive w-100">
-                <div className="d-flex flex-column align-items-center w-100 my-1">
-                    <h2 className="mb-4">Usuarios</h2>
-                    <div className="botones mb-3">
-                        <Link to="/admin" className="btn general_btn px-3 m-2">Inicio</Link>
-                        <Link to="/admin/users/new_user" className="btn general_btn me-2">Nuevo Usuario</Link>
-                    </div>
-                </div>
-
-                <div className="mb-2 w-100">
-                    <input
-                        type="text"
-                        placeholder="Buscar por nombre, username o correo"
-                        className="form-control mb-2"
-                        value={busqueda}
-                        onChange={(e) => setBusqueda(e.target.value)}
-                    />
-                </div>
-                <div className='usuarios-contenedor mb-2'>
-                    {cargando
-                        ? <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '300px' }}>
-                            <Spinner animation="border" />
-                        </div>
-                        : (
-                            // <div>
-                            //     <Table bordered hover className="align-middle text-center fade-in">
-                            //         <thead className="table-dark">
-                            //             <tr>
-                            //                 <th>Foto</th>
-                            //                 <th>Nombre</th>
-                            //                 <th>Username</th>
-                            //                 <th>Correo</th>
-                            //                 <th>Acciones</th>
-                            //             </tr>
-                            //         </thead>
-                            //         <tbody>
-                            //             {usuarios.length === 0 ? (
-                            //                 <tr>
-                            //                     <td colSpan={5}>No hay usuarios registrados.</td>
-                            //                 </tr>
-                            //             ) : (
-                            //                 usuarios.map(usuario => (
-                            //                     <tr key={usuario._id}>
-                            //                         <td>
-                            //                             <Image
-                            //                                 src={usuario.fotoPerfilUrl || '/images/default-user.png'}
-                            //                                 // onError={(e) => (e.currentTarget.src = '/default-user.png')}
-                            //                                 roundedCircle
-                            //                                 height={60}
-                            //                                 width={60}
-                            //                                 alt={usuario.nombre}
-                            //                                 style={{
-                            //                                     objectFit: 'cover',
-                            //                                     width: '60px',
-                            //                                     height: '60px',
-                            //                                     minWidth: '60px',
-                            //                                     minHeight: '60px'
-                            //                                 }}
-                            //                             />
-                            //                         </td>
-                            //                         <td>{usuario.nombre}</td>
-                            //                         <td>{usuario.username}</td>
-                            //                         <td>{usuario.correo}</td>
-                            //                         <td>
-                            //                             <Link className='btn general_btn me-2' to={`/admin/edit_user/${usuario._id}`}>
-                            //                                 Editar Usuario
-                            //                             </Link>
-                            //                             <Button
-                            //                                 variant="danger"
-                            //                                 onClick={() => deleteUser(usuario._id)}
-                            //                             >
-                            //                                 Eliminar
-                            //                             </Button>
-                            //                         </td>
-                            //                     </tr>
-                            //                 ))
-                            //             )}
-                            //         </tbody>
-                            //     </Table>
-                            // </div>
-                            <>
-                                <Table bordered hover responsive className="text-center align-middle">
-                                    <thead className="table-dark">
-                                        <tr>
-                                            <th>Foto</th>
-                                            <th>Nombre</th>
-                                            <th>Username</th>
-                                            <th>Rol de Usuario</th>
-                                            <th>Correo</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {usuarios.length === 0 ? (
-                                            <tr><td colSpan={6}>No se encontraron usuarios con ese criterio.</td></tr>
-                                        ) : (
-                                            usuarios.map(usuario => (
-                                                <tr key={usuario._id}>
-                                                    <td>
-                                                        <Image
-                                                            src={usuario.fotoPerfilUrl || '/images/default-user.png'}
-                                                            roundedCircle
-                                                            height={50}
-                                                            width={50}
-                                                            style={{ objectFit: 'cover' }}
-                                                            alt={usuario.nombre}
-                                                        />
-                                                    </td>
-                                                    <td>{usuario.nombre}</td>
-                                                    <td>{usuario.username}</td>
-                                                    <td>{capitalizarPalabra(usuario.rol)}</td>
-                                                    <td>{usuario.correo}</td>
-                                                    <td>
-                                                        <Link to={`/admin/edit_user/${usuario._id}`} className="btn general_btn me-2">Editar</Link>
-                                                        <Button
-                                                            variant="danger"
-                                                            onClick={() => deleteUser(usuario._id)}
-                                                        >
-                                                            Eliminar
-                                                        </Button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </Table>
-
-                                <div className="d-flex justify-content-center gap-2 mt-3">
-                                    <Button
-                                        variant="secondary"
-                                        onClick={() => handlePagina(paginaActual - 1)}
-                                        disabled={paginaActual === 1}
-                                    >
-                                        Anterior
-                                    </Button>
-
-                                    <span className="align-self-center">
-                                        Página {paginaActual} de {totalPaginas}
-                                    </span>
-
-                                    <Button
-                                        variant="secondary"
-                                        onClick={() => handlePagina(paginaActual + 1)}
-                                        disabled={paginaActual === totalPaginas}
-                                    >
-                                        Siguiente
-                                    </Button>
-                                </div>
-                            </>
-                        )
-                    }
+        <div className="table-responsive">
+            <div className="d-flex flex-column align-items-center my-1">
+                <h2 className="mb-4">Usuarios</h2>
+                <div className="botones mb-3">
+                    <Link to="/admin" className="btn general_btn px-3 m-2">Inicio</Link>
+                    <Link to="/admin/users/new_user" className="btn general_btn me-2">Nuevo Usuario</Link>
                 </div>
             </div>
-        </section>
+
+            <div className="mb-2">
+                <input
+                    type="text"
+                    placeholder="Buscar por nombre, username o correo"
+                    className="form-control mb-2"
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                />
+            </div>
+            <div className='mb-2'>
+                {cargando
+                    ? <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '300px' }}>
+                        <Spinner animation="border" />
+                    </div>
+                    : (
+                        // <div>
+                        //     <Table bordered hover className="align-middle text-center fade-in">
+                        //         <thead className="table-dark">
+                        //             <tr>
+                        //                 <th>Foto</th>
+                        //                 <th>Nombre</th>
+                        //                 <th>Username</th>
+                        //                 <th>Correo</th>
+                        //                 <th>Acciones</th>
+                        //             </tr>
+                        //         </thead>
+                        //         <tbody>
+                        //             {usuarios.length === 0 ? (
+                        //                 <tr>
+                        //                     <td colSpan={5}>No hay usuarios registrados.</td>
+                        //                 </tr>
+                        //             ) : (
+                        //                 usuarios.map(usuario => (
+                        //                     <tr key={usuario._id}>
+                        //                         <td>
+                        //                             <Image
+                        //                                 src={usuario.fotoPerfilUrl || '/images/default-user.png'}
+                        //                                 // onError={(e) => (e.currentTarget.src = '/default-user.png')}
+                        //                                 roundedCircle
+                        //                                 height={60}
+                        //                                 width={60}
+                        //                                 alt={usuario.nombre}
+                        //                                 style={{
+                        //                                     objectFit: 'cover',
+                        //                                     width: '60px',
+                        //                                     height: '60px',
+                        //                                     minWidth: '60px',
+                        //                                     minHeight: '60px'
+                        //                                 }}
+                        //                             />
+                        //                         </td>
+                        //                         <td>{usuario.nombre}</td>
+                        //                         <td>{usuario.username}</td>
+                        //                         <td>{usuario.correo}</td>
+                        //                         <td>
+                        //                             <Link className='btn general_btn me-2' to={`/admin/edit_user/${usuario._id}`}>
+                        //                                 Editar Usuario
+                        //                             </Link>
+                        //                             <Button
+                        //                                 variant="danger"
+                        //                                 onClick={() => deleteUser(usuario._id)}
+                        //                             >
+                        //                                 Eliminar
+                        //                             </Button>
+                        //                         </td>
+                        //                     </tr>
+                        //                 ))
+                        //             )}
+                        //         </tbody>
+                        //     </Table>
+                        // </div>
+                        <>
+                            <Table bordered hover responsive className="text-center align-middle mx-auto">
+                                <thead className="table-dark">
+                                    <tr>
+                                        <th>Foto</th>
+                                        <th>Nombre</th>
+                                        <th>Username</th>
+                                        <th>Rol de Usuario</th>
+                                        <th>Correo</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {usuarios.length === 0 ? (
+                                        <tr><td colSpan={6}>No se encontraron usuarios con ese criterio.</td></tr>
+                                    ) : (
+                                        usuarios.map(usuario => (
+                                            <tr key={usuario._id}>
+                                                <td>
+                                                    <Image
+                                                        src={usuario.fotoPerfilUrl || '/images/default-user.png'}
+                                                        roundedCircle
+                                                        height={50}
+                                                        width={50}
+                                                        style={{ objectFit: 'cover' }}
+                                                        alt={usuario.nombre}
+                                                    />
+                                                </td>
+                                                <td>{usuario.nombre}</td>
+                                                <td>{usuario.username}</td>
+                                                <td>{capitalizarPalabra(usuario.rol)}</td>
+                                                <td>{usuario.correo}</td>
+                                                <td>
+                                                    <Link to={`/admin/edit_user/${usuario._id}`} className="btn general_btn mb-2 mb-md-0 me-2">Editar</Link>
+                                                    <Button
+                                                        variant="danger"
+                                                        onClick={() => deleteUser(usuario._id)}
+                                                    >
+                                                        Eliminar
+                                                    </Button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </Table>
+
+                            <div className="d-flex justify-content-center gap-2 mt-3">
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => handlePagina(paginaActual - 1)}
+                                    disabled={paginaActual === 1}
+                                >
+                                    Anterior
+                                </Button>
+
+                                <span className="align-self-center">
+                                    Página {paginaActual} de {totalPaginas}
+                                </span>
+
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => handlePagina(paginaActual + 1)}
+                                    disabled={paginaActual === totalPaginas}
+                                >
+                                    Siguiente
+                                </Button>
+                            </div>
+                        </>
+                    )
+                }
+            </div>
+        </div>
     );
 };

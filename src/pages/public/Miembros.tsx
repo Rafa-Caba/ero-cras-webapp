@@ -1,6 +1,4 @@
 import MiembrosSection from "../../components-public/MiembrosSection"
-import SidebarLeft from "../../components-public/SidebarLeft";
-import SidebarRight from "../../components-public/SidebarRight";
 
 interface Member {
     name: string;
@@ -24,13 +22,7 @@ const miembros: Member[] = [
 
 const Miembros = () => {
     return (
-        <main className="main row d-flex">
-            <SidebarLeft />
-            <section className="center col-12 col-md-8 d-flex flex-column align-items-center order-0 order-md-1">
-                <MiembrosSection members={miembros} />
-            </section>
-            <SidebarRight />
-        </main>
+        <MiembrosSection members={miembros} />
     )
 }
 

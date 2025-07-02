@@ -4,7 +4,7 @@ import type { AxiosResponse } from 'axios';
 import Swal from "sweetalert2";
 import api from "../../api/axios";
 import { useAuth } from "../../hooks/useAuth";
-import AdminFooter from "../../components-admin/AdminFooter";
+import { AdminFooter } from "../../components-admin/AdminFooter";
 import type { Usuario } from "../../types";
 
 interface LoginResponse {
@@ -45,8 +45,8 @@ const AdminLogin = () => {
     };
 
     return (
-        <div className="container" style={{ minWidth: '100vw' }}>
-            <header className="row">
+        <div>
+            <header className="layout-header">
                 <div className="titulo-nav px-0 col-12 d-flex flex-column">
                     <div className="titulo mx-5 text-black d-flex flex-column flex-md-row justify-content-md-between align-items-md-center">
                         <div className="titulo text-center text-md-start mt-3">
@@ -57,47 +57,45 @@ const AdminLogin = () => {
                 </div>
             </header>
 
-            <main className="row" style={{ minHeight: '84vh' }}>
-                <section>
-                    <div className="form-contenedor my-5 mx-auto col-12 col-md-8 d-flex align-items-center justify-content-center">
-                        <article className="my-5 mx-auto w-50 d-flex flex-column align-items-center justify-content-center">
-                            <h2 className="titulo">Iniciar Sesión</h2>
-                            <form className="w-100 mt-4" onSubmit={handleLogin}>
-                                <input
-                                    className="mb-3 form-control"
-                                    type="text"
-                                    name="usuario"
-                                    placeholder="Usuario"
-                                    value={usuarioForm}
-                                    onChange={(e) => setUsuarioForm(e.target.value)}
-                                    required
-                                />
-                                <input
-                                    className="mb-3 form-control"
-                                    type="password"
-                                    name="password"
-                                    placeholder="Contraseña"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
+            <main className="layout-main" style={{ minHeight: '80vh' }}>
+                <div className="my-5 mx-auto col-12 col-md-8 d-flex align-items-center justify-content-center">
+                    <article className="my-5 mx-auto w-50 d-flex flex-column align-items-center justify-content-center">
+                        <h2 className="titulo">Iniciar Sesión</h2>
+                        <form className="w-100 mt-4" onSubmit={handleLogin}>
+                            <input
+                                className="mb-3 form-control"
+                                type="text"
+                                name="usuario"
+                                placeholder="Usuario"
+                                value={usuarioForm}
+                                onChange={(e) => setUsuarioForm(e.target.value)}
+                                required
+                            />
+                            <input
+                                className="mb-3 form-control"
+                                type="password"
+                                name="password"
+                                placeholder="Contraseña"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
 
-                                <button type="submit" className="form-control btn login_btn">
-                                    Login
-                                </button>
+                            <button type="submit" className="form-control btn login_btn">
+                                Login
+                            </button>
 
-                                {error && <p className="text-danger text-center">{error}</p>}
-                            </form>
+                            {error && <p className="text-danger text-center">{error}</p>}
+                        </form>
 
-                            <p>
-                                ¿ No tienes cuenta ?
-                                <Link className="derecha" to="/admin/registrate">
-                                    Regístrate
-                                </Link>
-                            </p>
-                        </article>
-                    </div>
-                </section>
+                        <p>
+                            ¿ No tienes cuenta ?
+                            <Link className="derecha" to="/admin/registrate">
+                                Regístrate
+                            </Link>
+                        </p>
+                    </article>
+                </div>
             </main>
 
             <AdminFooter />
