@@ -1,16 +1,29 @@
-import cruzLogo from '/images/ero-cras-cruz.png';
-import eroLogo from '/images/2019.png';
+import { Image } from 'react-bootstrap';
+import { useGaleriaStore } from '../store/useGaleriaStore';
+import { FaImage } from 'react-icons/fa';
 
 export const AdminSidebarRight = () => {
+    const { imagenes } = useGaleriaStore();
+    const imagenRightMenu = imagenes.find(img => img.imagenRightMenu);
+
     return (
         <aside className="layout-menu-derecho col-12 col-md-2 d-flex flex-column align-content-start order-1 order-md-2">
-            <div className="d-flex flex-column align-items-center justify-content-between">
-                <div className="logo-img my-4 fade-in">
-                    <img className="img-fluid" src={cruzLogo} alt="Ero Cras" />
-                </div>
-
-                <div className="logo-img my-4 mt-auto mx-3 fade-in">
-                    <img className="img-fluid" src={eroLogo} alt="Ero Cras" />
+            <div className="my-3">
+                <div className="imagen-right-container text-center">
+                    {imagenRightMenu ? (
+                        <Image
+                            src={imagenRightMenu.imagenUrl}
+                            alt={imagenRightMenu.titulo}
+                            height={200}
+                            width={140}
+                            className="imagen-fija-right-menu"
+                        />
+                    ) : (
+                        <div className="text-muted d-flex flex-column align-items-center">
+                            <FaImage size={80} color="#ccc" />
+                            <p className="mt-2 fs-6">No hay imagen seleccionada aún</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </aside>

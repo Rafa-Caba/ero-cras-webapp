@@ -1,30 +1,21 @@
 import { Link, useSearchParams } from "react-router-dom";
-// import type { ImagenGaleria } from "../../types";
 import { useEffect, useState } from "react";
-// import { obtenerImagenes } from '../../services/gallery';
 import Swal from "sweetalert2";
 import { Button, Spinner } from "react-bootstrap";
 import { useGaleriaStore } from "../../store/useGaleriaStore";
 
-
 export const AdminGallery = () => {
     const [searchParams] = useSearchParams();
-    // const [imagenes, setImagenes] = useState<ImagenGaleria[]>([]);
-    // const [paginaActual, setPaginaActual] = useState(1);
-    // const [totalPaginas, setTotalPaginas] = useState(1);
     const [cargando, setCargando] = useState(true);
 
-    const { imagenes, fetchImagenes, destacarImagen, totalPaginas, paginaActual } = useGaleriaStore();
+    const { imagenes, fetchImagenes, marcarCampo, totalPaginas, paginaActual } = useGaleriaStore();
 
     useEffect(() => {
         const pageFromURL = parseInt(searchParams.get('p') || '1');
-        // setPaginaActual(pageFromURL);
 
         const obtenerImagenes = async () => {
             try {
                 fetchImagenes(pageFromURL);
-                // setImagenes(data.imagenes);
-                // setTotalPaginas(totalPaginas);
             } catch (error) {
                 Swal.fire("Error", "No se pudieron cargar las imágenes", "error");
             } finally {
@@ -34,6 +25,54 @@ export const AdminGallery = () => {
 
         obtenerImagenes();
     }, [searchParams]);
+
+    const mostrarOpcionesDeMarcado = async (imagenId: string) => {
+        const campos = [
+            { clave: 'imagenInicio', label: 'Imagen de Inicio' },
+            { clave: 'imagenLeftMenu', label: 'Menú Izquierdo' },
+            { clave: 'imagenRightMenu', label: 'Menú Derecho' },
+            { clave: 'imagenNosotros', label: 'Sección Nosotros' },
+            { clave: 'imagenLogo', label: 'Logo' }
+        ];
+
+        const formHtml = campos.map(c =>
+            `<div>
+                <input type="checkbox" id="${c.clave}" name="campo" value="${c.clave}"/>
+                <label for="${c.clave}">${c.label}</label>
+            </div>`
+        ).join('');
+
+        const { value: seleccionados, isConfirmed } = await Swal.fire({
+            title: 'Selecciona los campos',
+            html: formHtml,
+            focusConfirm: false,
+            preConfirm: () => {
+                const inputs = document.querySelectorAll<HTMLInputElement>('input[name="campo"]:checked');
+                const seleccionados = Array.from(inputs).map(input => input.value);
+
+                if (seleccionados.length === 0) {
+                    Swal.showValidationMessage('Selecciona al menos una opción');
+                }
+
+                return seleccionados;
+            },
+            confirmButtonText: 'Guardar',
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!isConfirmed || !seleccionados) return;
+
+        try {
+            for (const campo of seleccionados) {
+                await marcarCampo(imagenId, campo);
+            }
+            await fetchImagenes(paginaActual);
+            Swal.fire('Actualizado', 'Los campos fueron marcados correctamente', 'success');
+        } catch (err) {
+            Swal.fire('Error', 'No se pudo actualizar la imagen', 'error');
+        }
+    };
 
     return (
         <div>
@@ -62,15 +101,20 @@ export const AdminGallery = () => {
 
                                         <p className="fw-bolder mb-0">{imagen.titulo}</p>
                                         <div className="text-center">
-                                            {!imagen.destacada && (
-                                                <Button className="btn destacar_btn" onClick={() => destacarImagen(imagen._id!)}>
-                                                    Pon Imagen de Inicio
-                                                </Button>
-                                            )}
+                                            <Button
+                                                className="btn destacar_btn"
+                                                onClick={() => mostrarOpcionesDeMarcado(imagen._id!)}
+                                            >
+                                                Opciones de Imagen
+                                            </Button>
 
-                                            {imagen.destacada && (
-                                                <span className="badge bg-success py-2 mx-3">Imagen de Inicio</span>
-                                            )}
+                                            <div className="mt-2">
+                                                {imagen.imagenInicio && <span className="badge bg-primary me-1">Inicio</span>}
+                                                {imagen.imagenLeftMenu && <span className="badge bg-secondary me-1">Menú Izq</span>}
+                                                {imagen.imagenRightMenu && <span className="badge bg-info text-dark me-1">Menú Der</span>}
+                                                {imagen.imagenNosotros && <span className="badge bg-warning text-dark me-1">Nosotros</span>}
+                                                {imagen.imagenLogo && <span className="badge bg-success me-1">Logo</span>}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

@@ -4,7 +4,7 @@ import { MyCarousel } from '../../components-public/MyCarousel';
 
 const HomePage = () => {
     return (
-        <div className="w-100 px-3" style={{ maxWidth: '1100px' }}>
+        <div className="px-3">
             <div className="meaning w-100 d-flex flex-column align-items-center">
                 <h2 className="d-none d-md-block">Ero Cras:</h2>
                 <div className="d-flex flex-wrap flex-lg-nowrap flex-column flex-md-row justify-content-evenly align-items-center">
@@ -23,7 +23,7 @@ const HomePage = () => {
             </div>
 
             {/* Carousel */}
-            <div className="images-carousel w-100">
+            <div className="images-carousel my-3 w-100">
                 <MyCarousel />
             </div>
         </div>

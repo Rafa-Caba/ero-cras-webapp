@@ -1,5 +1,5 @@
 .contenedor_tarjeta {
-    margin: 20px;
+    margin: 15px;
 
     &:hover figure {
         -webkit-transform: perspective(600px) rotateY(180deg);
@@ -8,7 +8,7 @@
     }
 
     figure {
-        width: 200px;
+        width: 190px;
         transition: all ease .5s;
         transform-style: preserve-3d;
         transform: perspective(600px) rotateY(0deg);

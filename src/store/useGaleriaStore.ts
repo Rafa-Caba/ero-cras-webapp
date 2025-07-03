@@ -6,26 +6,9 @@ import {
     crearImagen,
     actualizarImagen,
     eliminarImagen,
-    destacarImagen,
+    marcarCampoImagen,
 } from '../services/gallery';
-import type { ImagenGaleria, ImagenResponse, ImagenesResponse } from '../types';
-
-interface GaleriaState {
-    imagenes: ImagenGaleria[];
-    imagenSeleccionada: ImagenGaleria | null;
-    paginaActual: number;
-    totalPaginas: number;
-    cargando: boolean;
-    error: string | null;
-
-    // Acciones
-    fetchImagenes: (pagina?: number) => Promise<void>;
-    fetchImagenPorId: (id: string) => Promise<void>;
-    crearNuevaImagen: (formData: FormData) => Promise<void>;
-    actualizarImagenExistente: (id: string, formData: FormData) => Promise<void>;
-    destacarImagen: (id: string) => Promise<ImagenResponse>;
-    eliminarImagenPorId: (id: string) => Promise<void>;
-}
+import type { GaleriaState } from '../types';
 
 export const useGaleriaStore = create<GaleriaState>()(
     persist(
@@ -40,7 +23,7 @@ export const useGaleriaStore = create<GaleriaState>()(
             fetchImagenes: async (pagina = 1) => {
                 try {
                     set({ cargando: true, error: null });
-                    const data: ImagenesResponse = await obtenerImagenes(pagina);
+                    const data = await obtenerImagenes(pagina);
                     set({
                         imagenes: data.imagenes,
                         paginaActual: data.paginaActual,
@@ -90,11 +73,11 @@ export const useGaleriaStore = create<GaleriaState>()(
                 }
             },
 
-            destacarImagen: async (id: string) => {
+            marcarCampo: async (id, campo) => {
                 try {
                     set({ cargando: true, error: null });
-                    const data = await destacarImagen(id);
-                    const refreshed = await obtenerImagenes(); // <-- refresca la lista
+                    const data = await marcarCampoImagen(id, campo);
+                    const refreshed = await obtenerImagenes();
                     set({
                         imagenes: refreshed.imagenes,
                         paginaActual: refreshed.paginaActual,
@@ -122,7 +105,7 @@ export const useGaleriaStore = create<GaleriaState>()(
             },
         }),
         {
-            name: 'galeria-store', // clave del localStorage
+            name: 'galeria-store',
         }
     )
 );

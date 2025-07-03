@@ -1,6 +1,11 @@
-import eroCras2021 from '/images/erocras-2021.jpg';
+import { Image } from 'react-bootstrap';
+import { useGaleriaStore } from '../store/useGaleriaStore';
+import { FaImage } from 'react-icons/fa';
 
 const NosotrosSection = () => {
+    const { imagenes } = useGaleriaStore();
+    const imagenNosotros = imagenes.find(img => img.imagenNosotros);
+
     return (
         <section className="center col-12 d-flex flex-column align-items-center order-0 order-md-1">
             <div className="nosotros galeria my-3 mx-0 mx-md-2">
@@ -24,8 +29,21 @@ const NosotrosSection = () => {
                     </p>
                 </div>
 
-                <div className="imagen p-2 p-md-5">
-                    <img className="img-fluid fade-in" src={eroCras2021} alt="Ero Cras" />
+                <div className="imagen-nosotros-container text-center my-3 mt-auto fade-in">
+                    {imagenNosotros ? (
+                        <Image
+                            src={imagenNosotros.imagenUrl}
+                            alt={imagenNosotros.titulo}
+                            height={380}
+                            width={650}
+                            className="imagen-fija-inicio"
+                        />
+                    ) : (
+                        <div className="text-muted d-flex flex-column align-items-center">
+                            <FaImage size={100} color="#ccc" />
+                            <p className="mt-2">No hay imagen de inicio aún</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </section>

@@ -48,12 +48,6 @@ function App() {
                 root.style.setProperty(`--color-${colorClass}`, color);
             });
         }
-
-        console.log({
-            themes: {
-                ...themes
-            }
-        });
     }, [themes]);
 
     return (

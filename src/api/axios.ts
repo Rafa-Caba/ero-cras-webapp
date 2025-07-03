@@ -3,10 +3,9 @@ import axios from 'axios';
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL + '/api',
     headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
-    timeout: 10000 // tiempo máximo de espera (opcional)
+    timeout: 10000
 });
 
 api.interceptors.response.use(

@@ -1,10 +1,30 @@
-import jesusito from '/images/jesusito.jpg';
+import { Image } from "react-bootstrap";
+import { FaImage } from "react-icons/fa";
+import { useGaleriaStore } from "../store/useGaleriaStore";
 
 export const AdminSidebarLeft = () => {
+    const { imagenes } = useGaleriaStore();
+    const imagenLeftMenu = imagenes.find(img => img.imagenLeftMenu);
+
     return (
         <aside className="layout-menu-izquierdo d-flex flex-column align-items-center order-2 order-md-0">
-            <div className="col-9 my-5">
-                <img src={jesusito} className="img-fluid fade-in" alt="Jesusito" />
+            <div className="my-3">
+                <div className="imagen-left-container text-center">
+                    {imagenLeftMenu ? (
+                        <Image
+                            src={imagenLeftMenu.imagenUrl}
+                            alt={imagenLeftMenu.titulo}
+                            height={200}
+                            width={140}
+                            className="imagen-fija-left-menu"
+                        />
+                    ) : (
+                        <div className="text-muted d-flex flex-column align-items-center">
+                            <FaImage size={80} color="#ccc" />
+                            <p className="mt-2 fs-6">No hay imagen seleccionada aún</p>
+                        </div>
+                    )}
+                </div>
                 <div className='mt-4'>
                     <h3 className='fw-bold'>Noticias</h3>
                     <ul>

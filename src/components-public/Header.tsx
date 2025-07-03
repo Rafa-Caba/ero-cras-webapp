@@ -14,13 +14,19 @@ export const Header = () => {
                     <div className="titulo text-center text-md-start">
                         <h1>Ero Cras Oficial</h1>
                     </div>
-                    {fromAdmin && (
-                        <div className="text-end mt-2 mt-md-0">
-                            <Link to="/admin" className="btn btn-outline-secondary btn-sm fw-bold">
-                                ← Volver al Admin
+                    {fromAdmin
+                        ? (
+                            <div className="text-end mt-2 mt-md-0">
+                                <Link to="/admin" className="btn btn-outline-secondary btn-sm fw-bold">
+                                    ← Volver al Admin
+                                </Link>
+                            </div>
+                        ) : (
+                            <Link to="/admin" className="btn btn-outline-secondary fs-6 btn-sm fw-bold">
+                                Ir al Admin
                             </Link>
-                        </div>
-                    )}
+                        )
+                    }
                 </div>
             </div>
         </header>

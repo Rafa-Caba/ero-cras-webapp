@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { Image } from 'react-bootstrap';
+import { FaImage } from "react-icons/fa";
 import LogoutButton from './LogoutButton';
 import { useGaleriaStore } from '../store/useGaleriaStore';
-import { Image } from 'react-bootstrap';
 import { useAuth } from '../hooks/useAuth';
 
 export const AdminDashboardPanel = () => {
@@ -15,15 +16,15 @@ export const AdminDashboardPanel = () => {
         return;
     }
 
-    const imagenDestacada = imagenes.find(img => img.destacada);
+    const imagenInicio = imagenes.find(img => img.imagenInicio);
 
     return (
-        <div className="d-flex flex-column py-3 px-3 px-md-5 mt-1">
+        <div className="d-flex flex-column pt-2 pb-1 px-3 px-md-5 mt-1">
             <p className="m-3 text-center fs-1 fw-bold">Panel de Control</p>
 
-            <div className="panel-titulo d-flex justify-content-between flex-grow-1 flex-column mb-2">
-                <div className='d-flex flex-column justify-content-center mb-2'>
-                    <div className='d-flex justify-content-center flex-wrap mb-2'>
+            <div className="panel-titulo d-flex justify-content-between flex-grow-1 flex-column mb-1">
+                <div className='d-flex flex-column justify-content-center mb-3'>
+                    <div className='d-flex justify-content-center flex-wrap mb-3'>
                         <Link to="/admin/users" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
                             Usuarios
                         </Link>
@@ -50,17 +51,20 @@ export const AdminDashboardPanel = () => {
                     </div>
                 </div>
 
-                <div className="imagen-inicio-contenedor text-center my-2 mt-auto">
-                    {imagenDestacada ? (
+                <div className="imagen-inicio-container text-center my-3 mt-auto fade-in">
+                    {imagenInicio ? (
                         <Image
-                            src={imagenDestacada.imagenUrl}
-                            alt={imagenDestacada.titulo}
+                            src={imagenInicio.imagenUrl}
+                            alt={imagenInicio.titulo}
                             height={650}
                             width={650}
-                            className="imagen-fija mt-3"
+                            className="imagen-fija-inicio"
                         />
                     ) : (
-                        <p>No hay imagen destacada aún</p>
+                        <div className="text-muted d-flex flex-column align-items-center">
+                            <FaImage size={100} color="#ccc" />
+                            <p className="mt-2">No hay imagen de inicio aún</p>
+                        </div>
                     )}
                 </div>
 

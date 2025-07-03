@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const AdminFooter = () => {
     return (
-        <footer className="layout-footer mb-1">
+        <footer className="layout-footer">
             <div className="my-1 d-flex flex-column flex-md-row justify-content-between mb-2">
                 <div className="copyright" style={{ marginLeft: '1em', marginTop: '4px' }}>
                     <p className="text-black-50 mb-2">Creada por Rafael Cabanillas - 2022</p>
