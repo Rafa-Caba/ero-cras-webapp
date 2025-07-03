@@ -34,7 +34,7 @@ export const marcarCampoImagen = async (
     id: string,
     campo: 'imagenInicio' | 'imagenLeftMenu' | 'imagenRightMenu' | 'imagenNosotros' | 'imagenLogo'
 ) => {
-    const res = await api.patch<ImagenResponse>(`/uploads/marcar/${campo}/${id}`);
+    const res = await api.patch<ImagenResponse>(`/uploads/marcar/${campo}/${id.trim()}`);
     return res.data;
 };
 
