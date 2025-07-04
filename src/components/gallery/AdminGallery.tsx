@@ -8,7 +8,7 @@ export const AdminGallery = () => {
     const [searchParams] = useSearchParams();
     const [cargando, setCargando] = useState(true);
 
-    const { imagenes, fetchImagenes, marcarCampo, totalPaginas, paginaActual } = useGaleriaStore();
+    const { imagenes, fetchImagenes, marcarCampo, totalPaginas, paginaActual, toggleGaleria } = useGaleriaStore();
 
     useEffect(() => {
         const pageFromURL = parseInt(searchParams.get('p') || '1');
@@ -26,20 +26,21 @@ export const AdminGallery = () => {
         obtenerImagenes();
     }, [searchParams]);
 
-    const mostrarOpcionesDeMarcado = async (imagenId: string) => {
+    const mostrarOpcionesDeMarcado = async (imagenId: string, yaEnGaleria: boolean) => {
         const campos = [
             { clave: 'imagenInicio', label: 'Imagen de Inicio' },
             { clave: 'imagenLeftMenu', label: 'Menú Izquierdo' },
             { clave: 'imagenRightMenu', label: 'Menú Derecho' },
             { clave: 'imagenNosotros', label: 'Sección Nosotros' },
-            { clave: 'imagenLogo', label: 'Logo' }
+            { clave: 'imagenLogo', label: 'Logo' },
+            { clave: 'imagenGaleria', label: yaEnGaleria ? 'Quitar de Galería' : 'Agregar a Galería' } // 🟣 Nueva opción
         ];
 
         const formHtml = campos.map(c =>
             `<div>
-                <input type="checkbox" id="${c.clave}" name="campo" value="${c.clave}"/>
-                <label for="${c.clave}">${c.label}</label>
-            </div>`
+            <input type="checkbox" id="${c.clave}" name="campo" value="${c.clave}"/>
+            <label for="${c.clave}">${c.label}</label>
+        </div>`
         ).join('');
 
         const { value: seleccionados, isConfirmed } = await Swal.fire({
@@ -65,14 +66,20 @@ export const AdminGallery = () => {
 
         try {
             for (const campo of seleccionados) {
-                await marcarCampo(imagenId, campo);
+                if (campo === 'imagenGaleria') {
+                    await toggleGaleria(imagenId, !yaEnGaleria);
+                } else {
+                    await marcarCampo(imagenId, campo as any);
+                }
             }
+
             await fetchImagenes(paginaActual);
             Swal.fire('Actualizado', 'Los campos fueron marcados correctamente', 'success');
         } catch (err) {
             Swal.fire('Error', 'No se pudo actualizar la imagen', 'error');
         }
     };
+
 
     return (
         <div>
@@ -90,7 +97,7 @@ export const AdminGallery = () => {
                         <div style={{ minHeight: '54vh' }} className="galeria w-100 mt-3 d-flex flex-wrap justify-content-center mb-0">
                             <div className="container d-flex flex-fill flex-column flex-md-row flex-wrap align-items-center justify-content-around">
                                 {imagenes.map((imagen) => (
-                                    <div key={imagen._id} className="col-3 d-flex flex-column align-items-center m-2">
+                                    <div key={imagen._id} className="col-3 d-flex flex-column align-items-center m-2 mb-3">
                                         <Link to={`/admin/photo/${imagen._id}`}>
                                             <img
                                                 className="galeria-img mb-1"
@@ -103,7 +110,7 @@ export const AdminGallery = () => {
                                         <div className="text-center">
                                             <Button
                                                 className="btn destacar_btn"
-                                                onClick={() => mostrarOpcionesDeMarcado(imagen._id!)}
+                                                onClick={() => mostrarOpcionesDeMarcado(imagen._id!, !!imagen.imagenGaleria)}
                                             >
                                                 Opciones de Imagen
                                             </Button>
@@ -114,6 +121,7 @@ export const AdminGallery = () => {
                                                 {imagen.imagenRightMenu && <span className="badge bg-info text-dark me-1">Menú Der</span>}
                                                 {imagen.imagenNosotros && <span className="badge bg-warning text-dark me-1">Nosotros</span>}
                                                 {imagen.imagenLogo && <span className="badge bg-success me-1">Logo</span>}
+                                                {imagen.imagenGaleria && <span className="badge bg-dark text-light me-1">Galería</span>}
                                             </div>
                                         </div>
                                     </div>

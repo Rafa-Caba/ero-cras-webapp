@@ -1,13 +1,5 @@
 import api from "../api/axios";
-import type { Usuario, UsuariosResponse } from "../types";
-
-export interface DeleteResponse {
-    mensaje: string;
-}
-
-export interface UpdateResponse {
-    mensaje: string;
-}
+import type { DeleteResponse, UpdateResponse, Usuario, UsuariosResponse } from "../types";
 
 export const obtenerUsuarios = async (pagina = 1, limit = 5): Promise<UsuariosResponse> => {
     const res = await api.get<UsuariosResponse>(`/usuarios?page=${pagina}&limit=${limit}`);

@@ -32,9 +32,18 @@ export const actualizarImagen = async (id: string, formData: FormData) => {
 // Marcar imagen para un campo especial (logo, leftMenu, etc.)
 export const marcarCampoImagen = async (
     id: string,
-    campo: 'imagenInicio' | 'imagenLeftMenu' | 'imagenRightMenu' | 'imagenNosotros' | 'imagenLogo'
+    campo: 'imagenInicio' | 'imagenLeftMenu' | 'imagenRightMenu' | 'imagenNosotros' | 'imagenLogo' | 'imagenGaleria'
 ) => {
     const res = await api.patch<ImagenResponse>(`/uploads/marcar/${campo}/${id.trim()}`);
+    return res.data;
+};
+
+export const marcarCampoGaleria = async (id: string, valor: boolean) => {
+    const res = await api.patch<ImagenResponse>(
+        `/uploads/marcar/imagenGaleria/${id}`,
+        { valor },
+        { headers: { 'Content-Type': 'application/json' } }
+    );
     return res.data;
 };
 

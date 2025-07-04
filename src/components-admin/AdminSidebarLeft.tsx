@@ -9,13 +9,13 @@ export const AdminSidebarLeft = () => {
     return (
         <aside className="layout-menu-izquierdo d-flex flex-column align-items-center order-2 order-md-0">
             <div className="my-3">
-                <div className="imagen-left-container text-center">
+                <div className={`${!imagenLeftMenu && 'imagen-left-container'} text-center`}>
                     {imagenLeftMenu ? (
                         <Image
                             src={imagenLeftMenu.imagenUrl}
                             alt={imagenLeftMenu.titulo}
-                            height={200}
-                            width={140}
+                            height={220}
+                            // width={140}
                             className="imagen-fija-left-menu"
                         />
                     ) : (

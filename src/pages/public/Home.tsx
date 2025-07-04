@@ -23,9 +23,7 @@ const HomePage = () => {
             </div>
 
             {/* Carousel */}
-            <div className="images-carousel my-3 w-100">
-                <MyCarousel />
-            </div>
+            <MyCarousel />
         </div>
     );
 };

@@ -103,7 +103,7 @@ export const AdminEditUser = () => {
     };
 
     return (
-        <Container className="my-4">
+        <Container className="m-3 col-md-6 mx-auto">
             <h3>Editar Usuario</h3>
 
             <Form onSubmit={handleSubmit} encType="multipart/form-data">
@@ -182,12 +182,14 @@ export const AdminEditUser = () => {
                     />
                 </Form.Group>
 
-                <Button type="submit" className="general_btn">
-                    Actualizar Usuario
-                </Button>
-                <Link to="/admin/users" className="btn btn-secondary ms-2">
-                    Regresar a Usuarios
-                </Link>
+                <div className='text-center'>
+                    <Button type="submit" className="general_btn">
+                        Actualizar Usuario
+                    </Button>
+                    <Link to="/admin/users" className="btn btn-secondary ms-2">
+                        Regresar a Usuarios
+                    </Link>
+                </div>
             </Form>
         </Container>
     );

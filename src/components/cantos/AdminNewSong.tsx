@@ -40,7 +40,7 @@ export const AdminNewSong = () => {
 
 
     return (
-        <article className="p-4">
+        <article className="m-3 col-md-8 mx-auto">
             <div className="form-canto">
                 <h2 className="titulo mb-4">Nuevo Canto</h2>
                 <Form onSubmit={handleSubmit}>
@@ -85,8 +85,8 @@ export const AdminNewSong = () => {
                         />
                     </Form.Group>
 
-                    <div className="d-flex gap-2">
-                        <Button type="submit" className="general_btn" variant="">Guardar Canto</Button>
+                    <div className='text-center'>
+                        <Button type="submit" className="general_btn me-2" variant="">Guardar Canto</Button>
                         <Button variant="secondary" onClick={() => navigate("/admin/cantos")}>
                             Cancelar
                         </Button>

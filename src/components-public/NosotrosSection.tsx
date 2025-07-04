@@ -29,7 +29,7 @@ const NosotrosSection = () => {
                     </p>
                 </div>
 
-                <div className="imagen-nosotros-container text-center my-3 mt-auto fade-in">
+                <div className={`${!imagenNosotros && 'imagen-nosotros-container'} text-center my-3 mt-auto fade-in`}>
                     {imagenNosotros ? (
                         <Image
                             src={imagenNosotros.imagenUrl}

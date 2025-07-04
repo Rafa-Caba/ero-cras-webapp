@@ -48,7 +48,7 @@ const AdminEditCanto = () => {
     if (!canto) return <p>Cargando canto...</p>;
 
     return (
-        <article className="p-4">
+        <article className="m-3 col-md-8 mx-auto">
             <div className="form-canto">
                 <h2 className="titulo">Editar Canto</h2>
                 <Form onSubmit={handleSubmit}>
@@ -99,8 +99,10 @@ const AdminEditCanto = () => {
                         />
                     </Form.Group>
 
-                    <Button type="submit" className="btn general_btn me-2">Modificar Canto</Button>
-                    <Button variant="secondary" onClick={() => navigate(`/admin/canto/${canto._id}`)}>Volver</Button>
+                    <div className='text-center'>
+                        <Button type="submit" className="btn general_btn me-2">Modificar Canto</Button>
+                        <Button variant="secondary" onClick={() => navigate(`/admin/canto/${canto._id}`)}>Volver</Button>
+                    </div>
                 </Form>
             </div>
         </article>

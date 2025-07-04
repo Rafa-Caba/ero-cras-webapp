@@ -6,12 +6,15 @@ import './fontawesome.ts';
 import App from './App.tsx'
 import { AuthProvider } from './context/AuthContext.tsx';
 import { BrowserRouter } from 'react-router-dom';
+import { GlobalAppProvider } from './context/GlobalAppContext.tsx';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <BrowserRouter>
             <AuthProvider>
-                <App />
+                <GlobalAppProvider>
+                    <App />
+                </GlobalAppProvider>
             </AuthProvider>
         </BrowserRouter>
     </StrictMode>,

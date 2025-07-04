@@ -32,6 +32,9 @@ import { ThemesPage } from './pages/admin/ThemesPage';
 import { useThemesStore } from './store/useThemesStore';
 import { NewColorTheme } from './pages/admin/NewColorTheme';
 import { AdminEditColorTheme } from './components/themes/AdminEditColorTheme';
+import { Members } from './pages/admin/Members';
+import { EditMember } from './pages/admin/EditMember';
+import { NewMember } from './pages/admin/NewMember';
 
 function App() {
     const { themes, getThemes } = useThemesStore();
@@ -70,19 +73,22 @@ function App() {
                 }>
                     <Route index element={<Dashboard />} />
                     <Route path="users" element={<Users />} />
-                    <Route path="edit_user/:id" element={<EditUser />} />
+                    <Route path="users/edit/:id" element={<EditUser />} />
                     <Route path="users/new_user" element={<NewUser />} />
                     <Route path="cantos" element={<Cantos />} />
                     <Route path="canto/:id" element={<Canto />} />
-                    <Route path="edit_canto/:id" element={<EditCanto />} />
+                    <Route path="cantos/edit/:id" element={<EditCanto />} />
                     <Route path="cantos/new_song" element={<NewSong />} />
                     <Route path="gallery" element={<Gallery />} />
                     <Route path="photo/:id" element={<Photo />} />
-                    <Route path="edit_imagen/:id" element={<EditPhoto />} />
+                    <Route path="gallery/edit/:id" element={<EditPhoto />} />
                     <Route path="gallery/new_image" element={<NewImage />} />
                     <Route path="themes" element={<ThemesPage />} />
                     <Route path="edit_class_color/:id" element={<AdminEditColorTheme />} />
                     <Route path="themes/new_class_color" element={<NewColorTheme />} />
+                    <Route path="members" element={<Members />} />
+                    <Route path="members/edit/:id" element={<EditMember />} />
+                    <Route path="members/new_member" element={<NewMember />} />
                 </Route>
 
                 {/* Login (outside layout) */}

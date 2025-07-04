@@ -2,25 +2,22 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { useUsuariosStore } from '../../store/useUsuariosStore';
-import type { UsuarioForm } from '../../types';
+import { useMiembrosStore } from '../../store/useMiembrosStore';
+import type { MiembroForm } from '../../types';
 
 type InputOrSelectEvent = ChangeEvent<
     HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 >;
 
-export const AdminNewUser = () => {
+export const AdminNewMember = () => {
     const navigate = useNavigate();
+    const { crearNuevoMiembro } = useMiembrosStore();
 
-    const { crearNuevoUsuario } = useUsuariosStore();
-    const [formData, setFormData] = useState<UsuarioForm>({
+    const [formData, setFormData] = useState<MiembroForm>({
         nombre: '',
-        username: '',
-        correo: '',
-        password: '',
-        password2: '',
-        rol: 'viewer',
-        fotoPerfil: null
+        instrumento: '',
+        tieneVoz: false,
+        fotoPerfil: null,
     });
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -35,6 +32,8 @@ export const AdminNewUser = () => {
             setFormData({ ...formData, fotoPerfil: file });
             const preview = URL.createObjectURL(file);
             setPreviewUrl(preview);
+        } else if (name === 'tieneVoz') {
+            setFormData({ ...formData, tieneVoz: value === 'true' });
         } else {
             setFormData({ ...formData, [name]: value });
         }
@@ -45,12 +44,7 @@ export const AdminNewUser = () => {
         const newErrors: string[] = [];
 
         if (!formData.nombre.trim()) newErrors.push('El nombre es requerido.');
-        if (!formData.username.trim()) newErrors.push('El username es requerido.');
-        if (!formData.correo.trim()) newErrors.push('El correo es requerido.');
-        if (!formData.password.trim()) newErrors.push('La contraseña es requerida.');
-        if (formData.password !== formData.password2) newErrors.push('Las contraseñas no coinciden.');
-
-        if (!formData.rol) newErrors.push('Selecciona un rol de usuario.');
+        if (!formData.instrumento.trim()) newErrors.push('El instrumento es requerido.');
 
         if (newErrors.length > 0) {
             setErrores(newErrors);
@@ -59,30 +53,25 @@ export const AdminNewUser = () => {
 
         const formPayload = new FormData();
         formPayload.append('nombre', formData.nombre);
-        formPayload.append('username', formData.username.toLowerCase().trim());
-        formPayload.append('correo', formData.correo);
-        formPayload.append('password', formData.password);
-        formPayload.append('rol', formData.rol);
+        formPayload.append('instrumento', formData.instrumento);
+        formPayload.append('tieneVoz', formData.tieneVoz ? 'true' : 'false');
         if (formData.fotoPerfil) {
             formPayload.append('fotoPerfil', formData.fotoPerfil);
         }
 
         try {
-            await crearNuevoUsuario(formPayload);
+            await crearNuevoMiembro(formPayload);
 
-            Swal.fire('¡Usuario creado!', `✅ El Usuario has sido creado`, 'success');
+            Swal.fire('¡Miembro creado!', `✅ El miembro ha sido creado`, 'success');
             setFormData({
                 nombre: '',
-                username: '',
-                correo: '',
-                password: '',
-                password2: '',
-                rol: 'viewer',
-                fotoPerfil: null
+                instrumento: '',
+                tieneVoz: false,
+                fotoPerfil: null,
             });
             setPreviewUrl(null);
             setErrores([]);
-            navigate("/admin/users");
+            navigate("/admin/members");
         } catch (error) {
             Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
         }
@@ -97,7 +86,7 @@ export const AdminNewUser = () => {
     return (
         <article className="m-3 col-md-6 mx-auto">
             <div className="form-canto">
-                <h3>Nuevo Usuario</h3>
+                <h3>Nuevo Miembro</h3>
 
                 <Form onSubmit={handleSubmit} encType="multipart/form-data">
                     <Form.Group className="mb-3" controlId="formNombre">
@@ -112,52 +101,29 @@ export const AdminNewUser = () => {
                         />
                     </Form.Group>
 
-                    <Form.Group className="mb-3" controlId="formUsername">
-                        <Form.Label>Username</Form.Label>
+                    <Form.Group className="mb-3" controlId="formInstrumento">
+                        <Form.Label>Instrumento</Form.Label>
                         <Form.Control
                             type="text"
-                            name="username"
-                            placeholder="Nombre de usuario"
-                            value={formData.username}
+                            name="instrumento"
+                            placeholder="Ej. Guitarra, Violín..."
+                            value={formData.instrumento}
                             onChange={handleChange}
                             required
                         />
                     </Form.Group>
 
-                    <Form.Group className="mb-3" controlId="formCorreo">
-                        <Form.Label>Correo</Form.Label>
-                        <Form.Control
-                            type="email"
-                            name="correo"
-                            placeholder="Correo electrónico"
-                            value={formData.correo}
+                    <Form.Group className="mb-3" controlId="formTieneVoz">
+                        <Form.Label>¿Tiene Voz?</Form.Label>
+                        <Form.Select
+                            name="tieneVoz"
+                            value={formData.tieneVoz ? 'true' : 'false'}
                             onChange={handleChange}
                             required
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="formPassword">
-                        <Form.Label>Contraseña</Form.Label>
-                        <Form.Control
-                            type="password"
-                            name="password"
-                            placeholder="Contraseña"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="formPassword2">
-                        <Form.Label>Repetir Contraseña</Form.Label>
-                        <Form.Control
-                            type="password"
-                            name="password2"
-                            placeholder="Repite la contraseña"
-                            value={formData.password2}
-                            onChange={handleChange}
-                            required
-                        />
+                        >
+                            <option value="false">No</option>
+                            <option value="true">Sí</option>
+                        </Form.Select>
                     </Form.Group>
 
                     <Form.Group className="mb-3" controlId="formFile">
@@ -194,9 +160,9 @@ export const AdminNewUser = () => {
 
                     <div className='text-center'>
                         <Button type="submit" className="general_btn">
-                            Crear usuario
+                            Crear miembro
                         </Button>
-                        <Button className='ms-2' variant="secondary" onClick={() => navigate("/admin/users")}>
+                        <Button className="ms-2" variant="secondary" onClick={() => navigate("/admin/members")}>
                             Cancelar
                         </Button>
                     </div>

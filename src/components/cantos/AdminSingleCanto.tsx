@@ -87,7 +87,7 @@ const AdminSingleCanto = ({ cantoId }: Props) => {
                 <p className="fst-italic mb-4 fw-bold">{canto.compositor}</p>
 
                 <div className="m-0">
-                    <Link to={`/admin/edit_canto/${canto._id}`} className="btn general_btn me-2">
+                    <Link to={`/admin/cantos/edit/${canto._id}`} className="btn general_btn me-2">
                         Editar
                     </Link>
                     <Link to="/admin/cantos" className="btn general_btn me-2">

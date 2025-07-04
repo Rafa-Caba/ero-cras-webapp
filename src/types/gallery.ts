@@ -8,6 +8,7 @@ export interface ImagenGaleria {
     imagenLeftMenu: string;
     imagenRightMenu: string;
     imagenNosotros: string;
+    imagenGaleria?: boolean;
     imagenLogo: string;
     createdAt?: string;
 }
@@ -44,7 +45,8 @@ export interface GaleriaState {
     actualizarImagenExistente: (id: string, formData: FormData) => Promise<void>;
     marcarCampo: (
         id: string,
-        campo: 'imagenInicio' | 'imagenLeftMenu' | 'imagenRightMenu' | 'imagenNosotros' | 'imagenLogo'
+        campo: 'imagenInicio' | 'imagenLeftMenu' | 'imagenRightMenu' | 'imagenNosotros' | 'imagenLogo' | 'imagenGaleria'
     ) => Promise<ImagenResponse>;
+    toggleGaleria: (id: string, valor: boolean) => Promise<ImagenResponse>;
     eliminarImagenPorId: (id: string) => Promise<void>;
 }

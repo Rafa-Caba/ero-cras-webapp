@@ -51,12 +51,12 @@ export const AdminDashboardPanel = () => {
                     </div>
                 </div>
 
-                <div className="imagen-inicio-container text-center my-3 mt-auto fade-in">
+                <div className={`${!imagenInicio && 'imagen-inicio-container'} text-center my-3 mt-auto fade-in`}>
                     {imagenInicio ? (
                         <Image
                             src={imagenInicio.imagenUrl}
                             alt={imagenInicio.titulo}
-                            height={650}
+                            // height={650}
                             width={650}
                             className="imagen-fija-inicio"
                         />

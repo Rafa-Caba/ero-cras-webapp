@@ -7,6 +7,7 @@ import {
     actualizarImagen,
     eliminarImagen,
     marcarCampoImagen,
+    marcarCampoGaleria,
 } from '../services/gallery';
 import type { GaleriaState } from '../types';
 
@@ -84,6 +85,23 @@ export const useGaleriaStore = create<GaleriaState>()(
                         totalPaginas: refreshed.totalPaginas,
                         cargando: false,
                     });
+                    return data;
+                } catch (error: any) {
+                    set({ error: error.message, cargando: false });
+                    throw error;
+                }
+            },
+
+            toggleGaleria: async (id, valor) => {
+                try {
+                    set({ cargando: true, error: null });
+                    const data = await marcarCampoGaleria(id, valor);
+                    set((state) => ({
+                        imagenes: state.imagenes.map((img) =>
+                            img._id === id ? { ...img, imagenGaleria: valor } : img
+                        ),
+                        cargando: false,
+                    }));
                     return data;
                 } catch (error: any) {
                     set({ error: error.message, cargando: false });

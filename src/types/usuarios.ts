@@ -26,3 +26,11 @@ export interface UsuariosResponse {
     totalPaginas: number;
     totalUsuarios: number;
 }
+
+export interface DeleteResponse {
+    mensaje: string;
+}
+
+export interface UpdateResponse {
+    mensaje: string;
+}
