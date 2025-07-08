@@ -29,8 +29,6 @@ const AdminSingleCanto = ({ cantoId }: Props) => {
         cargarCanto();
     }, [cantoId]);
 
-    console.log(canto);
-
     if (!canto) {
         return <p>No se encontró el canto.</p>;
     }

@@ -8,8 +8,8 @@ import {
     eliminarImagen,
     marcarCampoImagen,
     marcarCampoGaleria,
-} from '../services/gallery';
-import type { GaleriaState } from '../types';
+} from '../../services/gallery';
+import type { GaleriaState } from '../../types';
 
 export const useGaleriaStore = create<GaleriaState>()(
     persist(

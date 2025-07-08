@@ -1,4 +1,4 @@
-import api from "../api/axios";
+import api, { publicApi } from "../api/axios";
 import type { ImagenesResponse, ImagenGaleria, ImagenResponse } from "../types";
 
 // Obtener imágenes con paginación
@@ -51,4 +51,10 @@ export const marcarCampoGaleria = async (id: string, valor: boolean) => {
 export const eliminarImagen = async (id: string) => {
     const res = await api.delete<{ mensaje: string }>(`/uploads/${id}`);
     return res.data;
+};
+
+// Obtener todas las imágenes públicas (sin paginación)
+export const obtenerImagenesPublicas = async () => {
+    const res = await publicApi.get<{ imagenes: ImagenGaleria[] }>('/uploads/public');
+    return res.data.imagenes;
 };

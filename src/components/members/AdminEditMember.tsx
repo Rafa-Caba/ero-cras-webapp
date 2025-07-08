@@ -2,7 +2,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Form, Button, Container, Image } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { useMiembrosStore } from '../../store/useMiembrosStore';
+import { useMiembrosStore } from '../../store/admin/useMiembrosStore';
 import type { MiembroForm } from '../../types';
 
 type InputOrSelectEvent = ChangeEvent<

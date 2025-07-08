@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Image } from 'react-bootstrap';
 import { FaImage } from "react-icons/fa";
 import LogoutButton from './LogoutButton';
-import { useGaleriaStore } from '../store/useGaleriaStore';
+import { useGaleriaStore } from '../store/admin/useGaleriaStore';
 import { useAuth } from '../hooks/useAuth';
 
 export const AdminDashboardPanel = () => {
@@ -19,7 +19,7 @@ export const AdminDashboardPanel = () => {
     const imagenInicio = imagenes.find(img => img.imagenInicio);
 
     return (
-        <div className="d-flex flex-column pt-2 pb-1 px-3 px-md-5 mt-1">
+        <div className="d-flex flex-column pt-2 pb-1 px-1 px-md-5 mt-1">
             <p className="m-3 text-center fs-1 fw-bold">Panel de Control</p>
 
             <div className="panel-titulo d-flex justify-content-between flex-grow-1 flex-column mb-1">
@@ -37,11 +37,17 @@ export const AdminDashboardPanel = () => {
                         <Link to="/admin/members" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
                             Miembros
                         </Link>
-                        <Link to="/admin/avisos" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
+                        <Link to="/admin/blogposts" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
+                            Blogs
+                        </Link>
+                        <Link to="/admin/announcements" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
                             Avisos
                         </Link>
-                        <Link to="/admin/themes" className="btn general_btn py-1 px-3 me-2">
+                        <Link to="/admin/themes" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
                             Temas de Color
+                        </Link>
+                        <Link to="/admin/website_settings" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
+                            Ajustes de Pagina
                         </Link>
                     </div>
                     <div className='d-flex justify-content-center'>
@@ -56,8 +62,8 @@ export const AdminDashboardPanel = () => {
                         <Image
                             src={imagenInicio.imagenUrl}
                             alt={imagenInicio.titulo}
-                            // height={650}
-                            width={650}
+                            height={500}
+                            width={600}
                             className="imagen-fija-inicio"
                         />
                     ) : (

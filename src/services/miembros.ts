@@ -1,4 +1,4 @@
-import api from '../api/axios';
+import api, { publicApi } from '../api/axios';
 import type { MiembrosResponse, DeleteResponse, UpdateResponse, Miembro, MiembroDeleteResponse, MiembroUpdateResponse } from '../types';
 
 export const obtenerMiembros = async (pagina = 1, limit = 5): Promise<MiembrosResponse> => {
@@ -32,5 +32,10 @@ export const crearMiembro = async (formData: FormData): Promise<MiembroUpdateRes
 
 export const buscarMiembros = async (q: string): Promise<Miembro[]> => {
     const res = await api.get<Miembro[]>(`/miembros/buscar?q=${encodeURIComponent(q)}`);
+    return res.data;
+};
+
+export const obtenerMiembrosPublicos = async (): Promise<Miembro[]> => {
+    const res = await publicApi.get<Miembro[]>('/miembros/publicos');
     return res.data;
 };

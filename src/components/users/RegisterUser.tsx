@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Form, Button, Container } from 'react-bootstrap';
+import { Form, Button, Container, Image } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { crearUsuario } from '../../services/usuarios';
@@ -91,6 +91,23 @@ export const RegisterUser = () => {
     return (
         <main className='layout-main mx-3'>
             <Container className="mt-4 d-flex flex-column justify-content-center col-12 col-md-6">
+                <Image
+                    src={'/images/erocrasLogo.png'}
+                    roundedCircle
+                    height={50}
+                    width={50}
+                    alt={`Ero Cras Official`}
+                    style={{
+                        objectFit: 'cover',
+                        width: '170px',
+                        height: '170px',
+                        minWidth: '170px',
+                        minHeight: '170px',
+                        border: '3px solid purple',
+                        margin: '.3rem'
+                    }}
+                    className="text-center mx-auto mb-5"
+                />
                 <h3>Registrar Usuario</h3>
 
                 <Form onSubmit={handleSubmit} encType="multipart/form-data">

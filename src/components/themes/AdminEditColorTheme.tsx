@@ -3,7 +3,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Button, Container, Alert, Spinner } from 'react-bootstrap';
 import type { Theme } from '../../types';
-import { useThemesStore } from '../../store/useThemesStore';
+import { useThemesStore } from '../../store/admin/useThemesStore';
 import { actualizarColorClass } from '../../services/themes';
 
 export const AdminEditColorTheme = () => {

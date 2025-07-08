@@ -6,8 +6,8 @@ import {
     crearCanto,
     actualizarCanto,
     eliminarCanto
-} from '../services/cantos';
-import type { Canto } from '../types';
+} from '../../services/cantos';
+import type { Canto } from '../../types';
 
 
 interface CantosState {

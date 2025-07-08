@@ -2,7 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { Button, Spinner } from "react-bootstrap";
-import { useGaleriaStore } from "../../store/useGaleriaStore";
+import { useGaleriaStore } from "../../store/admin/useGaleriaStore";
 
 export const AdminGallery = () => {
     const [searchParams] = useSearchParams();
@@ -94,10 +94,10 @@ export const AdminGallery = () => {
             {
                 !cargando
                     ? (
-                        <div style={{ minHeight: '54vh' }} className="galeria w-100 mt-3 d-flex flex-wrap justify-content-center mb-0">
+                        <div className="galeria w-100 mt-3 d-flex flex-wrap justify-content-center mb-0">
                             <div className="container d-flex flex-fill flex-column flex-md-row flex-wrap align-items-center justify-content-around">
                                 {imagenes.map((imagen) => (
-                                    <div key={imagen._id} className="col-3 d-flex flex-column align-items-center m-2 mb-3">
+                                    <div key={imagen._id} className="col-md-3 d-flex flex-column align-items-center m-2 mb-3">
                                         <Link to={`/admin/photo/${imagen._id}`}>
                                             <img
                                                 className="galeria-img mb-1"
@@ -143,7 +143,7 @@ export const AdminGallery = () => {
                 )}
                 <span className="align-self-center">Página {paginaActual} de {totalPaginas}</span>
                 {paginaActual < totalPaginas && (
-                    <Link className="btn btn-outline-primary" to={`/admin/gallery?p=${paginaActual + 1}`}>
+                    <Link className="btn btn-outline" to={`/admin/gallery?p=${paginaActual + 1}`}>
                         Página Siguiente →
                     </Link>
                 )}

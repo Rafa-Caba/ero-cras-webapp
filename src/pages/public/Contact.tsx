@@ -1,6 +1,5 @@
 import { useState } from "react";
-
-import ContactSection from "../../components-public/ContactSection";
+import { ContactSection } from "../../components-public/ContactSection";
 
 const Contact = () => {
 

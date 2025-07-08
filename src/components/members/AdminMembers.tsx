@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Table, Image, Button, Spinner } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { useMiembrosStore } from '../../store/useMiembrosStore';
+import { useMiembrosStore } from '../../store/admin/useMiembrosStore';
 import type { Miembro } from '../../types/miembros';
 
 export const AdminMembers = () => {

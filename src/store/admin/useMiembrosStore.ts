@@ -7,8 +7,8 @@ import {
     actualizarMiembro,
     eliminarMiembro,
     buscarMiembros
-} from '../services/miembros';
-import type { Miembro } from '../types/miembros';
+} from '../../services/miembros';
+import type { Miembro } from '../../types/miembros';
 
 interface MiembrosState {
     miembros: Miembro[];

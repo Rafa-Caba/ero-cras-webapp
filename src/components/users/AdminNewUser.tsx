@@ -2,7 +2,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { useUsuariosStore } from '../../store/useUsuariosStore';
+import { useUsuariosStore } from '../../store/admin/useUsuariosStore';
 import type { UsuarioForm } from '../../types';
 
 type InputOrSelectEvent = ChangeEvent<

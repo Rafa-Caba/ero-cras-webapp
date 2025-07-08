@@ -6,7 +6,7 @@ export const AdminNav = () => {
             <ul className="nav w-100 nav-pills nav-fill">
                 <li className="nav-item">
                     <Link className="nav-link text-black" to="/?fromAdmin=true">
-                        Ero Cras Inicio
+                        Inicio
                     </Link>
                 </li>
                 <li className="nav-item">
@@ -16,7 +16,7 @@ export const AdminNav = () => {
                 </li>
                 <li className="nav-item">
                     <Link className="nav-link text-black" to="/misa-erocras?fromAdmin=true">
-                        Misa Ero Cras
+                        Misa Cantos
                     </Link>
                 </li>
                 <li className="nav-item">
@@ -27,6 +27,11 @@ export const AdminNav = () => {
                 <li className="nav-item">
                     <Link className="nav-link text-black" to="/contact?fromAdmin=true">
                         Contacto
+                    </Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link text-black" to="/admin/blog_posts?fromAdmin=true">
+                        Blog
                     </Link>
                 </li>
             </ul>

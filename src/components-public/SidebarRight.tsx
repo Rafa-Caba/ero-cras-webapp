@@ -1,10 +1,10 @@
 import { Image } from "react-bootstrap";
-import { useGaleriaStore } from "../store/useGaleriaStore";
 import { FaImage } from "react-icons/fa";
+import { usePublicGaleriaStore } from "../store/public/usePublicGaleriaStore";
 
 
 export const SidebarRight = () => {
-    const { imagenes } = useGaleriaStore();
+    const { imagenes } = usePublicGaleriaStore();
     const imagenRightMenu = imagenes.find(img => img.imagenRightMenu);
 
     return (

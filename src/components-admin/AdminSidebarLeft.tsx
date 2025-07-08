@@ -1,23 +1,26 @@
 import { Image } from "react-bootstrap";
 import { FaImage } from "react-icons/fa";
-import { useGaleriaStore } from "../store/useGaleriaStore";
+import { useGaleriaStore } from "../store/admin/useGaleriaStore";
+import { AvisosSidebar } from "../components/announcements/AnnouncementSidebar";
 
 export const AdminSidebarLeft = () => {
     const { imagenes } = useGaleriaStore();
     const imagenLeftMenu = imagenes.find(img => img.imagenLeftMenu);
 
     return (
-        <aside className="layout-menu-izquierdo d-flex flex-column align-items-center order-2 order-md-0">
+        <aside className="layout-menu-izquierdo sidebar d-flex flex-column align-items-center order-1 order-md-0">
             <div className="my-3">
                 <div className={`${!imagenLeftMenu && 'imagen-left-container'} text-center`}>
                     {imagenLeftMenu ? (
-                        <Image
-                            src={imagenLeftMenu.imagenUrl}
-                            alt={imagenLeftMenu.titulo}
-                            height={220}
-                            // width={140}
-                            className="imagen-fija-left-menu"
-                        />
+                        <div className="d-none d-md-block text-center mb-3">
+                            <Image
+                                src={imagenLeftMenu.imagenUrl}
+                                alt={imagenLeftMenu.titulo}
+                                height={220}
+                                // width={140}
+                                className="imagen-fija-left-menu"
+                            />
+                        </div>
                     ) : (
                         <div className="text-muted d-flex flex-column align-items-center">
                             <FaImage size={80} color="#ccc" />
@@ -25,14 +28,10 @@ export const AdminSidebarLeft = () => {
                         </div>
                     )}
                 </div>
-                <div className='mt-4'>
-                    <h3 className='fw-bold'>Noticias</h3>
-                    <ul>
-                        <li>Hoy es Dia del Amor (Jesus)</li>
-                        <li>Nunca te olvides de Dios</li>
-                        <li>Dios es Amor!!!</li>
-                    </ul>
 
+                {/* <AvisosSidebar /> */}
+                <div className="avisos-scrollbox">
+                    <AvisosSidebar />
                 </div>
             </div>
         </aside>

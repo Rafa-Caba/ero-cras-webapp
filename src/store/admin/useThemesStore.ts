@@ -5,9 +5,10 @@ import {
     crearColorClass,
     eliminarColorClass,
     actualizarColorClass,
-    obtenerTemaPorId
-} from '../services/themes';
-import type { ThemeState } from '../types';
+    obtenerTemaPorId,
+    obtenerTodosLosTemas
+} from '../../services/themes';
+import type { ThemeState } from '../../types';
 
 export const useThemesStore = create<ThemeState>((set) => ({
     themes: [],
@@ -15,19 +16,33 @@ export const useThemesStore = create<ThemeState>((set) => ({
     paginaActual: 1,
     totalPaginas: 1,
 
-    getThemes: async (pagina = 1) => {
+    getThemes: async (pagina = 1, limit = 6) => {
         set({ loading: true });
         try {
-            const data = await obtenerTema(pagina);
-            if (data) {
-                set({
-                    themes: data.temas,
-                    paginaActual: data.paginaActual,
-                    totalPaginas: data.totalPaginas
-                });
-            }
+            const data = await obtenerTema(pagina, limit);
+            set({
+                themes: data.temas,
+                paginaActual: data.paginaActual ?? 1,
+                totalPaginas: data.totalPaginas ?? 1
+            });
         } catch (err) {
-            console.error('Error al obtener los temas:', err);
+            console.error('Error al obtener los temas paginados:', err);
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+    getAllThemes: async () => {
+        set({ loading: true });
+        try {
+            const { temas } = await obtenerTodosLosTemas();
+            set({
+                themes: temas,
+                paginaActual: 1,
+                totalPaginas: 1
+            });
+        } catch (err) {
+            console.error('Error al obtener todos los temas:', err);
         } finally {
             set({ loading: false });
         }

@@ -1,16 +1,14 @@
 import { useEffect } from 'react';
 import { Carousel } from 'react-bootstrap';
-import { useGaleriaStore } from '../store/useGaleriaStore';
 import { FaImage } from 'react-icons/fa';
+import { usePublicGaleriaStore } from '../store/public/usePublicGaleriaStore';
 
 export const MyCarousel = () => {
 
-    const { imagenes, fetchImagenes } = useGaleriaStore();
+    const { imagenes, fetchImagenesPublicas } = usePublicGaleriaStore();
 
     useEffect(() => {
-        if (imagenes.length === 0) {
-            fetchImagenes();
-        }
+        fetchImagenesPublicas();
     }, []);
 
     return (
@@ -25,7 +23,7 @@ export const MyCarousel = () => {
                                     className="imagen-fija-carousel w-100"
                                     src={imagen.imagenUrl}
                                     alt={imagen.titulo}
-                                    // height={515}
+                                    // height={650}
                                     width={650}
                                     style={{ objectFit: 'cover' }}
                                 />

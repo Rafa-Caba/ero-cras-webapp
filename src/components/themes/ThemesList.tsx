@@ -3,13 +3,13 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Table, Button, Spinner } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { useThemesStore } from '../../store/useThemesStore';
+import { useThemesStore } from '../../store/admin/useThemesStore';
 
 export const ThemesList = () => {
     const {
         themes,
         loading,
-        getThemes,
+        getAllThemes,
         deleteColorClass,
         paginaActual,
         totalPaginas,
@@ -17,7 +17,7 @@ export const ThemesList = () => {
     } = useThemesStore();
 
     useEffect(() => {
-        getThemes();
+        getAllThemes();
     }, []);
 
     const deleteColor = async (id: string) => {

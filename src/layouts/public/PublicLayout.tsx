@@ -1,28 +1,54 @@
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-
+import { usePublicGaleriaStore, usePublicSettingsStore } from '../../store/public';
 import { Header } from '../../components-public/Header';
 import { NavBar } from '../../components-public/NavBar';
 import { SidebarLeft } from '../../components-public/SidebarLeft';
 import { SidebarRight } from '../../components-public/SidebarRight';
 import { Footer } from '../../components-public/Footer';
 
-const PublicLayout = () => (
-    <div className="layout-container">
-        <Header />
-        <NavBar />
+const PublicLayout = () => {
+    const { settings, fetchSettingsPublicos } = usePublicSettingsStore();
+    const { imagenes, fetchImagenesPublicas } = usePublicGaleriaStore();
 
-        <main className="layout-main">
-            <SidebarLeft />
+    useEffect(() => {
+        fetchSettingsPublicos();
+        fetchImagenesPublicas();
+    }, []);
 
-            <section className="layout-content">
-                <Outlet />
-            </section>
+    useEffect(() => {
+        if (settings?.tituloWeb) {
+            document.title = settings.tituloWeb;
+        } else {
+            document.title = 'Ero Cras Oficial';
+        }
 
-            <SidebarRight />
-        </main>
+        const imagenLogo = imagenes.find(img => img.imagenLogo);
+        const favicon = document.querySelector("link[rel='icon']") as HTMLLinkElement;
 
-        <Footer />
-    </div>
-);
+        if (favicon && imagenLogo) {
+            favicon.href = imagenLogo?.imagenUrl || '/images/erocrasLogo.png';
+        }
+    }, [settings, imagenes]);
+
+    return (
+        <div className="layout-container">
+            <Header />
+            <NavBar />
+
+            <main className="layout-main">
+                <SidebarLeft />
+
+                <section className="layout-content">
+                    <Outlet />
+                </section>
+
+                <SidebarRight />
+            </main>
+
+            <Footer />
+        </div>
+    )
+};
 
 export default PublicLayout;

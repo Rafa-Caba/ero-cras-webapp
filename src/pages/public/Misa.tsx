@@ -1,9 +1,7 @@
 import { CantosMisaSection } from "../../components-public/CantosMisaSection";
 
-const MisaErocrasPage = () => {
+export const MisaPage = () => {
     return (
         <CantosMisaSection />
     )
 }
-
-export default MisaErocrasPage

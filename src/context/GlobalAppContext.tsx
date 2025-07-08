@@ -1,8 +1,12 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useThemesStore } from '../store/useThemesStore';
-import { useGaleriaStore } from '../store/useGaleriaStore';
-import { useCantosStore } from '../store/useCantosStore';
-import { useUsuariosStore } from '../store/useUsuariosStore';
+import { useThemesStore } from '../store/admin/useThemesStore';
+import { useGaleriaStore } from '../store/admin/useGaleriaStore';
+import { useCantosStore } from '../store/admin/useCantosStore';
+import { useUsuariosStore } from '../store/admin/useUsuariosStore';
+import { useMiembrosStore } from '../store/admin/useMiembrosStore';
+import { useAvisosStore } from '../store/admin/useAvisosStore';
+import { useBlogPostsStore } from '../store/admin/useBlogPostsStore';
+import { useSettingsStore } from '../store/admin/useSettingsStore';
 
 interface GlobalAppContextProps {
     cargado: boolean;
@@ -13,19 +17,27 @@ const GlobalAppContext = createContext<GlobalAppContextProps>({ cargado: false }
 export const GlobalAppProvider = ({ children }: { children: React.ReactNode }) => {
     const [cargado, setCargado] = useState(false);
 
-    const { getThemes } = useThemesStore();
+    const { getAllThemes } = useThemesStore();
     const { fetchImagenes } = useGaleriaStore();
     const { obtenerTodos } = useCantosStore();
     const { fetchUsuarios } = useUsuariosStore();
+    const { fetchMiembros } = useMiembrosStore();
+    const { fetchAvisos } = useAvisosStore();
+    const { fetchPosts } = useBlogPostsStore();
+    const { fetchSettings } = useSettingsStore();
 
     useEffect(() => {
         const cargarDatos = async () => {
             try {
                 await Promise.all([
-                    getThemes(1),
+                    getAllThemes(),
                     fetchImagenes(1),
                     obtenerTodos(),
-                    fetchUsuarios(1)
+                    fetchUsuarios(1),
+                    fetchMiembros(1),
+                    fetchAvisos(1),
+                    fetchPosts(1),
+                    fetchSettings()
                 ]);
                 setCargado(true);
             } catch (error) {

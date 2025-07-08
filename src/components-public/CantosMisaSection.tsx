@@ -2,29 +2,32 @@
 import { useEffect, useState } from "react";
 import { Button } from 'react-bootstrap';
 import CantoModal from "./CantoModal";
-import { useCantosStore } from "../store/useCantosStore";
+import { usePublicCantosStore } from "../store/public/usePublicCantosStore";
 
 const tiposDeCanto = [
     "Entrada",
     "Kyrie",
     "Gloria",
     "Aleluya",
-    "Presentacion de Dones",
+    "Presentacion",
     "Santo",
     "Cordero de Dios",
     "Comunion",
-    "Salida"
+    "Salida",
+    "Otros"
 ];
 
 export const CantosMisaSection = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [tipoActual, setTipoActual] = useState<string>('');
 
-    const { cantos, obtenerTodos } = useCantosStore();
+    const { cantos, fetchCantosPublicos, cargando } = usePublicCantosStore();
 
     useEffect(() => {
-        obtenerTodos();
+        fetchCantosPublicos();
     }, []);
+
+    if (cargando) return <p>Cargando cantos...</p>;
 
     const abrirModal = (tipo: string) => {
         setTipoActual(tipo);
@@ -32,12 +35,12 @@ export const CantosMisaSection = () => {
     };
 
     return (
-        <section className="galeria w-100 m-3 p-4 text-center cantos-contenedor">
+        <section className="galeria w-100 p-3 text-center">
             <p className="fs-2 fw-bold">Cantos - Misa</p>
             <div className="menu-cantos d-flex flex-wrap justify-content-center">
                 {tiposDeCanto.map(tipo => (
                     <div key={tipo} className="p-2">
-                        <Button variant="primary" onClick={() => abrirModal(tipo)}>
+                        <Button className="general_btn" onClick={() => abrirModal(tipo)}>
                             {tipo}
                         </Button>
                     </div>

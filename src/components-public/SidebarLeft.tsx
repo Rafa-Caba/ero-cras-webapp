@@ -1,15 +1,15 @@
 import { Image } from "react-bootstrap";
-import { useGaleriaStore } from "../store/useGaleriaStore";
 import { FaImage } from "react-icons/fa";
+import { usePublicGaleriaStore } from "../store/public/usePublicGaleriaStore";
 
 export const SidebarLeft = () => {
-    const { imagenes } = useGaleriaStore();
+    const { imagenes } = usePublicGaleriaStore();
     const imagenLeftMenu = imagenes.find(img => img.imagenLeftMenu);
 
     return (
         <aside className="layout-menu-izquierdo d-flex flex-column align-items-center order-2 order-md-0">
             <div className="my-3">
-                <div className={`${!imagenLeftMenu && 'imagen-left-container'} text-center`}>
+                <div className={`${!imagenLeftMenu && 'imagen-left-container'} text-center d-none d-md-block`}>
                     {imagenLeftMenu ? (
                         <Image
                             src={imagenLeftMenu.imagenUrl}
@@ -25,7 +25,7 @@ export const SidebarLeft = () => {
                         </div>
                     )}
                 </div>
-                <div className='mt-4'>
+                {/* <div className='mt-4'>
                     <h3 className='fw-bold'>Noticias</h3>
                     <ul>
                         <li>Hoy es Dia del Amor (Jesus)</li>
@@ -33,7 +33,7 @@ export const SidebarLeft = () => {
                         <li>Dios es Amor!!!</li>
                     </ul>
 
-                </div>
+                </div> */}
             </div>
         </aside>
     );

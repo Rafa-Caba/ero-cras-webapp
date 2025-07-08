@@ -3,7 +3,7 @@ import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
 import type { Theme } from '../../types/themes';
-import { useThemesStore } from '../../store/useThemesStore';
+import { useThemesStore } from '../../store/admin/useThemesStore';
 
 export const AdminNewColorTheme = () => {
     const navigate = useNavigate();

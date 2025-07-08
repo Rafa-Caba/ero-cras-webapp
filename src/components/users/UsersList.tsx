@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Table, Image, Button, Spinner } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { useUsuariosStore } from '../../store/useUsuariosStore';
+import { useUsuariosStore } from '../../store/admin/useUsuariosStore';
 
 export const UsersList = () => {
     const [busqueda, setBusqueda] = useState('');

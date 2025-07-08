@@ -1,4 +1,4 @@
-import api from '../api/axios';
+import api, { publicApi } from '../api/axios';
 
 export interface Canto {
     _id?: string;
@@ -30,5 +30,11 @@ export const actualizarCanto = async (id: string, datos: Canto) => {
 
 export const eliminarCanto = async (id: string) => {
     const res = await api.delete(`/cantos/${id}`);
+    return res.data;
+};
+
+// Obtener todos los cantos públicamente
+export const obtenerCantosPublicos = async () => {
+    const res = await publicApi.get<Canto[]>('/cantos/public');
     return res.data;
 };

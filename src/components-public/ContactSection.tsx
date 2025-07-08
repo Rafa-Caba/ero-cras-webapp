@@ -7,14 +7,14 @@ interface Props {
     handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
-const ContactSection = ({ email, setEmail, emailMessage, setEmailMessage, handleSubmit }: Props) => {
+export const ContactSection = ({ email, setEmail, emailMessage, setEmailMessage, handleSubmit }: Props) => {
     return (
-        <section className="center col-12 col-md-8 d-flex flex-column align-items-center order-0 order-md-1">
+        <section className="layout-content d-flex flex-column align-items-center order-0 order-md-1">
             <p className="text-center fs-2">Contacto</p>
 
-            <div className="form mb-3 w-75">
+            <div className="form mb-3 col-md-8">
                 <form onSubmit={handleSubmit}>
-                    <div className="mb-3">
+                    <div className="mb-2">
                         <label className="form-label" htmlFor="correo">Correo Electrónico</label>
                         <input
                             type="email"
@@ -37,11 +37,12 @@ const ContactSection = ({ email, setEmail, emailMessage, setEmailMessage, handle
                             id="email_message"
                             value={emailMessage}
                             onChange={(e) => setEmailMessage(e.target.value)}
+                            rows={4}
                             required
                         ></textarea>
                     </div>
 
-                    <button type="submit" className="btn btn-primary" disabled={!email || !emailMessage}>
+                    <button type="submit" className="btn general_btn" disabled={!email || !emailMessage}>
                         Enviar mensaje
                     </button>
                 </form>
@@ -49,5 +50,3 @@ const ContactSection = ({ email, setEmail, emailMessage, setEmailMessage, handle
         </section>
     );
 };
-
-export default ContactSection;

@@ -1,0 +1,30 @@
+.sidebar {
+    min-width: 260px;
+    max-width: 320px;
+    padding: 1rem;
+}
+
+@media (min-width: 1200px) {
+    .sidebar {
+        width: 100%;
+    }
+}
+
+@media (max-width: 1200px) {
+    .sidebar {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 767px) {
+    .sidebar {
+        min-width: 100vw;
+        width: 100%;
+    }
+}
+
+// .avisos-scrollbox {
+//     max-height: 500px;
+//     overflow-y: auto;
+// }

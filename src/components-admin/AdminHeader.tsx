@@ -1,9 +1,15 @@
+import { useEffect } from 'react';
 import { Image } from 'react-bootstrap';
 import { useAuth } from '../hooks/useAuth';
+import { useSettingsStore } from '../store/admin/useSettingsStore';
 
 export const AdminHeader = () => {
-
     const { user } = useAuth();
+    const { settings, fetchSettings } = useSettingsStore();
+
+    useEffect(() => {
+        fetchSettings();
+    }, []);
 
     if (!user) {
         return (
@@ -18,7 +24,7 @@ export const AdminHeader = () => {
             <div className="titulo-nav px-0 d-flex flex-column">
                 <div className="titulo mx-5 text-black d-flex flex-column flex-md-row justify-content-md-between align-items-md-center">
                     <div className="titulo text-center text-md-start">
-                        <h1 className='mb-0'>Ero Cras - Admin</h1>
+                        <h1 className='mb-0'>{settings?.tituloWeb ? settings.tituloWeb : 'Company'} - Admin</h1>
                     </div>
                     <div className="contador_visitas d-flex flex-row align-items-center">
                         <p className="titulo mb-1 text-center fs-4 text-md-end">¡Hola {user.nombre}!</p>

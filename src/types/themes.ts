@@ -9,6 +9,7 @@ export interface ThemeState {
     themes: Theme[];
     loading: boolean;
     getThemes: (pagina?: number) => Promise<void>;  // Ahora acepta número de página opcional
+    getAllThemes: () => Promise<void>;
     createColorClass: (nuevo: Theme) => Promise<void>;
     deleteColorClass: (id: string) => Promise<void>;
     updateColorClass: (id: string, updated: Theme) => Promise<void>;

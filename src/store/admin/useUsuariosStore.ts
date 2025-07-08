@@ -8,8 +8,8 @@ import {
     actualizarUsuario,
     eliminarUsuario,
     buscarUsuarios
-} from '../services/usuarios';
-import type { Usuario } from '../types';
+} from '../../services/usuarios';
+import type { Usuario } from '../../types';
 
 interface UsuariosState {
     usuarios: Usuario[];

@@ -1,7 +1,7 @@
 import { AdminFooter } from '../../components-admin/AdminFooter';
 import { RegisterUser } from '../../components/users/RegisterUser';
 
-const AdminRegister = () => {
+export const AdminRegister = () => {
     return (
         <div>
             <header className="layout-header">
@@ -21,5 +21,3 @@ const AdminRegister = () => {
         </div>
     );
 };
-
-export default AdminRegister;

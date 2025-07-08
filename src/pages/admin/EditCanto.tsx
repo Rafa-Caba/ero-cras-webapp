@@ -1,9 +1,7 @@
 import AdminEditCanto from "../../components/cantos/AdminEditCanto";
 
-const EditCanto = () => {
+export const EditCanto = () => {
     return (
         <AdminEditCanto />
     );
 }
-
-export default EditCanto
