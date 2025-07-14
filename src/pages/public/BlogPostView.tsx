@@ -1,7 +1,7 @@
-import { PublicBlogPostView } from "../../components/blog/PublicBlogPostView";
+// import { PublicBlogPostView } from "../../components/blog/PublicBlogPostView";
 
-export const BlogPostView = () => {
-    return (
-        <PublicBlogPostView />
-    )
-};
+// export const BlogPostView = () => {
+//     return (
+//         <PublicBlogPostView />
+//     )
+// };
