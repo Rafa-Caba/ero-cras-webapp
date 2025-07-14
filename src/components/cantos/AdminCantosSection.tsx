@@ -1,28 +1,21 @@
-import { Accordion, Spinner } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Accordion, Spinner } from 'react-bootstrap';
+import { TiptapViewer } from '../tiptap-components/TiptapViewer';
 import { obtenerCantos } from '../../services/cantos';
 import type { Canto } from '../../types';
-
-const tipoDeCantos = [
-    'Entrada',
-    'Kyrie',
-    'Gloria',
-    'Aleluya',
-    'Presentacion de Dones',
-    'Santo',
-    'Cordero de Dios',
-    'Comunion',
-    'Salida',
-];
+import { useTiposCantoStore } from '../../store/admin/useTiposCantoStore';
 
 const AdminCantosSection = () => {
     const [cantos, setCantos] = useState<Canto[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const { tipos, getTipos } = useTiposCantoStore();
+
     useEffect(() => {
-        const cargarCantos = async () => {
+        const cargarDatos = async () => {
             try {
+                await getTipos(); // obtiene los tipos dinámicos
                 const data = await obtenerCantos();
                 setCantos(data);
             } catch (error) {
@@ -32,8 +25,18 @@ const AdminCantosSection = () => {
             }
         };
 
-        cargarCantos();
+        cargarDatos();
     }, []);
+
+    const tiposOrdenados = [...tipos].sort((a, b) => a.orden - b.orden);
+
+    const cantosConTipo = tiposOrdenados.map(tipo => ({
+        tipo: tipo.nombre,
+        cantos: cantos.filter(c => c.tipo === tipo.nombre)
+    }));
+
+    const tiposExistentes = tipos.map(t => t.nombre);
+    const cantosSinTipo = cantos.filter(c => !tiposExistentes.includes(c.tipo));
 
     return (
         <div className="d-flex flex-column justify-content-center px-3 px-md-5 mb-0">
@@ -45,45 +48,107 @@ const AdminCantosSection = () => {
                 </div>
             </div>
 
-            <div className="cantos-contenedor mb-2">
-                {
-                    !loading
-                        ? (
-                            <Accordion alwaysOpen id="accordionCantos">
-                                {tipoDeCantos.map((tipo, index) => (
-                                    <Accordion.Item eventKey={index.toString()} key={tipo}>
-                                        <Accordion.Header>{tipo === 'Presentacion de Dones' ? 'Presentación de Dones' : tipo}</Accordion.Header>
-                                        <Accordion.Body>
-                                            {cantos
-                                                .filter((canto) => canto.tipo === tipo)
-                                                .map((canto) => (
-                                                    <Accordion key={canto._id} className="mb-2">
-                                                        <Accordion.Item eventKey={String(canto._id)}>
-                                                            <Accordion.Header>{canto.titulo}</Accordion.Header>
-                                                            <Accordion.Body>
-                                                                <div className=''>
-                                                                    <p>
-                                                                        <Link
-                                                                            className="canto-single-link fw-bolder fs-4 text-decoration-none"
-                                                                            to={`/admin/canto/${canto._id}`}
-                                                                        >
-                                                                            - {canto.titulo} -
-                                                                        </Link>
-                                                                    </p>
-                                                                    <p className="text-start" style={{ whiteSpace: 'pre-wrap' }}>{canto.texto}</p>
-                                                                </div>
-                                                            </Accordion.Body>
-                                                        </Accordion.Item>
-                                                    </Accordion>
-                                                ))}
-                                        </Accordion.Body>
-                                    </Accordion.Item>
-                                ))}
-                            </Accordion>
-                        ) : (
-                            <Spinner animation="border" role="status" />
-                        )
+            <div className="cantos-contenedor pe-0 mb-2">
+                {!loading
+                    ? (
+                        <Accordion alwaysOpen id="accordionCantos">
+
+                            {cantosConTipo.map((grupo, index) => (
+                                <Accordion.Item eventKey={index.toString()} key={grupo.tipo}>
+                                    <Accordion.Header>{grupo.tipo}</Accordion.Header>
+                                    <Accordion.Body>
+                                        {grupo.cantos.map((canto) => (
+                                            <Accordion key={canto._id} className="mb-2">
+                                                <Accordion.Item eventKey={String(canto._id)}>
+                                                    <Accordion.Header>{canto.titulo}</Accordion.Header>
+                                                    <Accordion.Body>
+                                                        <div>
+                                                            <p>
+                                                                <Link
+                                                                    className="canto-single-link fw-bolder fs-4 text-decoration-none"
+                                                                    to={`/admin/canto/${canto._id}`}
+                                                                >
+                                                                    - {canto.titulo} -
+                                                                </Link>
+                                                            </p>
+                                                            <TiptapViewer content={canto.texto} />
+                                                        </div>
+                                                    </Accordion.Body>
+                                                </Accordion.Item>
+                                            </Accordion>
+                                        ))}
+                                    </Accordion.Body>
+                                </Accordion.Item>
+                            ))}
+
+                            {cantosSinTipo.length > 0 && (
+                                <Accordion.Item eventKey="sin-tipo">
+                                    <Accordion.Header>Sin tipo de Canto</Accordion.Header>
+                                    <Accordion.Body>
+                                        {cantosSinTipo.map((canto) => (
+                                            <Accordion key={canto._id} className="mb-2">
+                                                <Accordion.Item eventKey={String(canto._id)}>
+                                                    <Accordion.Header>{canto.titulo}</Accordion.Header>
+                                                    <Accordion.Body>
+                                                        <div>
+                                                            <p>
+                                                                <Link
+                                                                    className="canto-single-link fw-bolder fs-4 text-decoration-none"
+                                                                    to={`/admin/canto/${canto._id}`}
+                                                                >
+                                                                    - {canto.titulo} -
+                                                                </Link>
+                                                            </p>
+                                                            <TiptapViewer content={canto.texto} />
+                                                        </div>
+                                                    </Accordion.Body>
+                                                </Accordion.Item>
+                                            </Accordion>
+                                        ))}
+                                    </Accordion.Body>
+                                </Accordion.Item>
+                            )}
+                        </Accordion>
+                    ) : (
+                        <Spinner animation="border" role="status" />
+                    )
                 }
+
+                {/* {
+                    {
+                        // tipoDeCantos.map((tipo, index) => (
+                        // <Accordion.Item eventKey={index.toString()} key={tipo}>
+                        //     <Accordion.Header>{tipo === 'Presentacion' ? 'Presentación' : tipo}</Accordion.Header>
+                        //     <Accordion.Body>
+                        //         {cantos
+                        //             .filter((canto) => canto.tipo === tipo)
+                        //             .map((canto) => (
+                        //                 <Accordion key={canto._id} className="mb-2">
+                        //                     <Accordion.Item eventKey={String(canto._id)}>
+                        //                         <Accordion.Header>{canto.titulo}</Accordion.Header>
+                        //                         <Accordion.Body>
+                        //                             <div className=''>
+                        //                                 <p>
+                        //                                     <Link
+                        //                                         className="canto-single-link fw-bolder fs-4 text-decoration-none"
+                        //                                         to={`/admin/canto/${canto._id}`}
+                        //                                     >
+                        //                                         - {canto.titulo} -
+                        //                                     </Link>
+                        //                                 </p>
+                        //                                 <TiptapViewer content={canto.texto} />
+                        //                             </div>
+                        //                         </Accordion.Body>
+                        //                     </Accordion.Item>
+                        //                 </Accordion>
+                        //             ))}
+                        //     </Accordion.Body>
+                        //     </Accordion.Item>
+                        //     ))}
+                        // </Accordion>
+                        // ))}
+                } */}
+
             </div>
         </div>
     );

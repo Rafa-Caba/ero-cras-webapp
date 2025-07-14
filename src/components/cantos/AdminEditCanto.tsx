@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Form } from 'react-bootstrap';
 import { actualizarCanto, obtenerCantoPorId } from '../../services/cantos';
 import Swal from 'sweetalert2';
+import { TiptapEditor } from '../tiptap-components/TiptapEditor';
+import { createHandleTextoChange } from '../../utils/handleTextTipTap';
 import type { Canto } from '../../types';
 
 const AdminEditCanto = () => {
@@ -66,14 +68,10 @@ const AdminEditCanto = () => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label >Letra del Canto</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={7}
-                            name="canto_texto"
-                            value={canto.texto}
-                            onChange={handleChange}
-                            placeholder="Texto del canto"
+                        <Form.Label>Texto del Canto</Form.Label>
+                        <TiptapEditor
+                            content={canto.texto}
+                            onChange={createHandleTextoChange(setCanto, 'texto')}
                         />
                     </Form.Group>
 

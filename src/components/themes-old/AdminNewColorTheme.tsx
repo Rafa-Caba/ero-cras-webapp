@@ -1,4 +1,3 @@
-// 📁 components/admin/AdminNewColorTheme.tsx
 import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
@@ -49,13 +48,13 @@ export const AdminNewColorTheme = () => {
                 <Row className='mb-3'>
                     <Col md={6}>
                         <Form.Group controlId='nombre'>
-                            <Form.Label>Nombre legible</Form.Label>
+                            <Form.Label>Primario</Form.Label>
                             <Form.Control
                                 type='text'
-                                name='nombre'
+                                name='primario'
                                 value={formData.nombre}
                                 onChange={handleChange}
-                                placeholder='Ej: Color de Navegación'
+                                placeholder='Color de Primario'
                             />
                         </Form.Group>
                     </Col>

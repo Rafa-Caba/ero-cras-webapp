@@ -1,29 +1,28 @@
-// 📁 components/admin/ThemesList.tsx
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Table, Button, Spinner } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { useThemesStore } from '../../store/admin/useThemesStore';
+import { useThemeGroupsStore } from '../../store/admin/useThemeGroupsStore';
 
-export const ThemesList = () => {
+export const AdminThemeGroupsList = () => {
     const {
-        themes,
-        loading,
-        getAllThemes,
-        deleteColorClass,
+        grupos,
+        cargando,
         paginaActual,
         totalPaginas,
+        fetchGrupos,
+        eliminarGrupoPorId,
         setPaginaActual
-    } = useThemesStore();
+    } = useThemeGroupsStore();
 
     useEffect(() => {
-        getAllThemes();
-    }, []);
+        fetchGrupos(paginaActual);
+    }, [paginaActual]);
 
-    const deleteColor = async (id: string) => {
+    const handleEliminar = async (id: string) => {
         const confirmar = await Swal.fire({
             title: '¿Estás seguro?',
-            text: 'Esta acción eliminará esta clase de color del tema',
+            text: 'Esta acción eliminará el grupo de temas y no se puede deshacer.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
@@ -33,24 +32,24 @@ export const ThemesList = () => {
         if (!confirmar.isConfirmed) return;
 
         try {
-            await deleteColorClass(id);
-            Swal.fire('Eliminado', 'La clase de color ha sido eliminada.', 'success');
+            await eliminarGrupoPorId(id);
+            Swal.fire('Eliminado', 'El grupo ha sido eliminado.', 'success');
         } catch (error) {
-            Swal.fire('Error', 'No se pudo eliminar la clase de color', 'error');
+            Swal.fire('Error', 'No se pudo eliminar el grupo', 'error');
         }
     };
 
     return (
         <div className="table-responsive">
             <div className="d-flex flex-column align-items-center my-4">
-                <h2 className="mb-4">Clases de Color del Tema</h2>
+                <h2 className="mb-4">Grupos de Temas</h2>
                 <div className="mb-3 d-flex gap-2">
                     <Link to="/admin" className="btn general_btn px-3">Inicio</Link>
-                    <Link to="/admin/themes/new_class_color" className="btn general_btn">Nueva Clase de Color</Link>
+                    <Link to="/admin/theme-groups/new" className="btn general_btn">Nuevo Grupo</Link>
                 </div>
             </div>
 
-            {loading ? (
+            {cargando ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
                     <Spinner animation="border" />
                 </div>
@@ -58,28 +57,26 @@ export const ThemesList = () => {
                 <Table bordered hover responsive className="text-center align-middle">
                     <thead className="table-dark">
                         <tr>
-                            <th>Nombre</th>
-                            <th>Clase</th>
-                            <th>Color</th>
-                            <th>Vista</th>
+                            <th>Nombre del Grupo</th>
+                            <th># Clores</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {themes.length === 0 ? (
-                            <tr><td colSpan={5}>No hay clases de color registradas.</td></tr>
+                        {grupos.length === 0 ? (
+                            <tr><td colSpan={3}>No hay grupos de temas registrados.</td></tr>
                         ) : (
-                            themes.map(({ _id, nombre, colorClass, color }) => (
+                            grupos.map(({ _id, nombre, colores }) => (
                                 <tr key={_id}>
                                     <td>{nombre}</td>
-                                    <td><code>{colorClass}</code></td>
-                                    <td><code>{color}</code></td>
+                                    <td>{colores.length}</td>
                                     <td>
-                                        <div style={{ width: '40px', height: '40px', backgroundColor: color, borderRadius: '6px', border: '1px solid #ccc', margin: '0 auto' }} />
-                                    </td>
-                                    <td>
-                                        <Link to={`/admin/edit_class_color/${_id}`} className="btn general_btn me-2">Editar</Link>
-                                        <Button variant="danger" onClick={() => deleteColor(_id!)}>Eliminar</Button>
+                                        <Link to={`/admin/theme-groups/edit/${_id}`} className="btn general_btn me-2">
+                                            Editar
+                                        </Link>
+                                        <Button variant="danger" onClick={() => handleEliminar(_id!)}>
+                                            Eliminar
+                                        </Button>
                                     </td>
                                 </tr>
                             ))

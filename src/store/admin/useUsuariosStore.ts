@@ -1,4 +1,3 @@
-// stores/useUsuariosStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import {
@@ -9,26 +8,7 @@ import {
     eliminarUsuario,
     buscarUsuarios
 } from '../../services/usuarios';
-import type { Usuario } from '../../types';
-
-interface UsuariosState {
-    usuarios: Usuario[];
-    usuarioSeleccionado: Usuario | null;
-    cargando: boolean;
-    error: string | null;
-    paginaActual: number;
-    totalPaginas: number;
-    totalUsuarios: number;
-
-    // Acciones
-    fetchUsuarios: (pagina?: number, limite?: number) => Promise<void>;
-    fetchUsuarioPorId: (id: string) => Promise<Usuario>;
-    crearNuevoUsuario: (formData: FormData) => Promise<void>;
-    actualizarUsuarioExistente: (id: string, formData: FormData) => Promise<void>;
-    eliminarUsuarioPorId: (id: string) => Promise<void>;
-    buscarUsuariosPorTexto: (q: string) => Promise<void>;
-    setPaginaActual: (pagina: number) => void;
-}
+import type { UsuariosState } from '../../types';
 
 export const useUsuariosStore = create<UsuariosState>()(
     persist(
@@ -108,6 +88,18 @@ export const useUsuariosStore = create<UsuariosState>()(
                     set({ usuarios: resultados, cargando: false });
                 } catch (error: any) {
                     set({ error: error.message, cargando: false });
+                }
+            },
+
+            actualizarUsuarioLogueado: async (id, formData) => {
+                try {
+                    set({ cargando: true, error: null });
+                    const res = await actualizarUsuario(id, formData);
+                    set({ usuarioSeleccionado: res.usuarioActualizado })
+                    return res.usuarioActualizado;
+                } catch (error: any) {
+                    set({ error: error.message, cargando: false });
+                    throw error;
                 }
             },
 

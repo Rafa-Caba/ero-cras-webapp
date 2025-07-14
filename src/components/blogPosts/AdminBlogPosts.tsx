@@ -59,11 +59,6 @@ export const AdminBlogPosts = () => {
         }
     }, [busqueda]);
 
-    // const capitalizar = (texto: string) => {
-    //     if (!texto) return '';
-    //     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
-    // };
-
     return (
         <div className="table-responsive">
             <div className="d-flex flex-column align-items-center my-1">

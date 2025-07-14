@@ -1,7 +1,9 @@
+import type { JSONContent } from '@tiptap/react';
+
 export interface Aviso {
     _id: string;
     titulo: string;
-    contenido: string;
+    contenido: JSONContent;
     publicado: boolean;
     imagenUrl?: string;
     imagenPublicId?: string;
@@ -18,7 +20,7 @@ export interface AvisosResponse {
 
 export interface AvisoForm {
     titulo: string;
-    contenido: string;
+    contenido: JSONContent;
     publicado: boolean;
     imagen: File | null;
 }

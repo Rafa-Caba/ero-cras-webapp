@@ -4,27 +4,37 @@ import { Form, Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import { useAvisosStore } from '../../store/admin/useAvisosStore';
 import type { AvisoForm } from '../../types';
+import { emptyEditorContent } from '../../utils/editorDefaults';
+import { TiptapEditor } from '../tiptap-components/TiptapEditor';
+import { createHandleTextoChange, createUpdateFormData } from '../../utils/handleTextTipTap';
 
 type InputOrSelectEvent = ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
 
 export const AdminEditAnnouncement = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-
+    const [formData, setFormData] = useState<AvisoForm | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [errores, setErrores] = useState<string[]>([]);
     const {
         fetchAvisoPorId,
         actualizarAvisoExistente
     } = useAvisosStore();
 
-    const [formData, setFormData] = useState<AvisoForm>({
+    const setFormDataSafe: React.Dispatch<React.SetStateAction<AvisoForm | null>> = setFormData;
+
+    const defaultFormData: AvisoForm = {
         titulo: '',
-        contenido: '',
+        contenido: emptyEditorContent,
         publicado: true,
         imagen: null
-    });
+    };
 
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [errores, setErrores] = useState<string[]>([]);
+    useEffect(() => {
+        if (!formData) setFormData(defaultFormData);
+    }, []);
+
+    const updateFormData = createUpdateFormData<AvisoForm>()(setFormData);
 
     useEffect(() => {
         if (id) {
@@ -51,12 +61,14 @@ export const AdminEditAnnouncement = () => {
 
         if (name === 'imagen' && files && files[0]) {
             const file = files[0];
-            setFormData({ ...formData, imagen: file });
+            // setFormData({ ...formData, imagen: file });
+            updateFormData({ imagen: file });
             const preview = URL.createObjectURL(file);
             setPreviewUrl(preview);
         } else {
             const newValue = type === 'checkbox' ? checked : value;
-            setFormData({ ...formData, [name]: newValue });
+            // setFormData({ ...formData, [name]: newValue });
+            updateFormData({ [name]: newValue });
         }
     };
 
@@ -64,8 +76,13 @@ export const AdminEditAnnouncement = () => {
         e.preventDefault();
         const newErrors: string[] = [];
 
+        if (!formData) {
+            setErrores(['Error interno: el formulario no está cargado.']);
+            return;
+        }
+
         if (!formData.titulo.trim()) newErrors.push('El título es requerido.');
-        if (!formData.contenido.trim()) newErrors.push('El contenido es requerido.');
+        if (!formData.contenido) newErrors.push('El contenido es requerido.');
 
         if (newErrors.length > 0) {
             setErrores(newErrors);
@@ -74,7 +91,7 @@ export const AdminEditAnnouncement = () => {
 
         const formPayload = new FormData();
         formPayload.append('titulo', formData.titulo);
-        formPayload.append('contenido', formData.contenido);
+        formPayload.append('contenido', JSON.stringify(formData.contenido));
         formPayload.append('publicado', formData.publicado ? 'true' : 'false');
         if (formData.imagen) {
             formPayload.append('imagen', formData.imagen);
@@ -84,6 +101,9 @@ export const AdminEditAnnouncement = () => {
             if (id) {
                 await actualizarAvisoExistente(id, formPayload);
                 Swal.fire('Actualizado', '✅ El aviso fue actualizado exitosamente.', 'success');
+
+                setFormData(defaultFormData);
+
                 navigate('/admin/announcements');
             }
         } catch (error) {
@@ -109,22 +129,17 @@ export const AdminEditAnnouncement = () => {
                             type="text"
                             name="titulo"
                             placeholder="Título del aviso"
-                            value={formData.titulo}
+                            value={formData?.titulo}
                             onChange={handleChange}
                             required
                         />
                     </Form.Group>
 
-                    <Form.Group className="mb-3" controlId="formContenido">
-                        <Form.Label>Contenido</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={5}
-                            name="contenido"
-                            placeholder="Contenido del aviso"
-                            value={formData.contenido}
-                            onChange={handleChange}
-                            required
+                    <Form.Group className="mb-3">
+                        <Form.Label>Descripción</Form.Label>
+                        <TiptapEditor
+                            content={formData?.contenido}
+                            onChange={createHandleTextoChange<AvisoForm>(setFormDataSafe, 'contenido')}
                         />
                     </Form.Group>
 
@@ -133,7 +148,7 @@ export const AdminEditAnnouncement = () => {
                             type="checkbox"
                             name="publicado"
                             label="¿Publicado?"
-                            checked={formData.publicado}
+                            checked={formData?.publicado}
                             onChange={handleChange}
                         />
                     </Form.Group>

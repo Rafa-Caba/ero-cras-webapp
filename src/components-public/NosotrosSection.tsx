@@ -16,7 +16,7 @@ const NosotrosSection = () => {
 
     return (
         <section className="center col-12 d-flex flex-column align-items-center order-0 order-md-1">
-            <div className="nosotros galeria my-3 mx-0 mx-md-2">
+            <div className="nosotros primary-color-container my-3 mx-0 mx-md-2">
                 <div className="nosotros p-1">
                     <p className="fs-3 fw-bolder">Historia...</p>
 

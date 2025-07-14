@@ -1,0 +1,42 @@
+.editor {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 1rem;
+    min-height: 150px;
+    background-color: white;
+    outline: none;
+
+    p {
+        margin: 0;
+        padding: 0;
+        text-align: left;
+    }
+
+    h1,
+    h2,
+    h3 {
+        margin: 0;
+        padding: 0;
+        text-align: left;
+    }
+}
+
+.editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 0.5rem;
+
+    button {
+        background: #eee;
+        padding: 6px 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+
+        &.active {
+            background: #7d2181;
+            color: white;
+        }
+    }
+}

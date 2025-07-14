@@ -1,9 +1,13 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Spinner, Button, Form } from 'react-bootstrap';
+import { TiptapViewer } from '../tiptap-components/TiptapViewer';
 import Swal from 'sweetalert2';
-import { useBlogPostsStore } from '../../store/admin/useBlogPostsStore';
+import type { JSONContent } from '@tiptap/react';
+import { TiptapEditor } from '../tiptap-components/TiptapEditor';
 import { useAuth } from '../../hooks/useAuth';
+import { useBlogPostsStore } from '../../store/admin/useBlogPostsStore';
+import { createHandleTextoChange } from '../../utils/handleTextTipTap';
 
 export const AdminBlogPostSingleView = () => {
     const { id } = useParams<{ id: string }>();
@@ -16,7 +20,7 @@ export const AdminBlogPostSingleView = () => {
         cargando
     } = useBlogPostsStore();
 
-    const [comentario, setComentario] = useState('');
+    const [comentario, setComentario] = useState<{ texto: JSONContent } | null>(null);
     const [likeCargando, setLikeCargando] = useState(false);
     const [comentarioCargando, setComentarioCargando] = useState(false);
 
@@ -47,7 +51,7 @@ export const AdminBlogPostSingleView = () => {
 
     const handleComentario = async (e: FormEvent) => {
         e.preventDefault();
-        if (!comentario.trim()) {
+        if (!comentario) {
             Swal.fire('Oops', 'El comentario no puede estar vacío', 'warning');
             return;
         }
@@ -59,9 +63,9 @@ export const AdminBlogPostSingleView = () => {
 
         try {
             setComentarioCargando(true);
-            await comentarEnPost(id!, user.nombre, comentario.trim());
+            await comentarEnPost(id!, user.nombre, comentario);
             await fetchPostPorId(id!);
-            setComentario('');
+            setComentario(null);
         } catch (error) {
             Swal.fire('Error', 'No se pudo agregar el comentario', 'error');
         } finally {
@@ -91,7 +95,7 @@ export const AdminBlogPostSingleView = () => {
                     <img src={imagenUrl} alt={titulo} className="img-post rounded" />
                 </div>
             )}
-            <div dangerouslySetInnerHTML={{ __html: contenido }} />
+            <TiptapViewer content={contenido} />
 
             <div className="mt-4">
                 <Button
@@ -114,20 +118,15 @@ export const AdminBlogPostSingleView = () => {
 
             <hr />
 
-            <div className="comentarios mt-4">
+            <div className="comentarios p-2 p-md-3 mt-4">
                 <h4>Comentarios ({comentarios.length})</h4>
 
                 <Form onSubmit={handleComentario} className="mb-4">
-                    <Form.Group controlId="comentarioTexto" className="mb-3">
+                    <Form.Group className="mb-3">
                         <Form.Label>Comentario</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={3}
-                            placeholder="Escribe tu comentario..."
-                            value={comentario}
-                            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setComentario(e.target.value)}
-                        />
+                        <TiptapEditor content={comentario?.texto || null} onChange={createHandleTextoChange(setComentario, 'texto')} />
                     </Form.Group>
+
 
                     <Button type="submit" variant="success" disabled={comentarioCargando}>
                         {comentarioCargando ? 'Enviando...' : 'Comentar'}
@@ -135,10 +134,14 @@ export const AdminBlogPostSingleView = () => {
                 </Form>
 
                 {comentarios.length > 0 ? (
-                    comentarios.map((c, i) => (
-                        <div key={i} className="border p-2 rounded mb-2">
-                            <p className="mb-1"><strong>{c.autor}</strong> — <small>{new Date(c.fecha).toLocaleString()}</small></p>
-                            <p className="mb-0">{c.texto}</p>
+                    [...comentarios].reverse().map((c, i) => (
+                        <div key={i}>
+                            <div className="border p-0 rounded mb-2">
+                                <p className="mb-1"><strong>{c.autor}</strong> — <small>{new Date(c.fecha).toLocaleString()}</small></p>
+                                {/* <p className="mb-0">{c.texto}</p> */}
+                                <TiptapViewer content={c.texto} />
+                            </div>
+                            <hr />
                         </div>
                     ))
                 ) : (

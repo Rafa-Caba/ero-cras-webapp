@@ -1,4 +1,4 @@
-import { ThemesList } from "../../components/themes/ThemesList";
+import { ThemesList } from "../../components/themes-old/ThemesList";
 
 export const ThemesPage = () => {
     return (

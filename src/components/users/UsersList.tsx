@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Table, Image, Button, Spinner } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import { useUsuariosStore } from '../../store/admin/useUsuariosStore';
+import { capitalizarPalabra } from '../../utils';
 
 export const UsersList = () => {
     const [busqueda, setBusqueda] = useState('');
@@ -59,11 +60,6 @@ export const UsersList = () => {
             return () => clearTimeout(delay);
         }
     }, [busqueda]);
-
-    const capitalizarPalabra = (palabra: string) => {
-        if (!palabra) return '';
-        return palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase();
-    };
 
     return (
         <div className="table-responsive">

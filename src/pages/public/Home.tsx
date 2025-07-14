@@ -4,8 +4,8 @@ import { MyCarousel } from '../../components-public/MyCarousel';
 
 const HomePage = () => {
     return (
-        <div className="px-3">
-            <div className="meaning w-100 d-flex flex-column align-items-center">
+        <div className="px-md-3">
+            <div className="carousel-container acronym-labels w-100 d-flex flex-column align-items-center">
                 <h2 className="d-none d-md-block">Ero Cras:</h2>
                 <div className="d-flex flex-wrap flex-lg-nowrap flex-column flex-md-row justify-content-evenly align-items-center">
                     {[

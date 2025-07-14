@@ -4,6 +4,9 @@ import { Form, Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import { useBlogPostsStore } from '../../store/admin/useBlogPostsStore';
 import type { BlogPostForm } from '../../types';
+import { emptyEditorContent } from '../../utils/editorDefaults';
+import { TiptapEditor } from '../tiptap-components/TiptapEditor';
+import { createHandleTextoChange } from '../../utils/handleTextTipTap';
 
 
 type InputEvent = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
@@ -11,33 +14,48 @@ type InputEvent = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelec
 export const AdminNewBlogPost = () => {
     const navigate = useNavigate();
     const { crearNuevoPost } = useBlogPostsStore();
+    const [formData, setFormData] = useState<BlogPostForm | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [errores, setErrores] = useState<string[]>([]);
 
-    const [formData, setFormData] = useState<BlogPostForm>({
+    const setFormDataSafe: React.Dispatch<React.SetStateAction<BlogPostForm | null>> = setFormData;
+
+    const defaultFormData: BlogPostForm = {
         titulo: '',
-        contenido: '',
+        contenido: emptyEditorContent,
         autor: '',
         publicado: true,
         imagen: null
-    });
+    };
 
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [errores, setErrores] = useState<string[]>([]);
+    useEffect(() => {
+        if (!formData) setFormData(defaultFormData);
+    }, []);
+
+    const updateFormData = (changes: Partial<BlogPostForm>) => {
+        setFormData((prev) => (prev ? { ...prev, ...changes } : prev));
+    };
 
     const handleChange = (e: InputEvent) => {
         const { name, value, files } = e.target as HTMLInputElement;
 
         if (name === 'imagen' && files && files[0]) {
             const file = files[0];
-            setFormData({ ...formData, imagen: file });
+            updateFormData({ imagen: file });
             setPreviewUrl(URL.createObjectURL(file));
         } else {
-            setFormData({ ...formData, [name]: value });
+            updateFormData({ [name]: value });
         }
     };
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const newErrors: string[] = [];
+
+        if (!formData) {
+            setErrores(['Error interno: el formulario no está cargado.']);
+            return;
+        }
 
         if (!formData.titulo.trim()) newErrors.push('El título es obligatorio.');
         if (!formData.contenido.trim()) newErrors.push('El contenido no puede estar vacío.');
@@ -50,7 +68,7 @@ export const AdminNewBlogPost = () => {
 
         const formPayload = new FormData();
         formPayload.append('titulo', formData.titulo);
-        formPayload.append('contenido', formData.contenido);
+        formPayload.append('contenido', JSON.stringify(formData.contenido));
         formPayload.append('autor', formData.autor);
         formPayload.append('publicado', formData.publicado ? 'true' : 'false');
 
@@ -62,13 +80,8 @@ export const AdminNewBlogPost = () => {
             await crearNuevoPost(formPayload);
             Swal.fire('¡Post creado!', '✅ El post se ha creado exitosamente.', 'success');
 
-            setFormData({
-                titulo: '',
-                contenido: '',
-                autor: '',
-                publicado: true,
-                imagen: null
-            });
+            setFormData(defaultFormData);
+
             setPreviewUrl(null);
             setErrores([]);
 
@@ -96,22 +109,17 @@ export const AdminNewBlogPost = () => {
                             type="text"
                             name="titulo"
                             placeholder="Título del post"
-                            value={formData.titulo}
+                            value={formData?.titulo}
                             onChange={handleChange}
                             required
                         />
                     </Form.Group>
 
-                    <Form.Group className="mb-3" controlId="formContenido">
+                    <Form.Group className="mb-3">
                         <Form.Label>Contenido</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={6}
-                            name="contenido"
-                            placeholder="Contenido del post"
-                            value={formData.contenido}
-                            onChange={handleChange}
-                            required
+                        <TiptapEditor
+                            content={formData?.contenido}
+                            onChange={createHandleTextoChange<BlogPostForm>(setFormDataSafe, 'contenido')}
                         />
                     </Form.Group>
 
@@ -121,7 +129,7 @@ export const AdminNewBlogPost = () => {
                             type="text"
                             name="autor"
                             placeholder="Nombre del autor"
-                            value={formData.autor}
+                            value={formData?.autor}
                             onChange={handleChange}
                             required
                         />
@@ -132,7 +140,7 @@ export const AdminNewBlogPost = () => {
                             type="checkbox"
                             label="Publicado"
                             name="publicado"
-                            checked={formData.publicado}
+                            checked={formData?.publicado}
                             onChange={handleChange}
                         />
                     </Form.Group>

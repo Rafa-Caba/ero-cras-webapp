@@ -1,13 +1,15 @@
+import type { JSONContent } from '@tiptap/react';
+
 export interface Comentario {
     autor: string;
-    texto: string;
+    texto: JSONContent;
     fecha: string;
 }
 
 export interface BlogPost {
     _id: string;
     titulo: string;
-    contenido: string;
+    contenido: JSONContent;
     autor: string;
     imagenUrl?: string;
     imagenPublicId?: string;
@@ -48,7 +50,7 @@ export interface BlogPostComentarioResponse {
 
 export interface BlogPostForm {
     titulo: string;
-    contenido: string;
+    contenido: JSONContent;
     autor: string;
     publicado: boolean;
     imagen: File | null;

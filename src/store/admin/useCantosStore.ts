@@ -16,11 +16,12 @@ interface CantosState {
     loading: boolean;
     error: string | null;
 
-    obtenerTodos: () => Promise<void>;
+    obtenerTodos: () => Promise<Canto[] | undefined>;
     obtenerUno: (id: string) => Promise<void>;
     crear: (nuevo: Canto) => Promise<void>;
     actualizar: (id: string, datos: Canto) => Promise<void>;
     eliminar: (id: string) => Promise<void>;
+    setCantoSeleccionado: (canto: Canto | null) => void;
     resetCantos: () => void;
 }
 
@@ -36,8 +37,10 @@ export const useCantosStore = create<CantosState>()(
             try {
                 const data = await obtenerCantos();
                 set({ cantos: data });
-            } catch (err) {
-                set({ error: 'Error al obtener los cantos' });
+                return data;
+            } catch (err: any) {
+                console.error(err);
+                set({ error: err.message || 'Error al obtener los cantos' });
             } finally {
                 set({ loading: false });
             }
@@ -54,6 +57,8 @@ export const useCantosStore = create<CantosState>()(
                 set({ loading: false });
             }
         },
+
+        setCantoSeleccionado: (canto) => set({ cantoSeleccionado: canto }),
 
         crear: async (nuevo: Canto) => {
             set({ loading: true, error: null });

@@ -1,12 +1,5 @@
 import api, { publicApi } from '../api/axios';
-
-export interface Canto {
-    _id?: string;
-    titulo: string;
-    texto: string;
-    tipo: string;
-    compositor: string;
-}
+import type { Canto } from '../types';
 
 export const obtenerCantos = async () => {
     const res = await api.get<Canto[]>('/cantos');

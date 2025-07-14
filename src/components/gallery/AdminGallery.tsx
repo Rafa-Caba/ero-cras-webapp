@@ -83,7 +83,7 @@ export const AdminGallery = () => {
 
     return (
         <div>
-            <div className="galeria d-flex flex-column align-items-center w-100 my-3">
+            <div className="primary-color-container d-flex flex-column align-items-center w-100 my-3">
                 <h2 className="mt-3">Galeria Ero Cras</h2>
                 <div className="botones mb-3">
                     <Link to="/admin" className="btn general_btn me-2">Inicio</Link>
@@ -94,7 +94,7 @@ export const AdminGallery = () => {
             {
                 !cargando
                     ? (
-                        <div className="galeria w-100 mt-3 d-flex flex-wrap justify-content-center mb-0">
+                        <div className="primary-color-container w-100 mt-3 d-flex flex-wrap justify-content-center mb-0">
                             <div className="container d-flex flex-fill flex-column flex-md-row flex-wrap align-items-center justify-content-around">
                                 {imagenes.map((imagen) => (
                                     <div key={imagen._id} className="col-md-3 d-flex flex-column align-items-center m-2 mb-3">

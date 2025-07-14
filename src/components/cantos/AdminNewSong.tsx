@@ -2,12 +2,15 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
 import Swal from "sweetalert2";
+import type { JSONContent } from '@tiptap/react';
 import { crearCanto } from "../../services/cantos";
+import { TiptapEditor } from "../tiptap-components/TiptapEditor";
 
 
 export const AdminNewSong = () => {
     const [titulo, setTitulo] = useState("");
-    const [texto, setTexto] = useState("");
+    // const [texto, setTexto] = useState<any>(null);
+    const [texto, setTexto] = useState<JSONContent | null>(null);
     const [tipo, setTipo] = useState("");
     const [compositor, setCompositor] = useState("");
 
@@ -27,7 +30,7 @@ export const AdminNewSong = () => {
             Swal.fire("¡Éxito!", "Canto guardado correctamente", "success");
 
             setTitulo("");
-            setTexto("");
+            setTexto(null);
             setTipo("");
             setCompositor("");
 
@@ -37,7 +40,6 @@ export const AdminNewSong = () => {
             Swal.fire("Error", "Ocurrió un error inesperado", "error");
         }
     };
-
 
     return (
         <article className="m-3 col-md-8 mx-auto">
@@ -54,15 +56,9 @@ export const AdminNewSong = () => {
                         />
                     </Form.Group>
 
-                    <Form.Group className="mb-3" controlId="texto">
+                    <Form.Group className="mb-3">
                         <Form.Label>Texto del Canto</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={8}
-                            value={texto}
-                            onChange={(e) => setTexto(e.target.value)}
-                            placeholder="Texto del canto"
-                        />
+                        <TiptapEditor content={texto} onChange={(val: JSONContent) => setTexto(val)} />
                     </Form.Group>
 
                     <Form.Group className="mb-3" controlId="tipo">

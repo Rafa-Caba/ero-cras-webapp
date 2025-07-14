@@ -46,16 +46,16 @@ const AdminLogin = () => {
             <header className="layout-header">
                 <div className="titulo-nav px-0 col-12 d-flex flex-column">
                     <div className="titulo mx-5 text-black d-flex flex-column flex-md-row justify-content-md-between align-items-md-center">
-                        <div className="titulo text-center text-md-start d-flex justify-content-between mt-3 w-100">
-                            <h1 className="">Ero Cras Oficial - Admin</h1>
-                            <Link className="btn general_btn mt-3 fw-bold fs-5" to="/">Ir al Inicio</Link>
+                        <div className="titulo text-center text-md-start d-flex flex-column flex-md-row justify-content-between mt-3 w-100">
+                            <h2 className="">Ero Cras Oficial - Admin</h2>
+                            <Link className="btn general_btn mt-3 mt-md-0 mb-md-2 fw-bold fs-6 fs-md-5" to="/">Ir al Inicio</Link>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <main className="layout-main" style={{ minHeight: '80vh' }}>
-                <div className="my-5 mx-auto col-12 col-md-8 d-flex flex-column align-items-center justify-content-center">
+            <main className="layout-main primary-color-container" style={{ minHeight: '80vh' }}>
+                <div className="mt-5 my-mb-5 mx-auto col-12 col-md-8 d-flex flex-column align-items-center justify-content-center">
                     <Image
                         src={'/images/erocrasLogo.png'}
                         roundedCircle
@@ -73,7 +73,7 @@ const AdminLogin = () => {
                         }}
                         className="text-center"
                     />
-                    <article className="my-5 mx-auto w-50 d-flex flex-column align-items-center justify-content-center">
+                    <article className="mt-5 my-mb-5 mx-auto w-50 d-flex flex-column align-items-center justify-content-center">
                         <h2 className="titulo">Iniciar Sesión</h2>
                         <form className="w-100 mt-4" onSubmit={handleLogin}>
                             <input

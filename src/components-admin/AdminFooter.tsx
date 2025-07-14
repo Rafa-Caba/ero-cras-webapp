@@ -3,19 +3,23 @@ import '../assets/styles/components/_footer.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useSettingsStore } from '../store/admin/useSettingsStore';
 import { useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
 
 export const AdminFooter = () => {
+    const { isAuthenticated, loading } = useAuth();
     const { settings, fetchSettings } = useSettingsStore();
 
     useEffect(() => {
-        fetchSettings();
-    }, []);
+        if (!loading && isAuthenticated) {
+            fetchSettings();
+        }
+    }, [loading, isAuthenticated]);
 
     return (
-        <footer className="layout-footer">
+        <footer className="layout-footer color-footer">
             <div className="my-1 d-flex flex-column flex-md-row justify-content-between mb-2">
                 <div className="copyright" style={{ marginLeft: '1em', marginTop: '4px' }}>
-                    <p className="text-black-50 mb-2">Creada por Rafael Cabanillas - 2022</p>
+                    <p className="text-theme-color mb-2">Creada por Rafael Cabanillas - 2022</p>
                 </div>
                 <div style={{ marginRight: '1em' }} className='mb-3 mb-md-0'>
                     <ul className="nav w-100 order-1 d-flex justify-content-center">

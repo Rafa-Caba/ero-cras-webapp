@@ -20,6 +20,7 @@ export const actualizarUsuario2 = async (id: string, formData: FormData): Promis
     const res = await api.put<UpdateResponse>(`/usuarios/${id}`, formData);
     return res.data;
 };
+
 export const actualizarUsuario = async (id: string, formData: FormData): Promise<UpdateResponse> => {
     const res = await api.put<UpdateResponse>(`/usuarios/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -37,4 +38,9 @@ export const crearUsuario = async (formData: FormData): Promise<UpdateResponse> 
 export const buscarUsuarios = async (q: string): Promise<Usuario[]> => {
     const res = await api.get<Usuario[]>(`/usuarios/buscar?q=${encodeURIComponent(q)}`);
     return res.data;
+};
+
+export const updateUserData = async (id: string, data: Partial<Usuario>) => {
+    const res = await api.put(`/usuarios/${id}`, data);
+    return res.data.usuarioActualizado;
 };

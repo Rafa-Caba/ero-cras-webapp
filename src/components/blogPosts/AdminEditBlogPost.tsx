@@ -4,6 +4,9 @@ import { Form, Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import { useBlogPostsStore } from '../../store/admin/useBlogPostsStore';
 import type { BlogPostForm } from '../../types';
+import { createHandleTextoChange } from '../../utils/handleTextTipTap';
+import { TiptapEditor } from '../tiptap-components/TiptapEditor';
+import { emptyEditorContent } from '../../utils/editorDefaults';
 
 type InputOrSelectEvent = ChangeEvent<
     HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -17,16 +20,27 @@ export const AdminEditBlogPost = () => {
         actualizarPostExistente
     } = useBlogPostsStore();
 
-    const [formData, setFormData] = useState<BlogPostForm>({
-        titulo: '',
-        contenido: '',
-        autor: '',
-        publicado: true,
-        imagen: null
-    });
+    const [formData, setFormData] = useState<BlogPostForm | null>(null);
+    const setFormDataSafe: React.Dispatch<React.SetStateAction<BlogPostForm | null>> = setFormData;
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [errores, setErrores] = useState<string[]>([]);
+
+    const updateFormData = (changes: Partial<BlogPostForm>) => {
+        setFormData((prev) => (prev ? { ...prev, ...changes } : prev));
+    };
+
+    const defaultFormData: BlogPostForm = {
+        titulo: '',
+        contenido: emptyEditorContent,
+        autor: '',
+        publicado: true,
+        imagen: null
+    };
+
+    useEffect(() => {
+        if (!formData) setFormData(defaultFormData);
+    }, []);
 
     useEffect(() => {
         const cargarDatos = async () => {
@@ -49,13 +63,18 @@ export const AdminEditBlogPost = () => {
         const target = e.target as HTMLInputElement;
         const { name, value, files } = target;
 
+        if (!formData) {
+            setErrores(['Error interno: el formulario no está cargado.']);
+            return;
+        }
+
         if (name === 'imagen' && files && files[0]) {
             const file = files[0];
-            setFormData({ ...formData, imagen: file });
+            updateFormData({ imagen: file });
             const preview = URL.createObjectURL(file);
             setPreviewUrl(preview);
         } else {
-            setFormData({ ...formData, [name]: value });
+            updateFormData({ [name]: value });
         }
     };
 
@@ -63,18 +82,23 @@ export const AdminEditBlogPost = () => {
         e.preventDefault();
         const erroresValidacion: string[] = [];
 
-        if (!formData.titulo.trim()) erroresValidacion.push('El título es requerido.');
-        if (!formData.contenido.trim()) erroresValidacion.push('El contenido es requerido.');
-        if (!formData.autor.trim()) erroresValidacion.push('El autor es requerido.');
+        if (!formData?.titulo.trim()) erroresValidacion.push('El título es requerido.');
+        if (!formData?.contenido) erroresValidacion.push('El contenido es requerido.');
+        if (!formData?.autor.trim()) erroresValidacion.push('El autor es requerido.');
 
         if (erroresValidacion.length > 0) {
             setErrores(erroresValidacion);
             return;
         }
 
+        if (!formData) {
+            setErrores(['Error interno: el formulario no está cargado.']);
+            return;
+        }
+
         const payload = new FormData();
         payload.append('titulo', formData.titulo);
-        payload.append('contenido', formData.contenido);
+        payload.append('contenido', JSON.stringify(formData.contenido));
         payload.append('autor', formData.autor);
         payload.append('publicado', formData.publicado ? 'true' : 'false');
 
@@ -84,6 +108,8 @@ export const AdminEditBlogPost = () => {
 
         try {
             if (id) await actualizarPostExistente(id, payload);
+
+            setFormData(defaultFormData);
 
             Swal.fire('Actualizado', '✅ El post fue actualizado', 'success');
             navigate('/admin/blogposts');
@@ -109,7 +135,7 @@ export const AdminEditBlogPost = () => {
                         <Form.Control
                             type="text"
                             name="titulo"
-                            value={formData.titulo}
+                            value={formData?.titulo}
                             onChange={handleChange}
                             placeholder="Título del post"
                             required
@@ -117,15 +143,10 @@ export const AdminEditBlogPost = () => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Contenido</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            name="contenido"
-                            value={formData.contenido}
-                            onChange={handleChange}
-                            placeholder="Contenido del post"
-                            rows={6}
-                            required
+                        <Form.Label>Texto del Canto</Form.Label>
+                        <TiptapEditor
+                            content={formData?.contenido}
+                            onChange={createHandleTextoChange<BlogPostForm>(setFormDataSafe, 'contenido')}
                         />
                     </Form.Group>
 
@@ -134,7 +155,7 @@ export const AdminEditBlogPost = () => {
                         <Form.Control
                             type="text"
                             name="autor"
-                            value={formData.autor}
+                            value={formData?.autor}
                             onChange={handleChange}
                             placeholder="Nombre del autor"
                             required
@@ -146,7 +167,7 @@ export const AdminEditBlogPost = () => {
                             type="checkbox"
                             name="publicado"
                             label="¿Publicado?"
-                            checked={formData.publicado}
+                            checked={formData?.publicado}
                             onChange={handleChange}
                         />
                     </Form.Group>

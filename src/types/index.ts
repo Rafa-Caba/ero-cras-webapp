@@ -7,3 +7,6 @@ export * from './miembros';
 export * from './avisos';
 export * from './blogPosts';
 export * from './settings';
+export * from './logs';
+export * from './tiposCanto';
+export * from './themeGroups';

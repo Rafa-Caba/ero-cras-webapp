@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { JSONContent } from '@tiptap/react';
+
 import {
     actualizarBlogPost,
     agregarComentarioBlogPost,
@@ -29,7 +31,7 @@ interface BlogPostsState {
     eliminarPostPorId: (id: string) => Promise<void>;
     buscarPostsPorTexto: (q: string) => Promise<void>;
     darLike: (postId: string, userId: string) => Promise<void>;
-    comentarEnPost: (postId: string, autor: string, texto: string) => Promise<void>;
+    comentarEnPost: (postId: string, autor: string, texto: JSONContent) => Promise<void>;
     setPaginaActual: (pagina: number) => void;
 }
 

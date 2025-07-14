@@ -89,7 +89,7 @@ export const RegisterUser = () => {
     }, [formData.fotoPerfil]);
 
     return (
-        <main className='layout-main mx-3'>
+        <main className='layout-main primary-color-container mx-3'>
             <Container className="mt-4 d-flex flex-column justify-content-center col-12 col-md-6">
                 <Image
                     src={'/images/erocrasLogo.png'}

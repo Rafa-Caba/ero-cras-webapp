@@ -1,4 +1,3 @@
-// 📁 components/admin/AdminEditColorTheme.tsx
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Button, Container, Alert, Spinner } from 'react-bootstrap';

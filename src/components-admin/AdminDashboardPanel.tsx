@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Image } from 'react-bootstrap';
 import { FaImage } from "react-icons/fa";
@@ -11,10 +12,16 @@ export const AdminDashboardPanel = () => {
     const { imagenes } = useGaleriaStore();
     const { user } = useAuth();
 
+    useEffect(() => {
+        if (!user) {
+            navigate('/admin/login');
+        }
+    }, [user, navigate]);
+
     if (!user) {
-        navigate('/admin/login');
-        return;
+        return null; // o un loader temporal
     }
+
 
     const imagenInicio = imagenes.find(img => img.imagenInicio);
 
@@ -24,30 +31,36 @@ export const AdminDashboardPanel = () => {
 
             <div className="panel-titulo d-flex justify-content-between flex-grow-1 flex-column mb-1">
                 <div className='d-flex flex-column justify-content-center mb-3'>
-                    <div className='d-flex justify-content-center flex-wrap mb-3'>
-                        <Link to="/admin/users" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
+                    <div className='d-flex justify-content-center flex-wrap mb-2'>
+                        <Link to="/admin/users" className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2">
                             Usuarios
                         </Link>
-                        <Link to="/admin/cantos" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
+                        <Link to="/admin/cantos" className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2">
                             Cantos
                         </Link>
-                        <Link to="/admin/gallery" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
+                        <Link to="/admin/tipos-canto" className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2">
+                            Tipos de Cantos
+                        </Link>
+                        <Link to="/admin/gallery" className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2">
                             Galería
                         </Link>
-                        <Link to="/admin/members" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
+                        <Link to="/admin/members" className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2">
                             Miembros
                         </Link>
-                        <Link to="/admin/blogposts" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
+                        <Link to="/admin/blogposts" className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2">
                             Blogs
                         </Link>
-                        <Link to="/admin/announcements" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
+                        <Link to="/admin/announcements" className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2">
                             Avisos
                         </Link>
-                        <Link to="/admin/themes" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
+                        <Link to="/admin/theme-groups" className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2">
                             Temas de Color
                         </Link>
-                        <Link to="/admin/website_settings" className="btn general_btn mb-2 mb-md-0 py-1 px-3 me-2">
+                        <Link to="/admin/website_settings" className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2">
                             Ajustes de Pagina
+                        </Link>
+                        <Link to="/admin/logs-page" className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2">
+                            Logs del sitio
                         </Link>
                     </div>
                     <div className='d-flex justify-content-center'>
@@ -64,7 +77,7 @@ export const AdminDashboardPanel = () => {
                             alt={imagenInicio.titulo}
                             height={500}
                             width={600}
-                            className="imagen-fija-inicio"
+                            className="imagen-fija-inicio mt-3"
                         />
                     ) : (
                         <div className="text-muted d-flex flex-column align-items-center">

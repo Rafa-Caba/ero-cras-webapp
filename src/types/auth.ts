@@ -27,7 +27,10 @@ export interface AuthContextType {
     user: Usuario | null;
     token: string | null;
     isAuthenticated: boolean;
-    // login: (usernameOrEmail: string, password: string) => Promise<boolean>;
+    loading: boolean;
+
+    // Functions
     login: (userData: Usuario, token: string, refreshToken: string) => void;
     logout: () => void;
+    updateUser: (updatedUser: Usuario) => void;
 }

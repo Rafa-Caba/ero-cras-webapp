@@ -1,11 +1,11 @@
-
-
-import { useLocation, Link } from 'react-router-dom';
-import '../assets/styles/components/_header.scss';
 import { useEffect } from 'react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import '../assets/styles/components/_header.scss';
 import { usePublicSettingsStore } from '../store/public/usePublicSettingsStore';
 
 export const Header = () => {
+    const navigate = useNavigate();
+
     const location = useLocation();
     const fromAdmin = new URLSearchParams(location.search).get('fromAdmin') === 'true';
     const { settings, fetchSettingsPublicos } = usePublicSettingsStore();
@@ -13,6 +13,17 @@ export const Header = () => {
     useEffect(() => {
         fetchSettingsPublicos();
     }, []);
+
+    const botonIrAdmin = () => {
+        return (
+            <button
+                className='btn btn-outline-secondary fs-6 btn-sm fw-bold'
+                onClick={() => navigate('/admin', { replace: true })}
+            >
+                Ir al admin
+            </button>
+        );
+    };
 
     return (
         <header className="layout-header">
@@ -29,9 +40,7 @@ export const Header = () => {
                                 </Link>
                             </div>
                         ) : (
-                            <Link to="/admin" className="btn btn-outline-secondary fs-6 btn-sm fw-bold">
-                                Ir al Admin
-                            </Link>
+                            botonIrAdmin()
                         )
                     }
                 </div>

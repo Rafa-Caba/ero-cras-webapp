@@ -6,7 +6,7 @@ import {
     usePublicThemesStore
 } from '../../store/public';
 
-export const PublicDashboard = () => {
+export const PublicTestDashboard = () => {
     const { cantos } = usePublicCantosStore();
     const { imagenes } = usePublicGaleriaStore();
     const { settings } = usePublicSettingsStore();

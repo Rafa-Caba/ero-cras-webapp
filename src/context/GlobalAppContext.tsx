@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import { useThemesStore } from '../store/admin/useThemesStore';
 import { useGaleriaStore } from '../store/admin/useGaleriaStore';
 import { useCantosStore } from '../store/admin/useCantosStore';
@@ -7,6 +8,7 @@ import { useMiembrosStore } from '../store/admin/useMiembrosStore';
 import { useAvisosStore } from '../store/admin/useAvisosStore';
 import { useBlogPostsStore } from '../store/admin/useBlogPostsStore';
 import { useSettingsStore } from '../store/admin/useSettingsStore';
+import { useThemeGroupsStore } from '../store/admin/useThemeGroupsStore';
 
 interface GlobalAppContextProps {
     cargado: boolean;
@@ -14,8 +16,9 @@ interface GlobalAppContextProps {
 
 const GlobalAppContext = createContext<GlobalAppContextProps>({ cargado: false });
 
-export const GlobalAppProvider = ({ children }: { children: React.ReactNode }) => {
+const GlobalAppProvider = ({ children }: { children: React.ReactNode }) => {
     const [cargado, setCargado] = useState(false);
+    const { user } = useAuth();
 
     const { getAllThemes } = useThemesStore();
     const { fetchImagenes } = useGaleriaStore();
@@ -25,8 +28,11 @@ export const GlobalAppProvider = ({ children }: { children: React.ReactNode }) =
     const { fetchAvisos } = useAvisosStore();
     const { fetchPosts } = useBlogPostsStore();
     const { fetchSettings } = useSettingsStore();
+    const { fetchGrupos, temaActivo, fetchTemaActivo } = useThemeGroupsStore();
 
     useEffect(() => {
+        if (!user) return;
+
         const cargarDatos = async () => {
             try {
                 await Promise.all([
@@ -37,7 +43,8 @@ export const GlobalAppProvider = ({ children }: { children: React.ReactNode }) =
                     fetchMiembros(1),
                     fetchAvisos(1),
                     fetchPosts(1),
-                    fetchSettings()
+                    fetchSettings(),
+                    fetchGrupos(1),
                 ]);
                 setCargado(true);
             } catch (error) {
@@ -46,7 +53,28 @@ export const GlobalAppProvider = ({ children }: { children: React.ReactNode }) =
         };
 
         cargarDatos();
+    }, [user]);
+
+    useEffect(() => {
+        const cargarTemaActivo = async () => {
+            try {
+                await fetchTemaActivo();
+            } catch (err) {
+                console.warn('Error al obtener tema activo desde backend', err);
+            }
+        };
+
+        cargarTemaActivo();
     }, []);
+
+    useEffect(() => {
+        if (temaActivo) {
+            const root = document.documentElement;
+            temaActivo.colores.forEach(({ colorClass, color }) => {
+                root.style.setProperty(`--color-${colorClass}`, color);
+            });
+        }
+    }, [temaActivo]);
 
     return (
         <GlobalAppContext.Provider value={{ cargado }}>
@@ -64,4 +92,5 @@ export const GlobalAppProvider = ({ children }: { children: React.ReactNode }) =
     );
 };
 
-export const useGlobalApp = () => useContext(GlobalAppContext);
+export default GlobalAppProvider; // ✅ default
+export const useGlobalApp = () => useContext(GlobalAppContext); // ✅ ok, sin cambio necesario

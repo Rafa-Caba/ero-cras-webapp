@@ -24,9 +24,10 @@ const MiembrosSection = () => {
                             <figure className="position-relative m-0">
                                 <img className="frontal d-block" src={miembro.fotoPerfilUrl} alt={miembro.nombre} />
                                 <figcaption className="trasera">
-                                    <h2 className="titulo fs-3">{miembro.nombre}</h2>
-                                    <hr />
-                                    <p className="fs-4 lh-sm">{miembro.instrumento}</p>
+                                    <h2 className="titulo fs-3 mb-1 text-center">{miembro.nombre}</h2>
+                                    <hr className="my-2" />
+                                    <p className="fs-4 lh-sm mb-1">{miembro.instrumento}</p>
+                                    <p className="fs-4 lh-sm mb-0">{miembro.tieneVoz && 'Voz'}</p>
                                 </figcaption>
                             </figure>
                             <p className="text-center fw-bolder">{miembro.nombre}</p>

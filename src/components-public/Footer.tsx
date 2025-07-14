@@ -15,7 +15,7 @@ export const Footer = () => {
         <footer className="layout-footer">
             <div className="footer my-2 d-flex flex-column flex-md-row justify-content-between">
                 <div className="copyright ms-0 ms-md-3">
-                    <p className="text-black-50 mb-2">Creada por Rafael Cabanillas - 2022</p>
+                    <p className="text-theme-color mb-2">Creada por Rafael Cabanillas - 2022</p>
                 </div>
                 <div className='mb-3 mb-md-0 me-0 me-md-3'>
                     <ul className="nav w-100 order-1 d-flex justify-content-center">

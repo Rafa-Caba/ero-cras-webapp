@@ -1,35 +1,46 @@
-// AdminNewAnnouncement.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import { useAvisosStore } from '../../store/admin/useAvisosStore';
 import type { AvisoForm } from '../../types';
-
+import { TiptapEditor } from '../tiptap-components/TiptapEditor';
+import { createHandleTextoChange, createUpdateFormData } from '../../utils/handleTextTipTap';
+import { emptyEditorContent } from '../../utils/editorDefaults';
 
 export const AdminNewAnnouncement = () => {
     const navigate = useNavigate();
     const { crearNuevoAviso } = useAvisosStore();
 
-    const [formData, setFormData] = useState<AvisoForm>({
-        titulo: '',
-        contenido: '',
-        publicado: true,
-        imagen: null
-    });
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [errores, setErrores] = useState<string[]>([]);
+    const [formData, setFormData] = useState<AvisoForm | null>(null);
+    const setFormDataSafe: React.Dispatch<React.SetStateAction<AvisoForm | null>> = setFormData;
 
-    const handleChange = (e: any) => {
-        const { name, value, type, checked, files } = e.target;
+    const updateFormData = createUpdateFormData<AvisoForm>()(setFormData);
+
+    const defaultFormData: AvisoForm = {
+        titulo: '',
+        contenido: emptyEditorContent,
+        publicado: true,
+        imagen: null
+    };
+
+    useEffect(() => {
+        if (!formData) setFormData(defaultFormData);
+    }, []);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value, type, checked, files } = e.target as HTMLInputElement;
 
         if (type === 'checkbox') {
-            setFormData({ ...formData, [name]: checked });
-        } else if (type === 'file' && files[0]) {
-            setFormData({ ...formData, imagen: files[0] });
-            setPreviewUrl(URL.createObjectURL(files[0]));
+            updateFormData({ [name]: checked });
+        } else if (type === 'file' && files && files[0]) {
+            const file = files[0];
+            updateFormData({ imagen: file });
+            setPreviewUrl(URL.createObjectURL(file));
         } else {
-            setFormData({ ...formData, [name]: value });
+            updateFormData({ [name]: value });
         }
     };
 
@@ -37,8 +48,13 @@ export const AdminNewAnnouncement = () => {
         e.preventDefault();
         const newErrors: string[] = [];
 
+        if (!formData) {
+            setErrores(['Error interno: el formulario no está cargado.']);
+            return;
+        }
+
         if (!formData.titulo.trim()) newErrors.push('El título es obligatorio');
-        if (!formData.contenido.trim()) newErrors.push('La descripción es obligatoria');
+        if (!formData.contenido) newErrors.push('La descripción es obligatoria');
 
         if (newErrors.length > 0) {
             setErrores(newErrors);
@@ -47,7 +63,7 @@ export const AdminNewAnnouncement = () => {
 
         const formPayload = new FormData();
         formPayload.append('titulo', formData.titulo);
-        formPayload.append('contenido', formData.contenido);
+        formPayload.append('contenido', JSON.stringify(formData.contenido));
         formPayload.append('publicado', formData.publicado ? 'true' : 'false');
 
         if (formData.imagen) {
@@ -57,12 +73,9 @@ export const AdminNewAnnouncement = () => {
         try {
             await crearNuevoAviso(formPayload);
             Swal.fire('¡Aviso creado!', '', 'success');
-            setFormData({
-                titulo: '',
-                contenido: '',
-                publicado: true,
-                imagen: null
-            });
+
+            setFormData(defaultFormData);
+
             setPreviewUrl(null);
             setErrores([]);
             navigate('/admin/announcements');
@@ -88,7 +101,7 @@ export const AdminNewAnnouncement = () => {
                         <Form.Control
                             type="text"
                             name="titulo"
-                            value={formData.titulo}
+                            value={formData?.titulo}
                             onChange={handleChange}
                             required
                         />
@@ -96,13 +109,9 @@ export const AdminNewAnnouncement = () => {
 
                     <Form.Group className="mb-3">
                         <Form.Label>Descripción</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            name="contenido"
-                            rows={4}
-                            value={formData.contenido}
-                            onChange={handleChange}
-                            required
+                        <TiptapEditor
+                            content={formData?.contenido}
+                            onChange={createHandleTextoChange<AvisoForm>(setFormDataSafe, 'contenido')}
                         />
                     </Form.Group>
 
@@ -111,7 +120,7 @@ export const AdminNewAnnouncement = () => {
                             type="checkbox"
                             label="Publicado"
                             name="publicado"
-                            checked={formData.publicado}
+                            checked={formData?.publicado}
                             onChange={handleChange}
                         />
                     </Form.Group>
@@ -150,7 +159,9 @@ export const AdminNewAnnouncement = () => {
 
                     <div className='text-center'>
                         <Button type="submit" className="general_btn">Crear aviso</Button>
-                        <Button className='ms-2' variant="secondary" onClick={() => navigate('/admin/announcements')}>Cancelar</Button>
+                        <Button className='ms-2' variant="secondary" onClick={() => navigate('/admin/announcements')}>
+                            Cancelar
+                        </Button>
                     </div>
                 </Form>
             </div>

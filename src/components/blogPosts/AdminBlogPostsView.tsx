@@ -42,7 +42,7 @@ export const AdminBlogPostsView = () => {
                     className="my-masonry-grid"
                     columnClassName="my-masonry-grid_column"
                 >
-                    {posts.map((post) => (
+                    {[...posts].reverse().map((post) => (
                         <motion.div
                             className="masonry-item card post-card fade-in"
                             key={post._id}

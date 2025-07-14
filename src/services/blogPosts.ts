@@ -1,4 +1,5 @@
 import api, { publicApi } from "../api/axios";
+import type { JSONContent } from '@tiptap/react';
 import type {
     BlogPost,
     BlogPostUpdateResponse,
@@ -58,7 +59,7 @@ export const toggleLikeBlogPost = async (postId: string, userId: string): Promis
 export const agregarComentarioBlogPost = async (
     postId: string,
     autor: string,
-    texto: string
+    texto: JSONContent
 ): Promise<BlogPostComentarioResponse> => {
     const res = await api.post<BlogPostComentarioResponse>(`/blog-posts/${postId}/comentarios`, {
         autor,

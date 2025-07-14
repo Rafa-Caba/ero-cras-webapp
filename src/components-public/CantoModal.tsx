@@ -1,5 +1,6 @@
 import { Modal, Button, Accordion } from "react-bootstrap";
 import type { Canto } from "../types";
+import { TiptapViewer } from "../components/tiptap-components/TiptapViewer";
 
 interface CantosProps {
     show: boolean;
@@ -8,9 +9,7 @@ interface CantosProps {
     cantos: Canto[];
 }
 
-const CantoModal = ({ show, onHide, tipoDeCanto, cantos }: CantosProps) => {
-    const cantosFiltrados = cantos.filter(canto => canto.tipo === tipoDeCanto);
-
+export const CantoModal = ({ show, onHide, tipoDeCanto, cantos }: CantosProps) => {
     return (
         <Modal show={show} onHide={onHide} scrollable>
             <Modal.Header closeButton>
@@ -19,15 +18,15 @@ const CantoModal = ({ show, onHide, tipoDeCanto, cantos }: CantosProps) => {
 
             <Modal.Body>
                 <Accordion alwaysOpen>
-                    {cantosFiltrados.map((canto) => (
+                    {cantos.map((canto) => (
                         <Accordion.Item eventKey={String(canto._id)} key={canto._id}>
                             <Accordion.Header>{canto.titulo}</Accordion.Header>
                             <Accordion.Body>
                                 <p className="fw-bold fs-4">- {canto.titulo} -</p>
-                                {canto.texto.split("\n").map((line, i) => (
-                                    <span key={i}>{line}<br /></span>
-                                ))}
-                                <p className="fst-italic">
+
+                                <TiptapViewer content={canto.texto} />
+
+                                <p className="fst-italic mt-3">
                                     {canto.tipo} - {canto.compositor}
                                 </p>
                             </Accordion.Body>
@@ -44,5 +43,3 @@ const CantoModal = ({ show, onHide, tipoDeCanto, cantos }: CantosProps) => {
         </Modal>
     );
 };
-
-export default CantoModal;

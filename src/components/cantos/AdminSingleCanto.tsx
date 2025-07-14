@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { eliminarCanto, obtenerCantoPorId } from "../../services/cantos";
 import type { Canto } from "../../types";
 import { useEffect, useState } from "react";
+import { TiptapViewer } from "../tiptap-components/TiptapViewer";
 
 interface Props {
     cantoId: string;
@@ -57,10 +58,6 @@ const AdminSingleCanto = ({ cantoId }: Props) => {
         }
     };
 
-    console.log({
-        ...canto
-    });
-
     return (
         <div className="canto p-3 w-100 text-center my-3">
             <div>
@@ -69,15 +66,17 @@ const AdminSingleCanto = ({ cantoId }: Props) => {
 
                 <div className=".texto-scrollable">
                     {/* Responsive canto texto */}
-                    <p className="d-block d-md-none text-start mb-3 lh-base fs-6 texto-scrollable">
+                    {/* <p className="d-block d-md-none text-start mb-3 lh-base fs-6 texto-scrollable">
                         {canto.texto.split("\n").map((line, i) => (
                             <span key={i}>{line}<br /></span>
                         ))}
-                    </p>
-                    <p className="d-none d-md-block text-center mb-3 fs-4 texto-scrollable">
-                        {canto.texto.split("\n").map((line, i) => (
+                    </p> */}
+                    <p className="d-md-block text-center mb-3 fs-4 texto-scrollable">
+                        <TiptapViewer content={canto.texto} />
+
+                        {/* {canto.texto.split("\n").map((line, i) => (
                             <span key={i}>{line}<br /></span>
-                        ))}
+                        ))} */}
                     </p>
 
                 </div>

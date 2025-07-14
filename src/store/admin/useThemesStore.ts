@@ -1,4 +1,3 @@
-// 📦 Zustand Store - useThemesStore.ts (ajustado para modelo dinámico con paginación)
 import { create } from 'zustand';
 import {
     obtenerTema,

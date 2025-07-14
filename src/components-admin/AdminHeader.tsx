@@ -1,15 +1,17 @@
 import { useEffect } from 'react';
-import { Image } from 'react-bootstrap';
 import { useAuth } from '../hooks/useAuth';
 import { useSettingsStore } from '../store/admin/useSettingsStore';
+import { UserMenu } from '../components/user-menu/UserMenu';
 
 export const AdminHeader = () => {
-    const { user } = useAuth();
+    const { user, isAuthenticated, loading } = useAuth();
     const { settings, fetchSettings } = useSettingsStore();
 
     useEffect(() => {
-        fetchSettings();
-    }, []);
+        if (!loading && isAuthenticated) {
+            fetchSettings();
+        }
+    }, [loading, isAuthenticated]);
 
     if (!user) {
         return (
@@ -26,24 +28,11 @@ export const AdminHeader = () => {
                     <div className="titulo text-center text-md-start">
                         <h1 className='mb-0'>{settings?.tituloWeb ? settings.tituloWeb : 'Company'} - Admin</h1>
                     </div>
-                    <div className="contador_visitas d-flex flex-row align-items-center">
+                    <div className="contador_visitas d-flex flex-row justify-content-end align-items-center">
                         <p className="titulo mb-1 text-center fs-4 text-md-end">¡Hola {user.nombre}!</p>
-                        <Image
-                            src={user.fotoPerfilUrl || '/images/default-user.png'}
-                            roundedCircle
-                            height={50}
-                            width={50}
-                            alt={user.nombre}
-                            style={{
-                                objectFit: 'cover',
-                                width: '50px',
-                                height: '50px',
-                                minWidth: '50px',
-                                minHeight: '50px',
-                                border: '1px solid black',
-                                margin: '.3rem'
-                            }}
-                        />
+                        <div className="d-flex align-items-center">
+                            <UserMenu />
+                        </div>
                     </div>
                 </div>
             </div>

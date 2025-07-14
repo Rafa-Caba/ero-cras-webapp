@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Card, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAvisosStore } from '../../store/admin/useAvisosStore';
+import { TiptapViewer } from '../tiptap-components/TiptapViewer';
 
 export const AvisosSidebar = () => {
     const { avisos, fetchAvisos, cargando } = useAvisosStore();
@@ -25,17 +26,17 @@ export const AvisosSidebar = () => {
                         className="mb-3 shadow-sm border-0"
                         style={{ backgroundColor: '#f5e1ff', fontSize: '0.9rem' }}
                     >
-                        <Card.Body className="p-2">
-                            <Card.Title className="mb-1 text-truncate" title={aviso.titulo}>
+                        <Card.Body className="aviso-sidebar p-2">
+                            <Card.Title className="mb-1 text-truncate text-theme-color" title={aviso.titulo}>
                                 📌 {aviso.titulo}
                             </Card.Title>
-                            <Card.Text className="mb-1 text-muted small">
+                            <Card.Text className="mb-1 small text-theme-color">
                                 {new Date(aviso.createdAt!).toLocaleDateString()}
                             </Card.Text>
-                            <Card.Text className="text-truncate">
-                                {aviso.contenido.slice(0, 60)}...
-                            </Card.Text>
-                            <Link to="/admin/announcements" style={{ color: 'purple' }} className="small text-decoration-none">
+
+                            <TiptapViewer content={aviso.contenido} />...
+
+                            <Link to="/admin/announcements" className="small text-decoration-none text-theme-color">
                                 Ver más →
                             </Link>
                         </Card.Body>

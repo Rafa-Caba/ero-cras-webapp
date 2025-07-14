@@ -1,5 +1,3 @@
-// App.tsx
-import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import PublicLayout from './layouts/public/PublicLayout';
 import AdminLayout from './layouts/admin/AdminLayout';
@@ -30,7 +28,7 @@ import { EditPhoto } from './pages/admin/EditPhoto';
 import { Cantos } from './pages/admin/Cantos';
 import { ThemesPage } from './pages/admin/ThemesPage';
 import { NewColorTheme } from './pages/admin/NewColorTheme';
-import { AdminEditColorTheme } from './components/themes/AdminEditColorTheme';
+import { AdminEditColorTheme } from './components/themes-old/AdminEditColorTheme';
 import { Members } from './pages/admin/Members';
 import { EditMember } from './pages/admin/EditMember';
 import { NewMember } from './pages/admin/NewMember';
@@ -44,27 +42,19 @@ import { BlogPostsView } from './pages/admin/BlogPostsView';
 import { AdminBlogPostSingleView } from './components/blogPosts/AdminBlogPostSingleView';
 import { WebsiteSettings } from './pages/admin/WebsiteSettings';
 import { PublicGlobalProvider } from './context/PublicGlobalContext';
-import { PublicDashboard } from './pages/public/PublicDashboard';
-import { usePublicThemesStore } from './store/public';
-import { GlobalAppProvider } from './context/GlobalAppContext';
+import { PublicTestDashboard } from './pages/admin/PublicTestDashboard';
+import GlobalAppProvider from './context/GlobalAppContext';
+import { MyProfilePage } from './pages/admin/MyProfilePage';
+import { UserSettings } from './components/user-menu/UserSettings';
+import { LogsPage } from './pages/admin/Logs';
+import { TiposCanto } from './pages/admin/TiposCanto';
+import { EditTipoCanto } from './pages/admin/EditTipoCanto';
+import { NewTipoCanto } from './pages/admin/NewTipoCanto';
+import { ThemeGroupsList } from './pages/admin/ThemeGroupsList';
+import { EditThemeGroupList } from './pages/admin/EditThemeGroupList';
+import { NewThemeGroupList } from './pages/admin/NewThemeGroupList';
 
 function App() {
-    const { themes, fetchThemesPublicos } = usePublicThemesStore();
-    // Cargar tema al montar la app
-    useEffect(() => {
-        fetchThemesPublicos();
-    }, []);
-
-    // Estilos dinámicos basados en el tema
-    useEffect(() => {
-        if (themes.length > 0) {
-            const root = document.documentElement;
-            themes.forEach(({ colorClass, color }) => {
-                root.style.setProperty(`--color-${colorClass}`, color);
-            });
-        }
-    }, [themes]);
-
     return (
         <div>
             <Routes>
@@ -79,7 +69,6 @@ function App() {
                     <Route path="miembros" element={<Miembros />} />
                     <Route path="misa" element={<MisaPage />} />
                     <Route path="nosotros" element={<NosotrosPage />} />
-                    <Route path="public-test" element={<PublicDashboard />} />
                 </Route>
 
                 {/* Admin Section */}
@@ -110,6 +99,10 @@ function App() {
                     <Route path="edit_class_color/:id" element={<AdminEditColorTheme />} />
                     <Route path="themes/new_class_color" element={<NewColorTheme />} />
 
+                    <Route path="theme-groups" element={<ThemeGroupsList />} />
+                    <Route path="theme-groups/edit/:id" element={<EditThemeGroupList />} />
+                    <Route path="theme-groups/new" element={<NewThemeGroupList />} />
+
                     <Route path="members" element={<Members />} />
                     <Route path="members/edit/:id" element={<EditMember />} />
                     <Route path="members/new_member" element={<NewMember />} />
@@ -126,6 +119,15 @@ function App() {
                     <Route path="blog_posts/:id" element={<AdminBlogPostSingleView />} />
 
                     <Route path="website_settings" element={<WebsiteSettings />} />
+
+                    <Route path="mi-perfil" element={<MyProfilePage />} />
+                    <Route path="public-test" element={<PublicTestDashboard />} />
+                    <Route path="settings-user" element={<UserSettings />} />
+                    <Route path="logs-page" element={<LogsPage />} />
+
+                    <Route path="tipos-canto" element={<TiposCanto />} />
+                    <Route path="tipos-canto/edit/:id" element={<EditTipoCanto />} />
+                    <Route path="tipos-canto/new" element={<NewTipoCanto />} />
                 </Route>
 
                 {/* Login (outside layout) */}
