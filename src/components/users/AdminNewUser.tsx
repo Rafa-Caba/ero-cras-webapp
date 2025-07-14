@@ -95,7 +95,7 @@ export const AdminNewUser = () => {
     }, [previewUrl]);
 
     return (
-        <article className="m-3 col-md-6 mx-auto">
+        <article className="m-3 col-md-8 mx-auto">
             <div className="form-canto">
                 <h3>Nuevo Usuario</h3>
 

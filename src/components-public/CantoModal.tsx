@@ -12,12 +12,12 @@ interface CantosProps {
 export const CantoModal = ({ show, onHide, tipoDeCanto, cantos }: CantosProps) => {
     return (
         <Modal show={show} onHide={onHide} scrollable>
-            <Modal.Header closeButton>
+            <Modal.Header closeButton className="modal-bg-color">
                 <Modal.Title>{tipoDeCanto}</Modal.Title>
             </Modal.Header>
 
-            <Modal.Body>
-                <Accordion alwaysOpen>
+            <Modal.Body className="modal-bg-color">
+                <Accordion alwaysOpen className="accordion-custom">
                     {cantos.map((canto) => (
                         <Accordion.Item eventKey={String(canto._id)} key={canto._id}>
                             <Accordion.Header>{canto.titulo}</Accordion.Header>
@@ -35,7 +35,7 @@ export const CantoModal = ({ show, onHide, tipoDeCanto, cantos }: CantosProps) =
                 </Accordion>
             </Modal.Body>
 
-            <Modal.Footer>
+            <Modal.Footer className="modal-bg-color">
                 <Button variant="secondary" onClick={onHide}>
                     Cerrar
                 </Button>

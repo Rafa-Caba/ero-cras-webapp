@@ -51,21 +51,21 @@ const AdminCantosSection = () => {
             <div className="cantos-contenedor pe-0 mb-2">
                 {!loading
                     ? (
-                        <Accordion alwaysOpen id="accordionCantos">
+                        <Accordion alwaysOpen className='accordion-custom' id="accordionCantos">
 
                             {cantosConTipo.map((grupo, index) => (
                                 <Accordion.Item eventKey={index.toString()} key={grupo.tipo}>
                                     <Accordion.Header>{grupo.tipo}</Accordion.Header>
                                     <Accordion.Body>
                                         {grupo.cantos.map((canto) => (
-                                            <Accordion key={canto._id} className="mb-2">
+                                            <Accordion key={canto._id} className="accordion-custom mb-2">
                                                 <Accordion.Item eventKey={String(canto._id)}>
                                                     <Accordion.Header>{canto.titulo}</Accordion.Header>
                                                     <Accordion.Body>
                                                         <div>
                                                             <p>
                                                                 <Link
-                                                                    className="canto-single-link fw-bolder fs-4 text-decoration-none"
+                                                                    className="fw-bolder fs-4 text-decoration-none text-theme-color"
                                                                     to={`/admin/canto/${canto._id}`}
                                                                 >
                                                                     - {canto.titulo} -

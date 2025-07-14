@@ -25,14 +25,14 @@
             position: absolute;
             top: 0;
             padding: 20px;
-            color: #fff;
+            color: var(--color-text-color);
             transform: perspective(600px) rotateY(180deg);
             backface-visibility: hidden;
             overflow: auto;
             background: rgba(174, 103, 241, 0.8);
 
             .titulo {
-                color: #fff;
+                color: var(--color-text-color);
                 margin-bottom: 20px;
                 font-size: 24px;
             }

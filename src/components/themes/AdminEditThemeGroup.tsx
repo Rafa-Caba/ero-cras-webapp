@@ -61,7 +61,7 @@ export const AdminEditThemeGroup = () => {
         <Container className='my-4'>
             <h2 className='text-center mb-4'>Editar Tema</h2>
 
-            <Form onSubmit={handleSubmit} className='border p-4 rounded shadow-sm bg-white'>
+            <Form onSubmit={handleSubmit} className='border p-4 rounded shadow-sm form-color'>
                 <Form.Group className='mb-3'>
                     <Form.Label>Nombre del Grupo</Form.Label>
                     <Form.Control

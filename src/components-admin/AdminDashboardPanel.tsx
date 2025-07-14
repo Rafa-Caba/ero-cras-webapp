@@ -18,11 +18,6 @@ export const AdminDashboardPanel = () => {
         }
     }, [user, navigate]);
 
-    if (!user) {
-        return null; // o un loader temporal
-    }
-
-
     const imagenInicio = imagenes.find(img => img.imagenInicio);
 
     return (

@@ -1,13 +1,7 @@
 import { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
-import Underline from '@tiptap/extension-underline';
-import TextAlign from '@tiptap/extension-text-align';
-import Heading from '@tiptap/extension-heading';
-import BulletList from '@tiptap/extension-bullet-list';
-import OrderedList from '@tiptap/extension-ordered-list';
-import ListItem from '@tiptap/extension-list-item';
-import StarterKit from '@tiptap/starter-kit';
 import '../../assets/styles/components/_tiptapEditor.scss';
+import { customExtensions } from '../../utils/tiptap/extensions';
 
 interface Props {
     content: any; // o JSONContent si lo importas
@@ -16,20 +10,7 @@ interface Props {
 
 export const TiptapEditor = ({ content, onChange }: Props) => {
     const editor = useEditor({
-        extensions: [
-            StarterKit.configure({
-                bulletList: false, // desactiva para usar extensión personalizada
-                orderedList: false,
-            }),
-            Underline,
-            TextAlign.configure({
-                types: ['heading', 'paragraph'],
-            }),
-            Heading,
-            BulletList,
-            OrderedList,
-            ListItem,
-        ],
+        extensions: customExtensions,
         content,
         editorProps: {
             attributes: {
@@ -49,7 +30,7 @@ export const TiptapEditor = ({ content, onChange }: Props) => {
     }, [content]);
 
     return (
-        <div>
+        <div className='editor-estilo'>
             {editor && (
                 <div className="editor-toolbar mb-2">
                     <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'active' : ''}>B</button>
