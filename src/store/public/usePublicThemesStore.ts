@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { obtenerTemasPublicos } from '../../services/themes';
-import type { Theme } from '../../types';
+import type { ThemeOld } from '../../types';
 
 interface PublicThemesState {
-    themes: Theme[];
+    themes: ThemeOld[];
     cargando: boolean;
     error: string | null;
     fetchThemesPublicos: () => Promise<void>;

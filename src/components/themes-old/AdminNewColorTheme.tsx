@@ -1,14 +1,14 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
-import type { Theme } from '../../types/themes';
+import type { ThemeOld } from '../../types/themes';
 import { useThemesStore } from '../../store/admin/useThemesStore';
 
 export const AdminNewColorTheme = () => {
     const navigate = useNavigate();
     const { createColorClass, loading } = useThemesStore();
 
-    const [formData, setFormData] = useState<Theme>({
+    const [formData, setFormData] = useState<ThemeOld>({
         nombre: '',
         colorClass: '',
         color: '#000000'

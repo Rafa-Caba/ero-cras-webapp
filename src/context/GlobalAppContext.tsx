@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useThemesStore } from '../store/admin/useThemesStore';
 import { useGaleriaStore } from '../store/admin/useGaleriaStore';
 import { useCantosStore } from '../store/admin/useCantosStore';
 import { useUsuariosStore } from '../store/admin/useUsuariosStore';
@@ -20,7 +19,6 @@ const GlobalAppProvider = ({ children }: { children: React.ReactNode }) => {
     const [cargado, setCargado] = useState(false);
     const { user } = useAuth();
 
-    const { getAllThemes } = useThemesStore();
     const { fetchImagenes } = useGaleriaStore();
     const { obtenerTodos } = useCantosStore();
     const { fetchUsuarios } = useUsuariosStore();
@@ -36,7 +34,6 @@ const GlobalAppProvider = ({ children }: { children: React.ReactNode }) => {
         const cargarDatos = async () => {
             try {
                 await Promise.all([
-                    getAllThemes(),
                     fetchImagenes(1),
                     obtenerTodos(),
                     fetchUsuarios(1),

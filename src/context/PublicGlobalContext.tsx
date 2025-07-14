@@ -4,7 +4,6 @@ import {
     usePublicCantosStore,
     usePublicSettingsStore,
     usePublicMiembrosStore,
-    usePublicThemesStore
 } from '../store/public';
 import { usePublicThemeGroupsStore } from '../store/public/usePublicThemeGroupsStore';
 
@@ -19,7 +18,6 @@ export const PublicGlobalProvider = ({ children }: Props) => {
     const { fetchCantosPublicos } = usePublicCantosStore();
     const { fetchSettingsPublicos } = usePublicSettingsStore();
     const { fetchMiembrosPublicos } = usePublicMiembrosStore();
-    const { fetchThemesPublicos } = usePublicThemesStore();
     const { fetchThemeGroupsPublicos, fetchGrupoActivoPublico, temaActivo } = usePublicThemeGroupsStore();
 
     useEffect(() => {
@@ -27,7 +25,6 @@ export const PublicGlobalProvider = ({ children }: Props) => {
         fetchCantosPublicos();
         fetchSettingsPublicos();
         fetchMiembrosPublicos();
-        fetchThemesPublicos();
         fetchThemeGroupsPublicos();
     }, []);
 

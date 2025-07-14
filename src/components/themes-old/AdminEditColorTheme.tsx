@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Button, Container, Alert, Spinner } from 'react-bootstrap';
-import type { Theme } from '../../types';
+import type { ThemeOld } from '../../types';
 import { useThemesStore } from '../../store/admin/useThemesStore';
 import { actualizarColorClass } from '../../services/themes';
 
@@ -11,7 +11,7 @@ export const AdminEditColorTheme = () => {
 
     const { getColorClassById, themes, loading } = useThemesStore();
 
-    const [formData, setFormData] = useState<Theme | null>(null);
+    const [formData, setFormData] = useState<ThemeOld | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<boolean>(false);
     // const [loading, setLoading] = useState<boolean>(true);
