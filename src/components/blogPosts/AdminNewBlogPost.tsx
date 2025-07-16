@@ -6,7 +6,7 @@ import { useBlogPostsStore } from '../../store/admin/useBlogPostsStore';
 import type { BlogPostForm } from '../../types';
 import { emptyEditorContent } from '../../utils/editorDefaults';
 import { TiptapEditor } from '../tiptap-components/TiptapEditor';
-import { createHandleTextoChange } from '../../utils/handleTextTipTap';
+import { createHandleTextoChange, parseTexto } from '../../utils/handleTextTipTap';
 
 
 type InputEvent = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
@@ -120,7 +120,7 @@ export const AdminNewBlogPost = () => {
                     <Form.Group className="mb-3">
                         <Form.Label>Contenido</Form.Label>
                         <TiptapEditor
-                            content={formData?.contenido}
+                            content={parseTexto(formData?.contenido)}
                             onChange={createHandleTextoChange<BlogPostForm>(setFormDataSafe, 'contenido')}
                         />
                     </Form.Group>
