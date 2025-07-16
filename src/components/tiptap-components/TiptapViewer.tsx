@@ -1,14 +1,26 @@
-import { EditorContent, useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import { useEditor, EditorContent } from '@tiptap/react';
+import { customExtensions } from '../../utils/tiptap/extensions';
+import type { JSONContent } from '@tiptap/react';
+import { parseTexto } from '../../utils/handleTextTipTap';
 
-export const TiptapViewer = ({ content }: { content: any }) => {
+interface Props {
+    content: JSONContent | string;
+}
+
+export const TiptapViewer = ({ content }: Props) => {
+    const parsedContent = parseTexto(content);
+
     const editor = useEditor({
-        extensions: [StarterKit],
-        content,
-        editable: false
+        extensions: customExtensions,
+        content: parsedContent,
+        editable: false,
     });
 
     if (!editor) return null;
 
-    return <EditorContent editor={editor} />;
+    return (
+        <div className="tiptap-viewer">
+            <EditorContent editor={editor} />
+        </div>
+    );
 };

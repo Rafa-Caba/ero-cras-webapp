@@ -58,6 +58,12 @@ export const obtenerGrupoActivo = async (): Promise<ThemeGroup | null> => {
 
 // Obtener el grupo activo (público)
 export const obtenerGrupoActivoPublico = async (): Promise<ThemeGroup | null> => {
-    const res = await publicApi.get(`/themes-group/public/activo`);
+    const res = await publicApi.get(`/themes-group/public/tema-actual`)
+    return res.data;
+};
+
+// Marcar un grupo como tema público
+export const publicarThemeGroup = async (id: string): Promise<ThemeGroup> => {
+    const res = await api.put(`/themes-group/publicar/${id}`);
     return res.data;
 };

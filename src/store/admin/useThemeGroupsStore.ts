@@ -7,7 +7,8 @@ import {
     eliminarThemeGroup,
     obtenerGrupoActivo,
     obtenerThemeGroupPorId,
-    obtenerThemeGroups
+    obtenerThemeGroups,
+    publicarThemeGroup
 } from '../../services/themeGroups';
 import type { ThemeGroupsState, ThemeGroup, ThemeGroupForm } from '../../types';
 
@@ -65,9 +66,11 @@ export const useThemeGroupsStore = create<ThemeGroupsState>()(
             actualizarGrupoExistente: async (id: string, data: ThemeGroupForm) => {
                 try {
                     set({ cargando: true, error: null });
-                    await actualizarThemeGroup(id, data);
+                    const updatedTheme = await actualizarThemeGroup(id, data);
                     const { grupos: gruposActualizados } = await obtenerThemeGroups();
                     set({ grupos: gruposActualizados, cargando: false });
+
+                    return updatedTheme;
                 } catch (error: any) {
                     set({ error: error.message, cargando: false });
                 }
@@ -117,6 +120,23 @@ export const useThemeGroupsStore = create<ThemeGroupsState>()(
                     }
                 } catch (error: any) {
                     console.warn('No se pudo obtener el tema activo');
+                }
+            },
+
+            publicarGrupoComoPublico: async (id: string) => {
+                try {
+                    const actualizado = await publicarThemeGroup(id);
+
+                    set(state => ({
+                        grupos: state.grupos.map(g =>
+                            g._id === actualizado._id
+                                ? actualizado
+                                : { ...g, esTemaPublico: false }
+                        ),
+                        temaActivo: actualizado
+                    }));
+                } catch (err) {
+                    console.error('Error al publicar grupo como público:', err);
                 }
             },
         }),

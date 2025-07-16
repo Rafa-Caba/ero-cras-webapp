@@ -2,26 +2,28 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
+
 import { useAvisosStore } from '../../store/admin/useAvisosStore';
 import type { AvisoForm } from '../../types';
+
 import { emptyEditorContent } from '../../utils/editorDefaults';
+import { parseTexto, createHandleTextoChange, createUpdateFormData } from '../../utils/handleTextTipTap';
 import { TiptapEditor } from '../tiptap-components/TiptapEditor';
-import { createHandleTextoChange, createUpdateFormData } from '../../utils/handleTextTipTap';
 
 type InputOrSelectEvent = ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
 
 export const AdminEditAnnouncement = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
+
     const [formData, setFormData] = useState<AvisoForm | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [errores, setErrores] = useState<string[]>([]);
-    const {
-        fetchAvisoPorId,
-        actualizarAvisoExistente
-    } = useAvisosStore();
+
+    const { fetchAvisoPorId, actualizarAvisoExistente } = useAvisosStore();
 
     const setFormDataSafe: React.Dispatch<React.SetStateAction<AvisoForm | null>> = setFormData;
+    const updateFormData = createUpdateFormData<AvisoForm>()(setFormData);
 
     const defaultFormData: AvisoForm = {
         titulo: '',
@@ -34,24 +36,25 @@ export const AdminEditAnnouncement = () => {
         if (!formData) setFormData(defaultFormData);
     }, []);
 
-    const updateFormData = createUpdateFormData<AvisoForm>()(setFormData);
-
     useEffect(() => {
         if (id) {
-            fetchAvisoPorId(id).then((aviso) => {
-                setFormData({
-                    titulo: aviso.titulo,
-                    contenido: aviso.contenido,
-                    publicado: aviso.publicado,
-                    imagen: null
+            fetchAvisoPorId(id)
+                .then((aviso) => {
+                    setFormData({
+                        titulo: aviso.titulo,
+                        contenido: parseTexto(aviso.contenido) || emptyEditorContent,
+                        publicado: aviso.publicado,
+                        imagen: null
+                    });
+
+                    if (aviso.imagenUrl) {
+                        setPreviewUrl(aviso.imagenUrl);
+                    }
+                })
+                .catch(() => {
+                    Swal.fire('Error', 'No se pudo cargar el aviso', 'error');
+                    navigate('/admin/announcements');
                 });
-                if (aviso.imagenUrl) {
-                    setPreviewUrl(aviso.imagenUrl);
-                }
-            }).catch(() => {
-                Swal.fire('Error', 'No se pudo cargar el aviso', 'error');
-                navigate('/admin/announcements');
-            });
         }
     }, [id]);
 
@@ -61,26 +64,23 @@ export const AdminEditAnnouncement = () => {
 
         if (name === 'imagen' && files && files[0]) {
             const file = files[0];
-            // setFormData({ ...formData, imagen: file });
             updateFormData({ imagen: file });
-            const preview = URL.createObjectURL(file);
-            setPreviewUrl(preview);
+            setPreviewUrl(URL.createObjectURL(file));
         } else {
             const newValue = type === 'checkbox' ? checked : value;
-            // setFormData({ ...formData, [name]: newValue });
             updateFormData({ [name]: newValue });
         }
     };
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const newErrors: string[] = [];
 
         if (!formData) {
             setErrores(['Error interno: el formulario no está cargado.']);
             return;
         }
 
+        const newErrors: string[] = [];
         if (!formData.titulo.trim()) newErrors.push('El título es requerido.');
         if (!formData.contenido) newErrors.push('El contenido es requerido.');
 
@@ -93,6 +93,7 @@ export const AdminEditAnnouncement = () => {
         formPayload.append('titulo', formData.titulo);
         formPayload.append('contenido', JSON.stringify(formData.contenido));
         formPayload.append('publicado', formData.publicado ? 'true' : 'false');
+
         if (formData.imagen) {
             formPayload.append('imagen', formData.imagen);
         }
@@ -101,9 +102,7 @@ export const AdminEditAnnouncement = () => {
             if (id) {
                 await actualizarAvisoExistente(id, formPayload);
                 Swal.fire('Actualizado', '✅ El aviso fue actualizado exitosamente.', 'success');
-
                 setFormData(defaultFormData);
-
                 navigate('/admin/announcements');
             }
         } catch (error) {
@@ -138,7 +137,7 @@ export const AdminEditAnnouncement = () => {
                     <Form.Group className="mb-3">
                         <Form.Label>Descripción</Form.Label>
                         <TiptapEditor
-                            content={formData?.contenido}
+                            content={parseTexto(formData?.contenido)}
                             onChange={createHandleTextoChange<AvisoForm>(setFormDataSafe, 'contenido')}
                         />
                     </Form.Group>
@@ -185,11 +184,15 @@ export const AdminEditAnnouncement = () => {
                         </div>
                     )}
 
-                    <div className='text-center'>
+                    <div className="text-center">
                         <Button type="submit" className="general_btn">
                             Guardar cambios
                         </Button>
-                        <Button className='ms-2' variant="secondary" onClick={() => navigate("/admin/announcements")}>
+                        <Button
+                            className="ms-2"
+                            variant="secondary"
+                            onClick={() => navigate('/admin/announcements')}
+                        >
                             Cancelar
                         </Button>
                     </div>

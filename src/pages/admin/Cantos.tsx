@@ -1,4 +1,4 @@
-import AdminCantosSection from "../../components/cantos/AdminCantosSection";
+import { AdminCantosSection } from "../../components/cantos/AdminCantosSection";
 
 export const Cantos = () => {
     return (

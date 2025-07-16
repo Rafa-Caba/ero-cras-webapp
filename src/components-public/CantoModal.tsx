@@ -1,6 +1,7 @@
 import { Modal, Button, Accordion } from "react-bootstrap";
 import type { Canto } from "../types";
 import { TiptapViewer } from "../components/tiptap-components/TiptapViewer";
+import { parseTexto } from "../utils/handleTextTipTap";
 
 interface CantosProps {
     show: boolean;
@@ -11,7 +12,7 @@ interface CantosProps {
 
 export const CantoModal = ({ show, onHide, tipoDeCanto, cantos }: CantosProps) => {
     return (
-        <Modal show={show} onHide={onHide} scrollable>
+        <Modal show={show} onHide={onHide} scrollable enforceFocus={false}>
             <Modal.Header closeButton className="modal-bg-color">
                 <Modal.Title>{tipoDeCanto}</Modal.Title>
             </Modal.Header>
@@ -24,7 +25,7 @@ export const CantoModal = ({ show, onHide, tipoDeCanto, cantos }: CantosProps) =
                             <Accordion.Body>
                                 <p className="fw-bold fs-4">- {canto.titulo} -</p>
 
-                                <TiptapViewer content={canto.texto} />
+                                <TiptapViewer content={parseTexto(canto.texto)} />
 
                                 <p className="fst-italic mt-3">
                                     {canto.tipo} - {canto.compositor}

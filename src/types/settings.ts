@@ -1,3 +1,5 @@
+import type { JSONContent } from '@tiptap/react';
+
 export interface Setting {
     _id: string;
     tituloWeb: string;
@@ -12,7 +14,7 @@ export interface Setting {
         principal: string;
         secundaria: string;
     };
-    historiaNosotros: string;
+    historiaNosotros: JSONContent;
     telefonoContacto: string;
     createdAt?: string;
     updatedAt?: string;

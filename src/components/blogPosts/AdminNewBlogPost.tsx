@@ -24,7 +24,7 @@ export const AdminNewBlogPost = () => {
         titulo: '',
         contenido: emptyEditorContent,
         autor: '',
-        publicado: true,
+        publicado: false,
         imagen: null
     };
 
@@ -37,12 +37,14 @@ export const AdminNewBlogPost = () => {
     };
 
     const handleChange = (e: InputEvent) => {
-        const { name, value, files } = e.target as HTMLInputElement;
+        const { name, type, value, checked, files } = e.target as HTMLInputElement;
 
         if (name === 'imagen' && files && files[0]) {
             const file = files[0];
             updateFormData({ imagen: file });
             setPreviewUrl(URL.createObjectURL(file));
+        } else if (type === 'checkbox') {
+            updateFormData({ [name]: checked });
         } else {
             updateFormData({ [name]: value });
         }
@@ -58,7 +60,7 @@ export const AdminNewBlogPost = () => {
         }
 
         if (!formData.titulo.trim()) newErrors.push('El título es obligatorio.');
-        if (!formData.contenido.trim()) newErrors.push('El contenido no puede estar vacío.');
+        if (!formData.contenido) newErrors.push('El contenido no puede estar vacío.');
         if (!formData.autor.trim()) newErrors.push('El autor es obligatorio.');
 
         if (newErrors.length > 0) {

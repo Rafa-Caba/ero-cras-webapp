@@ -42,6 +42,14 @@ export const MyProfile = () => {
                 <li><strong>Email:</strong> {user?.correo}</li>
                 <li><strong>Rol:</strong> {user?.rol ? capitalizarPalabra(user.rol) : 'No disponible'}</li>
                 <li>
+                    <strong>🎨 Tema Personalizado:</strong>{' '}
+                    {user?.themePersonal ? (
+                        <span>{typeof user.themePersonal === 'object' ? user.themePersonal.nombre : 'ID: ' + user.themePersonal}</span>
+                    ) : (
+                        'No seleccionado'
+                    )}
+                </li>
+                <li>
                     <strong>🕓 Último acceso:</strong>{' '}
                     {user?.ultimoAcceso
                         ? new Date(user.ultimoAcceso).toLocaleString('es-MX', {

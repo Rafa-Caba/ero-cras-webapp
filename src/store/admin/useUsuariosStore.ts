@@ -6,9 +6,10 @@ import {
     crearUsuario,
     actualizarUsuario,
     eliminarUsuario,
-    buscarUsuarios
+    buscarUsuarios,
+    updateTemaPersonal
 } from '../../services/usuarios';
-import type { UsuariosState } from '../../types';
+import type { Usuario, UsuariosState } from '../../types';
 
 export const useUsuariosStore = create<UsuariosState>()(
     persist(
@@ -100,6 +101,22 @@ export const useUsuariosStore = create<UsuariosState>()(
                 } catch (error: any) {
                     set({ error: error.message, cargando: false });
                     throw error;
+                }
+            },
+
+            actualizarTemaPersonal: async (id: string, themeId: string): Promise<Usuario> => {
+                try {
+                    const usuarioActualizado = await updateTemaPersonal(id, themeId);
+                    set(state => ({
+                        usuarioSeleccionado:
+                            state.usuarioSeleccionado?._id === id
+                                ? usuarioActualizado
+                                : state.usuarioSeleccionado
+                    }));
+                    return usuarioActualizado;
+                } catch (error) {
+                    console.error("Error actualizando tema personal:", error);
+                    throw error; // 👈 para que no rompa la promesa
                 }
             },
 

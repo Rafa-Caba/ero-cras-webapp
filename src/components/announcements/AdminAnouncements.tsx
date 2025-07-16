@@ -1,15 +1,16 @@
-// AvisoForm.ts (interfaz)
-
-
-// AdminAnnouncements.tsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Table, Image, Button, Spinner } from 'react-bootstrap';
+import { Table, Image, Button, Spinner, Modal } from 'react-bootstrap';
 import Swal from 'sweetalert2';
+
 import { useAvisosStore } from '../../store/admin/useAvisosStore';
+import { TiptapViewer } from '../tiptap-components/TiptapViewer';
 
 export const AdminAnnouncements = () => {
     const [busqueda, setBusqueda] = useState('');
+    const [avisoSeleccionado, setAvisoSeleccionado] = useState<any | null>(null);
+    const [mostrarModal, setMostrarModal] = useState(false);
+
     const {
         avisos,
         paginaActual,
@@ -60,6 +61,16 @@ export const AdminAnnouncements = () => {
         }
     }, [busqueda]);
 
+    const abrirModal = (aviso: any) => {
+        setAvisoSeleccionado(aviso);
+        setMostrarModal(true);
+    };
+
+    const cerrarModal = () => {
+        setAvisoSeleccionado(null);
+        setMostrarModal(false);
+    };
+
     return (
         <div className="table-responsive">
             <div className="d-flex flex-column align-items-center my-1">
@@ -89,13 +100,14 @@ export const AdminAnnouncements = () => {
                             <tr>
                                 <th>Imagen</th>
                                 <th>Título</th>
+                                <th>Contenido</th>
                                 <th>Publicado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {avisos.length === 0 ? (
-                                <tr><td colSpan={4}>No se encontraron avisos con ese criterio.</td></tr>
+                                <tr><td colSpan={5}>No se encontraron avisos con ese criterio.</td></tr>
                             ) : (
                                 avisos.map(aviso => (
                                     <tr key={aviso._id}>
@@ -110,6 +122,15 @@ export const AdminAnnouncements = () => {
                                             />
                                         </td>
                                         <td>{aviso.titulo}</td>
+                                        <td>
+                                            <Button
+                                                size="sm"
+                                                variant="outline-secondary"
+                                                onClick={() => abrirModal(aviso)}
+                                            >
+                                                Ver más
+                                            </Button>
+                                        </td>
                                         <td>{aviso.publicado ? '✅' : '❌'}</td>
                                         <td>
                                             <Link to={`/admin/announcements/edit/${aviso._id}`} className="btn general_btn mb-2 mb-md-0 me-2">Editar</Link>
@@ -128,6 +149,34 @@ export const AdminAnnouncements = () => {
                     </div>
                 </>
             )}
+
+            {/* MODAL DE PREVISUALIZACIÓN */}
+            <Modal show={mostrarModal} onHide={cerrarModal} size="lg" centered>
+                <Modal.Header closeButton className="justify-content-between align-items-center">
+                    <div className="d-flex align-items-center w-100 justify-content-between">
+                        <Modal.Title className="mb-0">{avisoSeleccionado?.titulo}</Modal.Title>
+
+                        {avisoSeleccionado?.imagenUrl && (
+                            <Image
+                                src={avisoSeleccionado.imagenUrl}
+                                height={40}
+                                width={40}
+                                rounded
+                                alt="Miniatura"
+                                style={{ objectFit: 'cover', marginLeft: '1rem', marginRight: '1rem' }}
+                            />
+                        )}
+                    </div>
+                </Modal.Header>
+                <Modal.Body>
+                    {avisoSeleccionado?.contenido && (
+                        <TiptapViewer content={avisoSeleccionado.contenido} />
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={cerrarModal}>Cerrar</Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

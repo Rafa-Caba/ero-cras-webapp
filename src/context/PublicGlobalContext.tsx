@@ -18,7 +18,11 @@ export const PublicGlobalProvider = ({ children }: Props) => {
     const { fetchCantosPublicos } = usePublicCantosStore();
     const { fetchSettingsPublicos } = usePublicSettingsStore();
     const { fetchMiembrosPublicos } = usePublicMiembrosStore();
-    const { fetchThemeGroupsPublicos, fetchGrupoActivoPublico, temaActivo } = usePublicThemeGroupsStore();
+    const {
+        fetchThemeGroupsPublicos,
+        fetchTemaActivoPublico,
+        temaActivo
+    } = usePublicThemeGroupsStore();
 
     useEffect(() => {
         fetchImagenesPublicas();
@@ -26,12 +30,13 @@ export const PublicGlobalProvider = ({ children }: Props) => {
         fetchSettingsPublicos();
         fetchMiembrosPublicos();
         fetchThemeGroupsPublicos();
+        fetchTemaActivoPublico();
     }, []);
 
     useEffect(() => {
         const cargarTemaActivoPublico = async () => {
             try {
-                await fetchGrupoActivoPublico(); // del store público
+                await fetchTemaActivoPublico();
             } catch (err) {
                 console.warn('Error al obtener grupo activo público', err);
             }

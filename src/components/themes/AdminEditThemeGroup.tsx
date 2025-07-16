@@ -2,11 +2,14 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Button, Container, Alert, Row, Col, Spinner } from 'react-bootstrap';
 import { useThemeGroupsStore } from '../../store/admin/useThemeGroupsStore';
-import type { ThemeGroupForm } from '../../types';
+import { useAuth } from '../../hooks/useAuth';
+import type { ThemeGroup, ThemeGroupForm } from '../../types';
+import { applyThemeGroupToDocument } from '../../utils/applyThemeGroupToDocument';
 
 export const AdminEditThemeGroup = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const {
         fetchGrupoPorId,
@@ -39,8 +42,12 @@ export const AdminEditThemeGroup = () => {
     const handleChange = (index: number, value: string) => {
         const nuevosTemas = [...formData.colores];
         nuevosTemas[index].color = value;
-        setFormData(prev => ({ ...prev, temas: nuevosTemas }));
+        setFormData(prev => ({ ...prev, colores: nuevosTemas }));
     };
+
+    function isThemeGroup(obj: any): obj is ThemeGroup {
+        return obj && typeof obj === 'object' && '_id' in obj;
+    }
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -49,12 +56,22 @@ export const AdminEditThemeGroup = () => {
         try {
             await actualizarGrupoExistente(id, formData);
             setSuccess(true);
+
+            // 🧠 Si es el tema que está usando actualmente el user, reactiva el contexto con él:
+            if (isThemeGroup(user?.themePersonal) && user.themePersonal._id === id) {
+                const grupoActualizado = await fetchGrupoPorId(id);
+
+                if (grupoActualizado) {
+                    applyThemeGroupToDocument(grupoActualizado); // actualiza el estilo
+                }
+            }
+
+            setSuccess(true);
             setTimeout(() => navigate('/admin/theme-groups'), 1000);
         } catch {
             // ya se maneja error en el store
         }
     };
-
     if (cargando && !grupoSeleccionado) return <div className='text-center my-5'><Spinner animation='border' /></div>;
 
     return (

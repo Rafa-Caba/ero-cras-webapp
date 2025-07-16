@@ -44,3 +44,8 @@ export const updateUserData = async (id: string, data: Partial<Usuario>) => {
     const res = await api.put(`/usuarios/${id}`, data);
     return res.data.usuarioActualizado;
 };
+
+export const updateTemaPersonal = async (id: string, themePersonal: string): Promise<Usuario> => {
+    const res = await api.put<Usuario>(`/usuarios/usuario/tema/${id}`, { themePersonal });
+    return res.data;
+};

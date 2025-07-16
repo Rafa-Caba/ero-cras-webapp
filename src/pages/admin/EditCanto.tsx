@@ -1,4 +1,4 @@
-import AdminEditCanto from "../../components/cantos/AdminEditCanto";
+import { AdminEditCanto } from "../../components/cantos/AdminEditCanto";
 
 export const EditCanto = () => {
     return (

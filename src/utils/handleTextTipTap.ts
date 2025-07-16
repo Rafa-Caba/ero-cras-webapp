@@ -1,15 +1,18 @@
 import { type Dispatch, type SetStateAction } from 'react';
+import type { JSONContent } from '@tiptap/react';
 
 export function createHandleTextoChange<T extends object>(
     setState: React.Dispatch<React.SetStateAction<T | null>>,
-    campo: keyof T
+    key: keyof T
 ) {
-    return (nuevoTexto: any) => {
-        setState(prev => {
-            if (!prev) return prev; // protege si aún es null
+    return (value: any) => {
+        setState((prev) => {
+            if (!prev) {
+                return { [key]: value } as T;
+            }
             return {
                 ...prev,
-                [campo]: nuevoTexto
+                [key]: value
             };
         });
     };
@@ -38,4 +41,22 @@ export const getTextFromTipTapJSON = (json: any, maxLength = 60): string => {
 
     const text = extractText(json);
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+};
+
+
+export const parseTexto = (texto: any): JSONContent => {
+    if (typeof texto === 'string') {
+        try {
+            const parsed = JSON.parse(texto);
+            if (isValidTipTapContent(parsed)) return parsed;
+        } catch {
+            return { type: 'doc', content: [] };
+        }
+    }
+    return isValidTipTapContent(texto) ? texto : { type: 'doc', content: [] };
+};
+
+
+export const isValidTipTapContent = (json: any): json is JSONContent => {
+    return json && typeof json === 'object' && json.type === 'doc' && Array.isArray(json.content);
 };

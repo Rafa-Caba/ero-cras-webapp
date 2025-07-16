@@ -1,4 +1,4 @@
-import NosotrosSection from "../../components-public/NosotrosSection";
+import { NosotrosSection } from "../../components-public/NosotrosSection";
 
 const NosotrosPage = () => {
     return (

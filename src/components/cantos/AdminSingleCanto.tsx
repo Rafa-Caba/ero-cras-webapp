@@ -1,25 +1,22 @@
-
 import { Button } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import { eliminarCanto, obtenerCantoPorId } from "../../services/cantos";
 import type { Canto } from "../../types";
 import { useEffect, useState } from "react";
 import { TiptapViewer } from "../tiptap-components/TiptapViewer";
+import { parseTexto } from "../../utils/handleTextTipTap";
 
-interface Props {
-    cantoId: string;
-}
-
-const AdminSingleCanto = ({ cantoId }: Props) => {
+export const AdminSingleCanto = () => {
+    const { id } = useParams<string>();
     const navigate = useNavigate();
     const [canto, setCanto] = useState<Canto | null>(null);
 
     useEffect(() => {
         const cargarCanto = async () => {
             try {
-                if (cantoId) {
-                    const data = await obtenerCantoPorId(cantoId);
+                if (id) {
+                    const data = await obtenerCantoPorId(id);
                     setCanto(data);
                 }
             } catch (error) {
@@ -28,7 +25,7 @@ const AdminSingleCanto = ({ cantoId }: Props) => {
         };
 
         cargarCanto();
-    }, [cantoId]);
+    }, [id]);
 
     if (!canto) {
         return <p>No se encontró el canto.</p>;
@@ -65,20 +62,9 @@ const AdminSingleCanto = ({ cantoId }: Props) => {
                 <p className="fst-italic">{canto.tipo}</p>
 
                 <div className=".texto-scrollable">
-                    {/* Responsive canto texto */}
-                    {/* <p className="d-block d-md-none text-start mb-3 lh-base fs-6 texto-scrollable">
-                        {canto.texto.split("\n").map((line, i) => (
-                            <span key={i}>{line}<br /></span>
-                        ))}
-                    </p> */}
                     <p className="d-md-block text-center mb-3 fs-4 texto-scrollable">
-                        <TiptapViewer content={canto.texto} />
-
-                        {/* {canto.texto.split("\n").map((line, i) => (
-                            <span key={i}>{line}<br /></span>
-                        ))} */}
+                        <TiptapViewer content={parseTexto(canto.texto)} />
                     </p>
-
                 </div>
 
                 <p className="fst-italic mb-4 fw-bold">{canto.compositor}</p>
@@ -98,5 +84,3 @@ const AdminSingleCanto = ({ cantoId }: Props) => {
         </div>
     );
 };
-
-export default AdminSingleCanto;

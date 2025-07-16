@@ -11,6 +11,8 @@ export interface ThemeGroup {
     colores: Theme[];
     creadoPor?: string;
     actualizadoPor?: string;
+    activo: boolean;
+    esTemaPublico?: boolean;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -41,11 +43,12 @@ export interface ThemeGroupsState {
     fetchGrupos: (pagina?: number) => Promise<void>;
     fetchGrupoPorId: (id: string) => Promise<ThemeGroup>;
     createNuevoGrupo: (data: ThemeGroupForm) => Promise<void>;
-    actualizarGrupoExistente: (id: string, data: ThemeGroupForm) => Promise<void>;
+    actualizarGrupoExistente: (id: string, data: ThemeGroupForm) => Promise<ThemeGroup | undefined>;
     eliminarGrupoPorId: (id: string) => Promise<void>;
     setPaginaActual: (pagina: number) => void;
     setTemaActivo: (grupo: ThemeGroup) => void;
     activarGrupo: (id: string) => Promise<void>;
+    publicarGrupoComoPublico: (id: string) => Promise<void>;
     fetchTemaActivo: () => Promise<void>;
 }
 
@@ -55,6 +58,6 @@ export interface PublicThemeGroupsState {
     cargando: boolean;
     error: string | null;
     fetchThemeGroupsPublicos: () => Promise<void>;
-    fetchGrupoActivoPublico: () => Promise<void>
+    fetchTemaActivoPublico: () => Promise<void>
     setTemaActivo: (grupo: ThemeGroup) => void;
 }

@@ -1,3 +1,5 @@
+import type { ThemeGroup } from "./themeGroups";
+
 export interface Usuario {
     _id: string;
     nombre: string;
@@ -6,6 +8,7 @@ export interface Usuario {
     fotoPerfilUrl?: string;
     rol: 'admin' | 'editor' | 'viewer';
     ultimoAcceso: string;
+    themePersonal?: ThemeGroup | null;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -52,6 +55,7 @@ export interface UsuariosState {
     crearNuevoUsuario: (formData: FormData) => Promise<void>;
     actualizarUsuarioExistente: (id: string, formData: FormData) => Promise<void>;
     actualizarUsuarioLogueado: (id: string, data: any) => Promise<Usuario>;
+    actualizarTemaPersonal: (id: string, themeId: string) => Promise<Usuario>;
     eliminarUsuarioPorId: (id: string) => Promise<void>;
     buscarUsuariosPorTexto: (q: string) => Promise<void>;
     setPaginaActual: (pagina: number) => void;

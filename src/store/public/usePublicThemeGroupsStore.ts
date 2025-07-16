@@ -13,10 +13,10 @@ export const usePublicThemeGroupsStore = create<PublicThemeGroupsState>((set) =>
             set({ cargando: true, error: null });
             const grupos = await obtenerThemeGroupsPublicos();
 
-            // Por default el primero será el activo
+            const activo = grupos.find(g => g.esTemaPublico);
             set({
                 themeGroups: grupos,
-                temaActivo: grupos.length > 0 ? grupos[0] : null,
+                temaActivo: activo ?? null,
                 cargando: false
             });
         } catch (error: any) {
@@ -24,7 +24,7 @@ export const usePublicThemeGroupsStore = create<PublicThemeGroupsState>((set) =>
         }
     },
 
-    fetchGrupoActivoPublico: async () => {
+    fetchTemaActivoPublico: async () => {
         try {
             const activo = await obtenerGrupoActivoPublico();
             if (activo) {

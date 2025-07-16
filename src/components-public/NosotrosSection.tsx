@@ -3,8 +3,10 @@ import { Image } from 'react-bootstrap';
 import { FaImage } from 'react-icons/fa';
 import { usePublicGaleriaStore } from '../store/public/usePublicGaleriaStore';
 import { usePublicSettingsStore } from '../store/public/usePublicSettingsStore';
+import { TiptapViewer } from '../components/tiptap-components/TiptapViewer';
+import { parseTexto } from '../utils/handleTextTipTap';
 
-const NosotrosSection = () => {
+export const NosotrosSection = () => {
     const { settings, fetchSettingsPublicos } = usePublicSettingsStore();
     const { imagenes } = usePublicGaleriaStore();
 
@@ -17,10 +19,10 @@ const NosotrosSection = () => {
     return (
         <section className="center col-12 d-flex flex-column align-items-center order-0 order-md-1">
             <div className="nosotros primary-color-container my-3 mx-0 mx-md-2">
-                <div className="nosotros p-1">
+                <div className="nosotros p-1 mb-5">
                     <p className="fs-3 fw-bolder">Historia...</p>
 
-                    <p className="lh-base fs-5 mx-2" id="bio">{settings?.historiaNosotros ? settings.historiaNosotros : 'No hay historia agregada.'}</p>
+                    <TiptapViewer content={parseTexto(settings?.historiaNosotros)} />
                 </div>
 
                 <div className={`${!imagenNosotros && 'imagen-nosotros-container'} text-center my-3 mt-auto fade-in`}>
@@ -43,5 +45,3 @@ const NosotrosSection = () => {
         </section>
     );
 };
-
-export default NosotrosSection;

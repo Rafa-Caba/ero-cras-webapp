@@ -5,6 +5,8 @@ import Swal from 'sweetalert2';
 import Masonry from 'react-masonry-css';
 import { motion } from 'framer-motion';
 import { useBlogPostsStore } from '../../store/admin/useBlogPostsStore';
+import { TiptapViewer } from '../tiptap-components/TiptapViewer';
+import { parseTexto } from '../../utils/handleTextTipTap';
 
 export const AdminBlogPostsView = () => {
     const {
@@ -42,7 +44,7 @@ export const AdminBlogPostsView = () => {
                     className="my-masonry-grid"
                     columnClassName="my-masonry-grid_column"
                 >
-                    {[...posts].reverse().map((post) => (
+                    {[...posts].filter(post => post.publicado).reverse().map((post) => (
                         <motion.div
                             className="masonry-item card post-card fade-in"
                             key={post._id}
@@ -58,7 +60,7 @@ export const AdminBlogPostsView = () => {
                                     <Card.Title>{post.titulo}</Card.Title>
                                     <Card.Subtitle className="mb-2 text-muted">Por {post.autor}</Card.Subtitle>
                                     <Card.Text>
-                                        {post.contenido ? `${post.contenido.slice(0, 120)}...` : 'Sin contenido'}
+                                        {post.contenido && <TiptapViewer content={parseTexto(post.contenido)} />}
                                     </Card.Text>
                                     <Link to={`/admin/blog_posts/${post._id}`}>
                                         <Button className="btn general_btn">Leer más</Button>

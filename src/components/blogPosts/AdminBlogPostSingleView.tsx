@@ -7,7 +7,8 @@ import type { JSONContent } from '@tiptap/react';
 import { TiptapEditor } from '../tiptap-components/TiptapEditor';
 import { useAuth } from '../../hooks/useAuth';
 import { useBlogPostsStore } from '../../store/admin/useBlogPostsStore';
-import { createHandleTextoChange } from '../../utils/handleTextTipTap';
+import { createHandleTextoChange, parseTexto } from '../../utils/handleTextTipTap';
+import { emptyEditorContent } from '../../utils/editorDefaults';
 
 export const AdminBlogPostSingleView = () => {
     const { id } = useParams<{ id: string }>();
@@ -20,7 +21,9 @@ export const AdminBlogPostSingleView = () => {
         cargando
     } = useBlogPostsStore();
 
-    const [comentario, setComentario] = useState<{ texto: JSONContent } | null>(null);
+    const [comentario, setComentario] = useState<{ texto: JSONContent } | null>({
+        texto: { type: 'doc', content: [] }
+    });
     const [likeCargando, setLikeCargando] = useState(false);
     const [comentarioCargando, setComentarioCargando] = useState(false);
 
@@ -51,7 +54,12 @@ export const AdminBlogPostSingleView = () => {
 
     const handleComentario = async (e: FormEvent) => {
         e.preventDefault();
-        if (!comentario) {
+
+        const tieneContenido = comentario?.texto?.content?.some((bloque: any) =>
+            bloque.content?.some((child: any) => child.text?.trim())
+        );
+
+        if (!tieneContenido) {
             Swal.fire('Oops', 'El comentario no puede estar vacío', 'warning');
             return;
         }
@@ -63,7 +71,7 @@ export const AdminBlogPostSingleView = () => {
 
         try {
             setComentarioCargando(true);
-            await comentarEnPost(id!, user.nombre, comentario);
+            await comentarEnPost(id!, user.nombre, comentario!.texto);
             await fetchPostPorId(id!);
             setComentario(null);
         } catch (error) {
@@ -95,7 +103,7 @@ export const AdminBlogPostSingleView = () => {
                     <img src={imagenUrl} alt={titulo} className="img-post rounded" />
                 </div>
             )}
-            <TiptapViewer content={contenido} />
+            <TiptapViewer content={parseTexto(contenido)} />
 
             <div className="mt-4">
                 <Button
@@ -124,7 +132,7 @@ export const AdminBlogPostSingleView = () => {
                 <Form onSubmit={handleComentario} className="mb-4">
                     <Form.Group className="mb-3">
                         <Form.Label>Comentario</Form.Label>
-                        <TiptapEditor content={comentario?.texto || null} onChange={createHandleTextoChange(setComentario, 'texto')} />
+                        <TiptapEditor content={comentario?.texto ?? emptyEditorContent} onChange={createHandleTextoChange(setComentario, 'texto')} />
                     </Form.Group>
 
 
@@ -138,8 +146,8 @@ export const AdminBlogPostSingleView = () => {
                         <div key={i}>
                             <div className="border p-0 rounded mb-2">
                                 <p className="mb-1"><strong>{c.autor}</strong> — <small>{new Date(c.fecha).toLocaleString()}</small></p>
-                                {/* <p className="mb-0">{c.texto}</p> */}
-                                <TiptapViewer content={c.texto} />
+
+                                <TiptapViewer content={parseTexto(c.texto)} />
                             </div>
                             <hr />
                         </div>

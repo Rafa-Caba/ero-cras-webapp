@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
+
 import { useAvisosStore } from '../../store/admin/useAvisosStore';
 import type { AvisoForm } from '../../types';
+
 import { TiptapEditor } from '../tiptap-components/TiptapEditor';
-import { createHandleTextoChange, createUpdateFormData } from '../../utils/handleTextTipTap';
+import { createHandleTextoChange, createUpdateFormData, parseTexto } from '../../utils/handleTextTipTap';
 import { emptyEditorContent } from '../../utils/editorDefaults';
 
 export const AdminNewAnnouncement = () => {
@@ -15,8 +17,8 @@ export const AdminNewAnnouncement = () => {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [errores, setErrores] = useState<string[]>([]);
     const [formData, setFormData] = useState<AvisoForm | null>(null);
-    const setFormDataSafe: React.Dispatch<React.SetStateAction<AvisoForm | null>> = setFormData;
 
+    const setFormDataSafe: React.Dispatch<React.SetStateAction<AvisoForm | null>> = setFormData;
     const updateFormData = createUpdateFormData<AvisoForm>()(setFormData);
 
     const defaultFormData: AvisoForm = {
@@ -30,8 +32,9 @@ export const AdminNewAnnouncement = () => {
         if (!formData) setFormData(defaultFormData);
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value, type, checked, files } = e.target as HTMLInputElement;
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const target = e.target as HTMLInputElement;
+        const { name, value, type, checked, files } = target;
 
         if (type === 'checkbox') {
             updateFormData({ [name]: checked });
@@ -44,17 +47,17 @@ export const AdminNewAnnouncement = () => {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const newErrors: string[] = [];
 
         if (!formData) {
             setErrores(['Error interno: el formulario no está cargado.']);
             return;
         }
 
-        if (!formData.titulo.trim()) newErrors.push('El título es obligatorio');
-        if (!formData.contenido) newErrors.push('La descripción es obligatoria');
+        const newErrors: string[] = [];
+        if (!formData.titulo.trim()) newErrors.push('El título es obligatorio.');
+        if (!formData.contenido) newErrors.push('La descripción es obligatoria.');
 
         if (newErrors.length > 0) {
             setErrores(newErrors);
@@ -75,7 +78,6 @@ export const AdminNewAnnouncement = () => {
             Swal.fire('¡Aviso creado!', '', 'success');
 
             setFormData(defaultFormData);
-
             setPreviewUrl(null);
             setErrores([]);
             navigate('/admin/announcements');
@@ -90,6 +92,8 @@ export const AdminNewAnnouncement = () => {
         };
     }, [previewUrl]);
 
+    if (!formData) return null;
+
     return (
         <article className="m-3 col-md-6 mx-auto">
             <div className="form-canto">
@@ -101,7 +105,7 @@ export const AdminNewAnnouncement = () => {
                         <Form.Control
                             type="text"
                             name="titulo"
-                            value={formData?.titulo}
+                            value={formData?.titulo ?? ''}
                             onChange={handleChange}
                             required
                         />
@@ -110,7 +114,7 @@ export const AdminNewAnnouncement = () => {
                     <Form.Group className="mb-3">
                         <Form.Label>Descripción</Form.Label>
                         <TiptapEditor
-                            content={formData?.contenido}
+                            content={parseTexto(formData?.contenido)}
                             onChange={createHandleTextoChange<AvisoForm>(setFormDataSafe, 'contenido')}
                         />
                     </Form.Group>
@@ -157,9 +161,9 @@ export const AdminNewAnnouncement = () => {
                         </div>
                     )}
 
-                    <div className='text-center'>
+                    <div className="text-center">
                         <Button type="submit" className="general_btn">Crear aviso</Button>
-                        <Button className='ms-2' variant="secondary" onClick={() => navigate('/admin/announcements')}>
+                        <Button className="ms-2" variant="secondary" onClick={() => navigate('/admin/announcements')}>
                             Cancelar
                         </Button>
                     </div>

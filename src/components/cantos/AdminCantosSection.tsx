@@ -5,8 +5,9 @@ import { TiptapViewer } from '../tiptap-components/TiptapViewer';
 import { obtenerCantos } from '../../services/cantos';
 import type { Canto } from '../../types';
 import { useTiposCantoStore } from '../../store/admin/useTiposCantoStore';
+import { parseTexto } from '../../utils/handleTextTipTap';
 
-const AdminCantosSection = () => {
+export const AdminCantosSection = () => {
     const [cantos, setCantos] = useState<Canto[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -52,7 +53,6 @@ const AdminCantosSection = () => {
                 {!loading
                     ? (
                         <Accordion alwaysOpen className='accordion-custom' id="accordionCantos">
-
                             {cantosConTipo.map((grupo, index) => (
                                 <Accordion.Item eventKey={index.toString()} key={grupo.tipo}>
                                     <Accordion.Header>{grupo.tipo}</Accordion.Header>
@@ -71,7 +71,7 @@ const AdminCantosSection = () => {
                                                                     - {canto.titulo} -
                                                                 </Link>
                                                             </p>
-                                                            <TiptapViewer content={canto.texto} />
+                                                            <TiptapViewer content={parseTexto(canto.texto)} />
                                                         </div>
                                                     </Accordion.Body>
                                                 </Accordion.Item>
@@ -99,7 +99,7 @@ const AdminCantosSection = () => {
                                                                     - {canto.titulo} -
                                                                 </Link>
                                                             </p>
-                                                            <TiptapViewer content={canto.texto} />
+                                                            <TiptapViewer content={parseTexto(canto.texto)} />
                                                         </div>
                                                     </Accordion.Body>
                                                 </Accordion.Item>
@@ -110,48 +110,12 @@ const AdminCantosSection = () => {
                             )}
                         </Accordion>
                     ) : (
-                        <Spinner animation="border" role="status" />
+                        <div className="cantos-contenedor text-center mt-3">
+                            <Spinner animation="border" role="status" />
+                        </div>
                     )
                 }
-
-                {/* {
-                    {
-                        // tipoDeCantos.map((tipo, index) => (
-                        // <Accordion.Item eventKey={index.toString()} key={tipo}>
-                        //     <Accordion.Header>{tipo === 'Presentacion' ? 'Presentación' : tipo}</Accordion.Header>
-                        //     <Accordion.Body>
-                        //         {cantos
-                        //             .filter((canto) => canto.tipo === tipo)
-                        //             .map((canto) => (
-                        //                 <Accordion key={canto._id} className="mb-2">
-                        //                     <Accordion.Item eventKey={String(canto._id)}>
-                        //                         <Accordion.Header>{canto.titulo}</Accordion.Header>
-                        //                         <Accordion.Body>
-                        //                             <div className=''>
-                        //                                 <p>
-                        //                                     <Link
-                        //                                         className="canto-single-link fw-bolder fs-4 text-decoration-none"
-                        //                                         to={`/admin/canto/${canto._id}`}
-                        //                                     >
-                        //                                         - {canto.titulo} -
-                        //                                     </Link>
-                        //                                 </p>
-                        //                                 <TiptapViewer content={canto.texto} />
-                        //                             </div>
-                        //                         </Accordion.Body>
-                        //                     </Accordion.Item>
-                        //                 </Accordion>
-                        //             ))}
-                        //     </Accordion.Body>
-                        //     </Accordion.Item>
-                        //     ))}
-                        // </Accordion>
-                        // ))}
-                } */}
-
             </div>
         </div>
     );
 };
-
-export default AdminCantosSection;

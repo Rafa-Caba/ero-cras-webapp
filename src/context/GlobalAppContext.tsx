@@ -53,6 +53,19 @@ const GlobalAppProvider = ({ children }: { children: React.ReactNode }) => {
     }, [user]);
 
     useEffect(() => {
+        const grupo = user?.themePersonal && typeof user.themePersonal === 'object'
+            ? user.themePersonal
+            : temaActivo;
+
+        if (grupo && grupo.colores) {
+            const root = document.documentElement;
+            grupo.colores.forEach(({ colorClass, color }) => {
+                root.style.setProperty(`--color-${colorClass}`, color);
+            });
+        }
+    }, [user?.themePersonal, temaActivo]);
+
+    useEffect(() => {
         const cargarTemaActivo = async () => {
             try {
                 await fetchTemaActivo();
@@ -63,15 +76,6 @@ const GlobalAppProvider = ({ children }: { children: React.ReactNode }) => {
 
         cargarTemaActivo();
     }, []);
-
-    useEffect(() => {
-        if (temaActivo) {
-            const root = document.documentElement;
-            temaActivo.colores.forEach(({ colorClass, color }) => {
-                root.style.setProperty(`--color-${colorClass}`, color);
-            });
-        }
-    }, [temaActivo]);
 
     return (
         <GlobalAppContext.Provider value={{ cargado }}>

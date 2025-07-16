@@ -4,10 +4,10 @@ import { Button, Form } from 'react-bootstrap';
 import { actualizarCanto, obtenerCantoPorId } from '../../services/cantos';
 import Swal from 'sweetalert2';
 import { TiptapEditor } from '../tiptap-components/TiptapEditor';
-import { createHandleTextoChange } from '../../utils/handleTextTipTap';
+import { createHandleTextoChange, parseTexto } from '../../utils/handleTextTipTap';
 import type { Canto } from '../../types';
 
-const AdminEditCanto = () => {
+export const AdminEditCanto = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [canto, setCanto] = useState<Canto | null>(null);
@@ -17,7 +17,7 @@ const AdminEditCanto = () => {
             try {
                 if (id) {
                     const data = await obtenerCantoPorId(id);
-                    setCanto(data);
+                    setCanto({ ...data, texto: parseTexto(data.texto) });
                 }
             } catch (error) {
                 console.error('Error al obtener el canto:', error);
@@ -106,5 +106,3 @@ const AdminEditCanto = () => {
         </article>
     );
 };
-
-export default AdminEditCanto;

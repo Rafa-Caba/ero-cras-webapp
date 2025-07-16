@@ -4,7 +4,7 @@ import { Form, Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import { useBlogPostsStore } from '../../store/admin/useBlogPostsStore';
 import type { BlogPostForm } from '../../types';
-import { createHandleTextoChange } from '../../utils/handleTextTipTap';
+import { createHandleTextoChange, parseTexto } from '../../utils/handleTextTipTap';
 import { TiptapEditor } from '../tiptap-components/TiptapEditor';
 import { emptyEditorContent } from '../../utils/editorDefaults';
 
@@ -21,7 +21,7 @@ export const AdminEditBlogPost = () => {
     } = useBlogPostsStore();
 
     const [formData, setFormData] = useState<BlogPostForm | null>(null);
-    const setFormDataSafe: React.Dispatch<React.SetStateAction<BlogPostForm | null>> = setFormData;
+    // const setFormDataSafe: React.Dispatch<React.SetStateAction<BlogPostForm | null>> = setFormData;
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [errores, setErrores] = useState<string[]>([]);
@@ -46,13 +46,15 @@ export const AdminEditBlogPost = () => {
         const cargarDatos = async () => {
             if (id) {
                 const post = await fetchPostPorId(id);
+
                 setFormData({
                     titulo: post.titulo,
-                    contenido: post.contenido,
+                    contenido: parseTexto(post.contenido),
                     autor: post.autor,
                     publicado: post.publicado,
                     imagen: null
                 });
+
                 setPreviewUrl(post.imagenUrl || null);
             }
         };
@@ -135,7 +137,7 @@ export const AdminEditBlogPost = () => {
                         <Form.Control
                             type="text"
                             name="titulo"
-                            value={formData?.titulo}
+                            value={formData?.titulo ?? ''}
                             onChange={handleChange}
                             placeholder="Título del post"
                             required
@@ -145,8 +147,8 @@ export const AdminEditBlogPost = () => {
                     <Form.Group className="mb-3">
                         <Form.Label>Texto del Canto</Form.Label>
                         <TiptapEditor
-                            content={formData?.contenido}
-                            onChange={createHandleTextoChange<BlogPostForm>(setFormDataSafe, 'contenido')}
+                            content={formData?.contenido ?? emptyEditorContent}
+                            onChange={createHandleTextoChange<BlogPostForm>(setFormData, 'contenido')}
                         />
                     </Form.Group>
 
@@ -155,7 +157,7 @@ export const AdminEditBlogPost = () => {
                         <Form.Control
                             type="text"
                             name="autor"
-                            value={formData?.autor}
+                            value={formData?.autor ?? ''}
                             onChange={handleChange}
                             placeholder="Nombre del autor"
                             required
@@ -167,7 +169,7 @@ export const AdminEditBlogPost = () => {
                             type="checkbox"
                             name="publicado"
                             label="¿Publicado?"
-                            checked={formData?.publicado}
+                            checked={formData?.publicado ?? false}
                             onChange={handleChange}
                         />
                     </Form.Group>

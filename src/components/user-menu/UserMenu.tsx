@@ -7,11 +7,13 @@ import { useThemeGroupsStore } from '../../store/admin/useThemeGroupsStore';
 import { ThemeSelectorModal } from './ThemeSelectorModal';
 import type { ThemeGroup } from '../../types';
 import Swal from 'sweetalert2';
+import { useUsuariosStore } from '../../store/admin/useUsuariosStore';
 
 export const UserMenu = () => {
-    const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const { grupos, activarGrupo } = useThemeGroupsStore();
+    const { user, updateUser, logout } = useAuth();
+    const { actualizarTemaPersonal } = useUsuariosStore();
+    const { grupos } = useThemeGroupsStore();
 
     const [mostrarModal, setMostrarModal] = useState(false);
 
@@ -22,13 +24,22 @@ export const UserMenu = () => {
 
     const handleSeleccionarTema = async (grupo: ThemeGroup) => {
         try {
-            if (!grupo?._id) return console.warn('Grupo inválido');
-            await activarGrupo(grupo._id);
+            if (!grupo?._id || !user?._id) return;
+
+            const actualizado = await actualizarTemaPersonal(user._id, grupo._id);
+
+            if (!actualizado) {
+                Swal.fire('Error', 'No se pudo guardar el tema. Intenta más tarde.', 'error');
+                return;
+            }
+
+            updateUser(actualizado);
+
             setMostrarModal(false);
-            Swal.fire('¡Tema aplicado!', `El tema "${grupo.nombre}" ha sido activado`, 'success');
+            Swal.fire('¡Tema aplicado!', `Se ha guardado tu preferencia de tema`, 'success');
         } catch (error) {
-            console.error('Error al activar tema:', error);
-            Swal.fire('Error', 'No se pudo activar el tema. Intenta más tarde.', 'error');
+            console.error('Error al guardar tema personal:', error);
+            Swal.fire('Error', 'No se pudo guardar el tema. Intenta más tarde.', 'error');
         }
     };
 
@@ -64,7 +75,15 @@ export const UserMenu = () => {
                         📄 Ver mi perfil
                     </Dropdown.Item>
 
-                    <Dropdown.Item onClick={() => setMostrarModal(true)}>
+                    <Dropdown.Item
+                        onClick={() => {
+                            if (user?._id) {
+                                setMostrarModal(true);
+                            } else {
+                                Swal.fire('Usuario no disponible', 'No se puede cambiar el tema en este momento.', 'warning');
+                            }
+                        }}
+                    >
                         🎨 Cambiar tema del admin
                     </Dropdown.Item>
 

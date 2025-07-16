@@ -12,7 +12,9 @@ export const AdminThemeGroupsList = () => {
         totalPaginas,
         fetchGrupos,
         eliminarGrupoPorId,
-        setPaginaActual
+        setPaginaActual,
+        publicarGrupoComoPublico,
+        activarGrupo
     } = useThemeGroupsStore();
 
     useEffect(() => {
@@ -39,6 +41,48 @@ export const AdminThemeGroupsList = () => {
         }
     };
 
+    const handleHacerPublico = async (id: string) => {
+        const confirmar = await Swal.fire({
+            title: '¿Hacer público este tema?',
+            text: 'Este grupo será el tema visual del sitio público.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, publicar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!confirmar.isConfirmed) return;
+
+        try {
+            await publicarGrupoComoPublico(id);
+            Swal.fire('Publicado', 'El tema fue marcado como público.', 'success');
+            fetchGrupos(paginaActual);
+        } catch {
+            Swal.fire('Error', 'No se pudo hacer público el tema.', 'error');
+        }
+    };
+
+    const handleActivarAdmin = async (id: string) => {
+        const confirmar = await Swal.fire({
+            title: '¿Activar para panel admin?',
+            text: 'Este grupo será el tema visual para los administradores.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, activar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!confirmar.isConfirmed) return;
+
+        try {
+            await activarGrupo(id);
+            Swal.fire('Activado', 'El tema fue marcado como activo en el panel admin.', 'success');
+            fetchGrupos(paginaActual);
+        } catch {
+            Swal.fire('Error', 'No se pudo activar el tema para admin.', 'error');
+        }
+    };
+
     return (
         <div className="table-responsive">
             <div className="d-flex flex-column align-items-center my-4">
@@ -58,25 +102,60 @@ export const AdminThemeGroupsList = () => {
                     <thead className="table-dark">
                         <tr>
                             <th>Nombre del Grupo</th>
-                            <th># Clores</th>
+                            <th># Colores</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {grupos.length === 0 ? (
-                            <tr><td colSpan={3}>No hay grupos de temas registrados.</td></tr>
+                            <tr><td colSpan={4}>No hay grupos de temas registrados.</td></tr>
                         ) : (
-                            grupos.map(({ _id, nombre, colores }) => (
+                            grupos.map(({ _id, nombre, colores, esTemaPublico, activo }) => (
                                 <tr key={_id}>
                                     <td>{nombre}</td>
                                     <td>{colores.length}</td>
                                     <td>
-                                        <Link to={`/admin/theme-groups/edit/${_id}`} className="btn general_btn me-2">
+                                        {esTemaPublico && <span className="badge bg-success me-1">🌐 Público</span>}
+                                        {activo && <span className="badge bg-primary">⚙️ Admin</span>}
+                                    </td>
+                                    <td className="d-flex flex-wrap gap-2 justify-content-center">
+                                        <Link
+                                            to={`/admin/theme-groups/edit/${_id}`}
+                                            className="btn btn-sm btn-outline-primary fw-bolder"
+                                        >
                                             Editar
                                         </Link>
-                                        <Button variant="danger" onClick={() => handleEliminar(_id!)}>
+
+                                        <Button
+                                            variant="outline-danger"
+                                            className='fw-bolder'
+                                            size="sm"
+                                            onClick={() => handleEliminar(_id!)}
+                                        >
                                             Eliminar
                                         </Button>
+
+                                        {!esTemaPublico && (
+                                            <Button
+                                                variant="outline-success"
+                                                className='fw-bolder'
+                                                size="sm"
+                                                onClick={() => handleHacerPublico(_id!)}
+                                            >
+                                                🌐 Hacer público
+                                            </Button>
+                                        )}
+
+                                        {!activo && (
+                                            <Button
+                                                className='btn-outline-morado fw-bolder'
+                                                size="sm"
+                                                onClick={() => handleActivarAdmin(_id!)}
+                                            >
+                                                ⚙️ Activar Admin
+                                            </Button>
+                                        )}
                                     </td>
                                 </tr>
                             ))

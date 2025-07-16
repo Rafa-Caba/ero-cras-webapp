@@ -5,11 +5,10 @@ import Swal from "sweetalert2";
 import type { JSONContent } from '@tiptap/react';
 import { crearCanto } from "../../services/cantos";
 import { TiptapEditor } from "../tiptap-components/TiptapEditor";
-
+import { parseTexto } from "../../utils/handleTextTipTap";
 
 export const AdminNewSong = () => {
     const [titulo, setTitulo] = useState("");
-    // const [texto, setTexto] = useState<any>(null);
     const [texto, setTexto] = useState<JSONContent | null>(null);
     const [tipo, setTipo] = useState("");
     const [compositor, setCompositor] = useState("");
@@ -36,7 +35,6 @@ export const AdminNewSong = () => {
 
             navigate("/admin/cantos");
         } catch (err) {
-            // console.error(err);
             Swal.fire("Error", "Ocurrió un error inesperado", "error");
         }
     };
@@ -58,7 +56,7 @@ export const AdminNewSong = () => {
 
                     <Form.Group className="mb-3">
                         <Form.Label>Texto del Canto</Form.Label>
-                        <TiptapEditor content={texto} onChange={(val: JSONContent) => setTexto(val)} />
+                        <TiptapEditor content={parseTexto(texto)} onChange={(val: JSONContent) => setTexto(val)} />
                     </Form.Group>
 
                     <Form.Group className="mb-3" controlId="tipo">
@@ -83,9 +81,7 @@ export const AdminNewSong = () => {
 
                     <div className='text-center'>
                         <Button type="submit" className="general_btn me-2" variant="">Guardar Canto</Button>
-                        <Button variant="secondary" onClick={() => navigate("/admin/cantos")}>
-                            Cancelar
-                        </Button>
+                        <Button variant="secondary" onClick={() => navigate("/admin/cantos")}>Cancelar</Button>
                     </div>
                 </Form>
             </div>
