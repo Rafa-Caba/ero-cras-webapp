@@ -4,6 +4,7 @@ export const capitalizarPalabra = (palabra: string) => {
     return palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase();
 };
 
+// Returns first name + first initial capitalized
 export const formatearNombre = (nombreCompleto: string): string => {
     if (!nombreCompleto) return '';
 

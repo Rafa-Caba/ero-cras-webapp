@@ -4,6 +4,7 @@ import { es } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import type { ChatMessage } from '../../types';
 import { TiptapChatViewer } from '../tiptap-components/TiptapChatViewer';
+import { formatearNombre } from '../../utils';
 
 interface Props {
     msg: ChatMessage;
@@ -50,7 +51,8 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
                         >
                             {!esMismoAutor && (
                                 <div className="text-xs text-gray-500 mb-1 fw-bold">
-                                    {msg.autor.nombre} (@{msg.autor.username})
+                                    <p className='chat-user-titulo'>{formatearNombre(msg.autor.nombre)}</p>
+                                    {/* (@{msg.autor.username}) */}
                                 </div>
                             )}
 
@@ -85,7 +87,9 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
                             </div>
 
                             <div className="text-[10px] text-gray-400 text-right mt-1">
-                                {format(parseISO(msg.createdAt), 'HH:mm', { locale: es })} hrs
+                                <p className='chat-user-fecha'>
+                                    {format(parseISO(msg.createdAt), 'HH:mm', { locale: es })} hrs
+                                </p>
                             </div>
                         </div>
                     </motion.div>

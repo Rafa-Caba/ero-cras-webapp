@@ -203,6 +203,21 @@
 .chat-viewer p {
     padding: 0;
     margin: 0 0 0.5rem 0;
+    font-size: 0.8rem;
+}
+
+.chat-user-titulo {
+    padding: 0;
+    margin: 0;
+    font-size: 0.9rem;
+    text-align: inherit;
+}
+
+.chat-user-fecha {
+    padding: 0;
+    margin: 0;
+    font-size: 0.8rem;
+    text-align: inherit;
 }
 
 .chat-viewer ul {
@@ -268,7 +283,7 @@
     height: 0;
     font-style: italic;
     opacity: 0.8;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
 }
 
 .ProseMirror h1.is-editor-empty:first-child::before,
@@ -316,6 +331,7 @@
     background-color: var(--color-footer) !important;
     color: var(--color-text-color) !important;
     border-color: var(--color-footer) !important;
+    // font-size: 0.8rem !important;
     // padding: 2rem 2.5rem;
 }
 
