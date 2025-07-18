@@ -41,7 +41,7 @@ export const AdminHeader = () => {
                         <Button
                             variant="link"
                             title="Abrir chat grupal"
-                            onClick={() => navigate('/admin/chat')}
+                            onClick={() => navigate('/admin/chat-group')}
                             className="chat-icon-btn p-0 m-0 border-0 d-flex align-items-center"
                         >
                             <FontAwesomeIcon icon={faComments} style={{ fontSize: '1.8rem' }} />

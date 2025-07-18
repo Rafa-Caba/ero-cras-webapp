@@ -41,6 +41,13 @@ This roadmap outlines planned improvements and future milestones for the Ero Cra
 
 ---
 
+### 🔐 Conversations & Structure
+- [ ] 👥 Direct messages (1-on-1 conversations)
+- [ ] 🧵 Threaded replies (optional)
+- [ ] 🔒 Role-based message visibility (Admin-only, Staff-only, etc.)
+- [ ] 🛑 Action restrictions by role (e.g., only Admins can delete messages, Editors can send files, etc.)
+
+
 ## 📅 Milestone Tags (suggested GitHub labels)
 - `type:enhancement`
 - `type:bug`
