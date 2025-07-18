@@ -40,3 +40,246 @@
         }
     }
 }
+
+.editor-estilo {
+    .ProseMirror {
+        color: #000 !important;
+        // background-color: var(--color-form-color);
+        caret-color: #000;
+
+        * {
+            color: #000 !important;
+        }
+    }
+}
+
+.tiptap-viewer {
+    p {
+        margin: 0;
+        padding: 0;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        margin: 0.5em 0;
+    }
+
+    ul,
+    ol {
+        margin: 0 0 1em 1.5em;
+        padding: 0;
+    }
+
+    // Alineaciones (por si acaso)
+    [data-align="center"] {
+        text-align: center;
+    }
+
+    [data-align="right"] {
+        text-align: right;
+    }
+
+    [data-align="left"] {
+        text-align: left;
+    }
+}
+
+.tiptap-viewer p:empty:not(:has(img))::before {
+    content: none;
+    display: none;
+}
+
+
+// =======================
+// Chats
+// =======================
+.chat-editor {
+    background-color: white;
+    outline: none;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 1rem;
+    min-height: 90px;
+    max-height: 150px;
+    overflow-y: auto;
+    /* SOLO aparece si lo necesita */
+    box-sizing: border-box;
+
+    p,
+    h1,
+    h2,
+    h3 {
+        margin: 0;
+        padding: 0;
+        text-align: left;
+    }
+}
+
+.chat-mensajes-container {
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+    /* ajusta según tu layout */
+    -webkit-overflow-scrolling: touch;
+}
+
+.chat-editor ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+}
+
+.chat-editor ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+}
+
+.chat-editor h1 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.chat-editor h2 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.chat-editor-container {
+    max-height: 150px;
+    /* Altura máxima visible */
+    overflow-y: auto;
+    /* Agrega scroll si se excede */
+    border-radius: 8px;
+    padding: 0.5rem;
+    background-color: white;
+    border: 1px solid #ddd;
+}
+
+.tiptap-editor {
+    min-height: 80px;
+    max-height: 150px;
+    overflow-y: auto;
+    padding: 0.25rem;
+}
+
+.tiptap-chat-wrapper {
+    width: 100%;
+}
+
+.chat-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    background-color: #f3f3f3;
+    padding: 6px;
+    border-radius: 8px;
+}
+
+.chat-toolbar button {
+    font-weight: bold;
+    padding: 4px 8px;
+    border: none;
+    background-color: #e1e1e1;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.chat-toolbar button:hover {
+    background-color: #d4d4d4;
+}
+
+.chat-toolbar button.active {
+    background-color: #a78bfa;
+    color: white;
+}
+
+/* Puedes ajustar márgenes, colores, etc. aquí */
+.chat-viewer p {
+    padding: 0;
+    margin: 0 0 0.5rem 0;
+}
+
+.chat-viewer ul {
+    padding-left: 1.5rem;
+    list-style-type: disc;
+}
+
+.chat-viewer ol {
+    padding-left: 1.5rem;
+    list-style-type: decimal;
+}
+
+.chat-viewer h1 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.chat-viewer h2 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+/* Alineación controlada por padre */
+.mensaje-burbuja .chat-viewer {
+    text-align: inherit !important;
+}
+
+.mensaje-burbuja.text-end .chat-viewer p,
+.mensaje-burbuja.text-end .chat-viewer ul,
+.mensaje-burbuja.text-end .chat-viewer ol,
+.mensaje-burbuja.text-end .chat-viewer h1,
+.mensaje-burbuja.text-end .chat-viewer h2 {
+    text-align: right !important;
+}
+
+.mensaje-burbuja.text-start .chat-viewer p,
+.mensaje-burbuja.text-start .chat-viewer ul,
+.mensaje-burbuja.text-start .chat-viewer ol,
+.mensaje-burbuja.text-start .chat-viewer h1,
+.mensaje-burbuja.text-start .chat-viewer h2 {
+    text-align: left !important;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: #a8a8a8;
+    pointer-events: none;
+    height: 0;
+    font-style: italic;
+    opacity: 0.8;
+    font-size: 1.1rem;
+}
+
+.ProseMirror h1.is-editor-empty:first-child::before,
+.ProseMirror h2.is-editor-empty:first-child::before,
+.ProseMirror ul.is-editor-empty:first-child::before,
+.ProseMirror ol.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: #a8a8a8;
+    pointer-events: none;
+    height: 0;
+    font-style: italic;
+    opacity: 0.8;
+    font-size: 1.1rem;
+}
+
+// =======================
+// Chats containers
+// =======================
+.chat_receiver {
+    background-color: var(--color-secondary);
+}
+
+.chat_sender {
+    background-color: var(--color-primary);
+}

@@ -53,6 +53,7 @@ import { NewTipoCanto } from './pages/admin/NewTipoCanto';
 import { ThemeGroupsList } from './pages/admin/ThemeGroupsList';
 import { EditThemeGroupList } from './pages/admin/EditThemeGroupList';
 import { NewThemeGroupList } from './pages/admin/NewThemeGroupList';
+import { ChatGroup } from './pages/admin/ChatGroup';
 
 function App() {
     return (
@@ -128,6 +129,8 @@ function App() {
                     <Route path="tipos-canto" element={<TiposCanto />} />
                     <Route path="tipos-canto/edit/:id" element={<EditTipoCanto />} />
                     <Route path="tipos-canto/new" element={<NewTipoCanto />} />
+
+                    <Route path="chat-group" element={<ChatGroup />} />
                 </Route>
 
                 {/* Login (outside layout) */}

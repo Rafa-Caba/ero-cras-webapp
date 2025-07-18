@@ -140,53 +140,6 @@ select:disabled {
     opacity: 0.6;
 }
 
-.editor-estilo {
-    .ProseMirror {
-        color: #000 !important;
-        // background-color: var(--color-form-color);
-        caret-color: #000;
-
-        * {
-            color: #000 !important;
-        }
-    }
-}
-
-.tiptap-viewer {
-    p {
-        margin: 0;
-        padding: 0;
-    }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        margin: 0.5em 0;
-    }
-
-    ul,
-    ol {
-        margin: 0 0 1em 1.5em;
-        padding: 0;
-    }
-
-    // Alineaciones (por si acaso)
-    [data-align="center"] {
-        text-align: center;
-    }
-
-    [data-align="right"] {
-        text-align: right;
-    }
-
-    [data-align="left"] {
-        text-align: left;
-    }
-}
-
 .btn-outline-morado {
     color: #7d2181;
     border-color: #7d2181;
@@ -318,6 +271,19 @@ select:disabled {
 .destacar_btn {
     font-size: 0.7rem;
     padding: 4px 15px;
+}
+
+.file_btn {
+    color: #000000;
+    font-size: 1rem;
+    padding: 5px 20px;
+    background: #BDBEBA;
+    border-radius: 10px;
+}
+
+.file_btn:hover {
+    background: #a8a8a8;
+    color: #fff;
 }
 
 // =======================

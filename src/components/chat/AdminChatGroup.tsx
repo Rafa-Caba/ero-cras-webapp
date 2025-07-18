@@ -1,0 +1,240 @@
+import { useEffect, useRef, useState } from 'react';
+import { Button, Card, Form, Figure, Spinner } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import type { JSONContent } from '@tiptap/react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPaperclip } from '@fortawesome/free-solid-svg-icons';
+import { useChatStore } from '../../store/admin/useChatStore';
+import { useAuth } from '../../hooks/useAuth';
+import type { ChatMessage, NuevoMensaje } from '../../types';
+import { obtenerEtiquetaFecha } from '../../utils/chat/obtenerEtiquetaFecha';
+import { TiptapChatEditor } from '../tiptap-components/TiptapChatEditor';
+import { emptyEditorContent } from '../../utils/editorDefaults';
+import { AdminChatBubbles, ChatImageModal } from './index';
+import { socket } from '../../services/socket';
+import { scrollChatToBottom } from '../../utils';
+
+export const AdminChatGroup = () => {
+    // socket.on('connect', () => {
+    //     console.log('🟢 Socket conectado con ID:', socket.id);
+    // });
+
+    // socket.on('disconnect', () => {
+    //     console.log('🔴 Socket desconectado');
+    // });
+    const { user } = useAuth();
+
+    const {
+        mensajes,
+        fetchMensajes,
+        agregarMensajeArchivo,
+        agregarMensajeSocket,
+        agregarMensajeTexto,
+        fetchMensajesAnteriores,
+        cargando,
+    } = useChatStore();
+
+    const [mensaje, setMensaje] = useState<JSONContent>(emptyEditorContent);
+    const [imagen, setImagen] = useState<File | null>(null);
+    const [imagenPreview, setImagenPreview] = useState<string | null>(null);
+    const [imagenAmpliada, setImagenAmpliada] = useState<string | null>(null);
+    const [cargandoMas, setCargandoMas] = useState(false);
+
+    const editorRef = useRef<{ clear: () => void }>(null);
+    const mensajesContainerRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        fetchMensajes();
+    }, []);
+
+    // Manages Scroll so that it will always be to the bottom of ChatsContainer
+    useEffect(() => {
+        scrollChatToBottom(mensajesContainerRef.current);
+    }, [mensajes]);
+
+    useEffect(() => {
+        const container = mensajesContainerRef.current;
+        if (!container) return;
+
+        const handleScroll = async () => {
+            if (container.scrollTop === 0 && !cargandoMas) {
+                setCargandoMas(true);
+                const scrollAlturaAntes = container.scrollHeight;
+
+                await fetchMensajesAnteriores();
+
+                // Espera a que DOM se actualice y hace scroll para mantener la posición
+                requestAnimationFrame(() => {
+                    const scrollAlturaDespues = container.scrollHeight;
+                    const diferencia = scrollAlturaDespues - scrollAlturaAntes;
+                    container.scrollTop = diferencia;
+                    setCargandoMas(false);
+                });
+            }
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [fetchMensajesAnteriores, cargandoMas]);
+
+    useEffect(() => {
+        const handler = (nuevoMensaje: ChatMessage) => {
+            // console.log('📥 Socket recibido:', nuevoMensaje);
+            agregarMensajeSocket(nuevoMensaje);
+        };
+
+        socket.on('nuevo-mensaje', handler);
+
+        return () => {
+            socket.off('nuevo-mensaje', handler); // 👈 asegúrate de usar el mismo nombre
+        };
+    }, []);
+
+    const enviarMensaje = async () => {
+        if ((!mensaje || !mensaje.content?.length) && !imagen) return;
+        if (!user) return;
+
+        if (imagen) {
+            const formData = new FormData();
+            formData.append('imagen', imagen);
+            formData.append('contenido', JSON.stringify(mensaje));
+            formData.append('autor', user._id);
+
+            try {
+                await agregarMensajeArchivo(formData);
+                await fetchMensajes();
+            } catch (error) {
+                console.error('Error enviando imagen del chat:', error);
+            }
+        } else {
+            const nuevoMensaje: NuevoMensaje = {
+                autor: user,
+                contenido: mensaje,
+                tipo: 'texto',
+            };
+
+            try {
+                await agregarMensajeTexto(nuevoMensaje);
+            } catch (error) {
+                console.error('Error al enviar mensaje de texto:', error);
+            }
+        }
+
+        // Limpieza visual
+        editorRef.current?.clear();
+        setMensaje(emptyEditorContent);
+        setImagen(null);
+        setImagenPreview(null);
+    };
+
+    const esMensajePropio = (autorId: string) => autorId === user?._id;
+
+    const mensajesAgrupados = mensajes.reduce((acc, mensaje) => {
+        const etiqueta = obtenerEtiquetaFecha(mensaje.createdAt);
+        if (!acc[etiqueta]) acc[etiqueta] = [];
+        acc[etiqueta].push(mensaje);
+        return acc;
+    }, {} as Record<string, ChatMessage[]>);
+
+    const handleImagenSeleccionada = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImagen(file);
+            setImagenPreview(URL.createObjectURL(file)); // para mostrar la preview
+        }
+    };
+
+    const handleClickAdjuntar = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''; // 🧼 Limpiar valor previo
+            fileInputRef.current.click();   // 📂 Forzar click
+        }
+    };
+
+    return (
+        <div className="container p-0 pt-md-2 my-0">
+            <Card className="shadow p-3">
+                <div className="botones d-flex flex-column flex-md-row justify-content-center justify-content-md-between align-items-center text-center mb-3">
+                    <h3 className="mb-1">💬 Chat de Grupo</h3>
+                    <Link to="/admin" className="btn general_btn fw-bolder px-3 m-2">Ir al Inicio</Link>
+                </div>
+
+                <div
+                    ref={mensajesContainerRef}
+                    style={{ maxHeight: '52vh', overflowY: 'auto', background: '#f9f9f9' }}
+                    className="chat-mensajes-container rounded p-3 mb-3 border"
+                >
+                    {/* Spinner arriba mientras se cargan más mensajes */}
+                    {cargandoMas && (
+                        <div className="text-center text-muted small mb-2">
+                            <Spinner animation="border" size="sm" className="me-2" />
+                            Cargando mensajes anteriores...
+                        </div>
+                    )}
+                    {<AdminChatBubbles
+                        mensajesAgrupados={mensajesAgrupados}
+                        esMensajePropio={esMensajePropio}
+                        setImagenAmpliada={setImagenAmpliada}
+                    />}
+                </div>
+
+                <div className='d-flex flex-row align-items-end gap-3 ms-3 mt-1 mb-1'>
+                    {/* Preview de imagen seleccionada */}
+                    {imagenPreview && (
+                        <Button
+                            variant="link"
+                            className='m-0 p-0 text-start'
+                            onClick={() => setImagenAmpliada(imagenPreview!)}
+                        >
+                            <Figure className='mb-0'>
+                                <Figure.Caption className="mb-1">Imagen seleccionada:</Figure.Caption>
+                                <Figure.Image
+                                    width={80}
+                                    alt="preview"
+                                    src={imagenPreview}
+                                    className="rounded shadow-sm"
+                                />
+                            </Figure>
+                        </Button>
+                    )}
+                    {cargando && (
+                        <div className="text-center my-2">
+                            <Spinner animation="border" />
+                        </div>
+                    )}
+                </div>
+
+                <div className="max-h-[150px] overflow-y-auto px-2 py-1 rounded bg-white border border-gray-300">
+                    <TiptapChatEditor ref={editorRef} content={mensaje} onChange={setMensaje} />
+                </div>
+
+                <div className="d-flex align-items-center justify-content-end gap-2 mt-3 flex-wrap">
+                    {/* Botón Adjuntar Imagen */}
+                    <Form.Group controlId="chat-file" className="mb-0">
+                        <Button variant="secondary" onClick={handleClickAdjuntar}>
+                            <FontAwesomeIcon icon={faPaperclip} className="text-white" size="lg" />
+                        </Button>
+                        <Form.Control
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef}
+                            onChange={handleImagenSeleccionada}
+                            style={{ display: 'none' }}
+                        />
+                    </Form.Group>
+
+                    {/* Botón Enviar */}
+                    <Button className='general_btn px-4' onClick={enviarMensaje}>
+                        Enviar
+                    </Button>
+                </div>
+            </Card>
+
+            <ChatImageModal
+                imagenUrl={imagenAmpliada}
+                onClose={() => setImagenAmpliada(null)}
+            />
+        </div>
+    );
+};

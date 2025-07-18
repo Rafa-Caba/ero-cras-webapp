@@ -59,7 +59,7 @@ export const AdminDashboardPanel = () => {
                         </Link>
                     </div>
                     <div className='d-flex justify-content-center'>
-                        <Link to={`/admin/chat/${user!._id || ''}`} className="btn general_btn py-1 px-3 me-2">
+                        <Link to={`/admin/chat-group`} className="btn general_btn py-1 px-3 me-2">
                             Chat de Grupo
                         </Link>
                     </div>

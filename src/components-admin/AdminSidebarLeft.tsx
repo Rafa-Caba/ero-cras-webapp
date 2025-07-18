@@ -9,7 +9,7 @@ export const AdminSidebarLeft = () => {
 
     return (
         <aside className="layout-menu-izquierdo sidebar d-flex flex-column align-items-center order-1 order-md-0">
-            <div className="my-3">
+            <div className="my-3 w-75">
                 <div className={`${!imagenLeftMenu && 'imagen-left-container'} text-center`}>
                     {imagenLeftMenu ? (
                         <div className="d-none d-md-block text-center mb-3">
@@ -30,7 +30,7 @@ export const AdminSidebarLeft = () => {
                 </div>
 
                 {/* <AvisosSidebar /> */}
-                <div className="avisos-scrollbox">
+                <div className="w-100 avisos-scrollbox">
                     <AvisosSidebar />
                 </div>
             </div>

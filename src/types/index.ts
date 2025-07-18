@@ -10,3 +10,4 @@ export * from './settings';
 export * from './logs';
 export * from './tiposCanto';
 export * from './themeGroups';
+export * from './chat';
