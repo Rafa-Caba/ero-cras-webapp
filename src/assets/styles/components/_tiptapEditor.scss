@@ -227,6 +227,18 @@
     margin-bottom: 0.5rem;
 }
 
+.no_srollbar {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE 10+ */
+}
+
+.no_srollbar::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari */
+}
+
 /* Alineación controlada por padre */
 .mensaje-burbuja .chat-viewer {
     text-align: inherit !important;
@@ -251,7 +263,7 @@
 .ProseMirror p.is-editor-empty:first-child::before {
     content: attr(data-placeholder);
     float: left;
-    color: #a8a8a8;
+    color: var(--color-text-color);
     pointer-events: none;
     height: 0;
     font-style: italic;
@@ -265,7 +277,7 @@
 .ProseMirror ol.is-editor-empty:first-child::before {
     content: attr(data-placeholder);
     float: left;
-    color: #a8a8a8;
+    color: var(--color-text-color);
     pointer-events: none;
     height: 0;
     font-style: italic;
@@ -277,9 +289,55 @@
 // Chats containers
 // =======================
 .chat_receiver {
-    background-color: var(--color-secondary);
+    background-color: var(--color-btn-general);
+    color: #fff;
 }
 
 .chat_sender {
-    background-color: var(--color-primary);
+    background-color: var(--color-btn-general);
+    color: #fff;
+}
+
+.chat-container-color {
+    background-color: var(--color-form-color) !important;
+    color: var(--color-text-color) !important;
+    border-color: var(--color-footer) !important;
+    // padding: 2rem 2.5rem;
+}
+
+.chat-container-color-textarea {
+    background-color: var(--color-form-color) !important;
+    color: var(--color-text-color) !important;
+    border-color: var(--color-footer) !important;
+    // padding: 2rem 2.5rem;
+}
+
+.chat-container-color-textarea-text {
+    background-color: var(--color-footer) !important;
+    color: var(--color-text-color) !important;
+    border-color: var(--color-footer) !important;
+    // padding: 2rem 2.5rem;
+}
+
+.chat-container {
+    background-color: var(--color-footer) !important;
+    color: var(--color-text-color) !important;
+    border-color: var(--color-footer) !important;
+}
+
+.emoji-container {
+    position: absolute;
+    bottom: 60px;
+    right: 20px;
+    z-index: 100;
+}
+
+.chat-icon-btn {
+    color: var(--color-btn-general);
+    transition: color 0.2s ease-in-out;
+}
+
+.chat-icon-btn:hover {
+    color: var(--color-btn-general-hover);
+    /* o tu color primario */
 }

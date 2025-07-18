@@ -8,11 +8,11 @@ export const AdminSidebarLeft = () => {
     const imagenLeftMenu = imagenes.find(img => img.imagenLeftMenu);
 
     return (
-        <aside className="layout-menu-izquierdo sidebar d-flex flex-column align-items-center order-1 order-md-0">
+        <aside className="layout-menu-izquierdo sidebar d-flex flex-column align-items-center order-1 order-lg-0">
             <div className="my-3 w-75">
                 <div className={`${!imagenLeftMenu && 'imagen-left-container'} text-center`}>
                     {imagenLeftMenu ? (
-                        <div className="d-none d-md-block text-center mb-3">
+                        <div className="d-none d-lg-block text-center mb-3">
                             <Image
                                 src={imagenLeftMenu.imagenUrl}
                                 alt={imagenLeftMenu.titulo}

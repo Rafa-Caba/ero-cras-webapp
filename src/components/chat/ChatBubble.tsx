@@ -22,14 +22,16 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
                 <div className='d-flex flex-row mb-3 gap-2'>
                     <Button
                         variant="link"
-                        className={`p-0 border-0 align-self-start ${esPropio ? 'order-2' : 'order-1'}`}
+                        className={`p-0 rounded border-0 align-self-start ${esPropio ? 'order-2' : 'order-1'}`}
                         onClick={() => onAvatarClick(msg.autor.fotoPerfilUrl!)}
                     >
                         <img
                             src={msg.autor.fotoPerfilUrl || '/images/default-user.png'}
-                            height={45}
+                            height={40}
+                            width={40}
                             alt={msg.autor.nombre}
-                            className="w-8 h-8 circled shadow"
+                            className="w-8 h-8 mt-1 rounded-circle shadow"
+                            style={{ objectFit: 'cover' }}
                         />
                     </Button>
 
@@ -42,9 +44,9 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
                     >
                         <div
                             className={`
-                p-3 max-w-[75%] transition-all duration-200 shadow-md rounded
-                ${esPropio ? 'text-end chat_sender' : 'text-start chat_receiver'}
-              `}
+                                p-3 max-w-[75%] transition-all duration-200 shadow-md rounded
+                                ${esPropio ? 'text-end chat_sender' : 'text-start chat_receiver'}
+                            `}
                         >
                             {!esMismoAutor && (
                                 <div className="text-xs text-gray-500 mb-1 fw-bold">

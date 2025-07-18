@@ -26,6 +26,7 @@ export const AdminChatGroup = () => {
 
     const {
         mensajes,
+        noHayMasMensajes,
         fetchMensajes,
         agregarMensajeArchivo,
         agregarMensajeSocket,
@@ -48,9 +49,13 @@ export const AdminChatGroup = () => {
         fetchMensajes();
     }, []);
 
-    // Manages Scroll so that it will always be to the bottom of ChatsContainer
     useEffect(() => {
-        scrollChatToBottom(mensajesContainerRef.current);
+        if (mensajes.length === 0) return;
+
+        // Solo hacer scroll automático si hay más de 5 mensajes
+        if (mensajes.length >= 5) {
+            scrollChatToBottom(mensajesContainerRef.current);
+        }
     }, [mensajes]);
 
     useEffect(() => {
@@ -58,13 +63,12 @@ export const AdminChatGroup = () => {
         if (!container) return;
 
         const handleScroll = async () => {
-            if (container.scrollTop === 0 && !cargandoMas) {
+            if (container.scrollTop === 0 && !cargandoMas && !noHayMasMensajes) {
                 setCargandoMas(true);
                 const scrollAlturaAntes = container.scrollHeight;
 
                 await fetchMensajesAnteriores();
 
-                // Espera a que DOM se actualice y hace scroll para mantener la posición
                 requestAnimationFrame(() => {
                     const scrollAlturaDespues = container.scrollHeight;
                     const diferencia = scrollAlturaDespues - scrollAlturaAntes;
@@ -154,20 +158,23 @@ export const AdminChatGroup = () => {
 
     return (
         <div className="container p-0 pt-md-2 my-0">
-            <Card className="shadow p-3">
-                <div className="botones d-flex flex-column flex-md-row justify-content-center justify-content-md-between align-items-center text-center mb-3">
+            <Card className="shadow p-3 chat-container">
+                <div className="botones chat-container-color d-flex flex-column flex-md-row justify-content-center justify-content-md-between align-items-center text-center mb-3">
                     <h3 className="mb-1">💬 Chat de Grupo</h3>
                     <Link to="/admin" className="btn general_btn fw-bolder px-3 m-2">Ir al Inicio</Link>
                 </div>
 
                 <div
                     ref={mensajesContainerRef}
-                    style={{ maxHeight: '52vh', overflowY: 'auto', background: '#f9f9f9' }}
-                    className="chat-mensajes-container rounded p-3 mb-3 border"
+                    style={{ maxHeight: '50vh', overflowY: 'auto', background: '#f9f9f9' }}
+                    className="chat-mensajes-container no_srollbar chat-container-color rounded p-3 mb-3 border"
                 >
                     {/* Spinner arriba mientras se cargan más mensajes */}
+                    {noHayMasMensajes && (
+                        <p className="text-center text-theme-color small">No more messages to load.</p>
+                    )}
                     {cargandoMas && (
-                        <div className="text-center text-muted small mb-2">
+                        <div className="text-center text-theme-color small mb-2">
                             <Spinner animation="border" size="sm" className="me-2" />
                             Cargando mensajes anteriores...
                         </div>
@@ -205,7 +212,7 @@ export const AdminChatGroup = () => {
                     )}
                 </div>
 
-                <div className="max-h-[150px] overflow-y-auto px-2 py-1 rounded bg-white border border-gray-300">
+                <div className="max-h-[150px] overflow-y-auto px-2 py-1 rounded bg-white border border-gray-300 chat-container-color-textarea">
                     <TiptapChatEditor ref={editorRef} content={mensaje} onChange={setMensaje} />
                 </div>
 

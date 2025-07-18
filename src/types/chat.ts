@@ -35,6 +35,7 @@ export interface ImagenSubida {
 
 export interface ChatState {
     mensajes: ChatMessage[];
+    noHayMasMensajes: boolean;
     cargando: boolean;
     error: string | null;
 

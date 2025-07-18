@@ -7,7 +7,7 @@ export const AdminSidebarRight = () => {
     const imagenRightMenu = imagenes.find(img => img.imagenRightMenu);
 
     return (
-        <aside className="layout-menu-derecho sidebar col-12 col-md-2 d-flex flex-column align-content-start order-2 order-md-2 d-none d-md-block">
+        <aside className="layout-menu-derecho sidebar col-12 col-lg-2 d-flex flex-column align-content-start order-2 order-lg-2 d-none d-lg-block">
             <div className="my-3">
                 <div className={`${!imagenRightMenu && 'imagen-right-container'} text-center`}>
                     {imagenRightMenu ? (

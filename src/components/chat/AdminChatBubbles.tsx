@@ -22,9 +22,9 @@ export const AdminChatBubbles = ({ mensajesAgrupados, esMensajePropio, setImagen
         <>
             {fechas.map(([fecha, msgsDelDia]) => (
                 <div key={fecha}>
-                    <div className="relative my-3">
+                    <div className="relative my-3 text-center">
                         <hr className="border-t border-gray-300" />
-                        <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-white dark:bg-gray-900 px-3 text-gray-600 text-sm">
+                        <span className="absolute left-1/2 -translate-x-1/2 -top-3 dark:bg-gray-900 px-3 text-theme-color fw-bold text-sm">
                             {fecha}
                         </span>
                     </div>

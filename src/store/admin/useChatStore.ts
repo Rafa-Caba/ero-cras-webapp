@@ -12,6 +12,7 @@ export const useChatStore = create<ChatState>()(
     persist(
         (set, get) => ({
             mensajes: [],
+            noHayMasMensajes: false,
             cargando: false,
             error: null,
 
@@ -32,6 +33,13 @@ export const useChatStore = create<ChatState>()(
                 if (!mensajeMasAntiguo) return;
 
                 const mensajesNuevos = await obtenerMensajesChat(50, mensajeMasAntiguo.createdAt);
+
+                // Si ya no hay más mensajes que cargar
+                if (mensajesNuevos.length === 0) {
+                    set({ noHayMasMensajes: true });
+                    return;
+                }
+
                 set((state) => ({
                     mensajes: [...mensajesNuevos, ...state.mensajes]
                 }));
