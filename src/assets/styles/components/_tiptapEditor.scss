@@ -363,16 +363,29 @@
 
 .chat-icon-btn {
     color: var(--color-btn-general);
-    transition: color 0.2s ease-in-out;
 }
 
 .chat-icon-btn:hover {
     color: var(--color-btn-general-hover);
-    /* o tu color primario */
+}
+
+.chat-msg-icon {
+    transition: transform 0.2s ease;
+}
+
+.chat-msg-icon:hover {
+    transform: scale(1.25);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .chat-msg-icon:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
 }
 
 .chat-scroll-container {
-    max-height: 40vh;
+    max-height: 38vh;
     overflow-y: auto;
 }
 
@@ -401,14 +414,18 @@
 
 .chat-reacciones {
     position: absolute;
-    bottom: -14px;
-    left: 3px;
+    bottom: -23px;
+    left: 0px;
     transition: transform 0.2s ease;
     z-index: 1;
 }
 
-.chat-reacciones:hover {
-    transform: scale(1.25);
+.btn-reaccion {
+    transition: box-shadow 0.2s ease;
+}
+
+.btn-reaccion:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .chat-bubble-container {

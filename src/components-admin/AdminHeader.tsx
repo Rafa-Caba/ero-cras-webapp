@@ -45,7 +45,7 @@ export const AdminHeader = () => {
                                 onClick={() => navigate('/admin/chat-group')}
                                 className="chat-icon-btn p-0 m-0 border-0 d-flex align-items-center"
                             >
-                                <FontAwesomeIcon icon={faComments} style={{ fontSize: '1.8rem' }} />
+                                <FontAwesomeIcon icon={faComments} className='chat-msg-icon' style={{ fontSize: '1.8rem' }} />
                             </Button>
 
                             <div className="d-flex align-items-center">

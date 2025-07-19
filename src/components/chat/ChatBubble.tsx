@@ -40,9 +40,9 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
     };
 
     return (
-        <div className={`w-75 d-flex mb-1 ${esPropio ? 'justify-content-end ms-auto' : 'justify-content-start me-auto'}`}>
+        <div className={`w-75 d-flex mb-2 ${esPropio ? 'justify-content-end ms-auto' : 'justify-content-start me-auto'}`}>
             <div className={`flex items-end gap-2 rounded ${esPropio ? 'flex-row-reverse' : ''}`}>
-                <div className='d-flex flex-row mb-3 gap-2'>
+                <div className='d-flex flex-row mb-4 gap-2'>
                     <Button
                         variant="link"
                         className={`p-0 rounded border-0 align-self-start ${esPropio ? 'order-2' : 'order-1'}`}
@@ -93,10 +93,14 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
                                                 <Button variant="link" className="p-0 border-0" onClick={() => onImagenClick(msg.imagenUrl!)}>
                                                     <Figure className="mt-2 mb-1">
                                                         <Figure.Image
-                                                            width={175}
                                                             alt="Imagen del mensaje"
                                                             src={msg.imagenUrl}
                                                             className="rounded shadow-sm"
+                                                            style={{
+                                                                width: '175px',
+                                                                height: '175px',
+                                                                objectFit: 'cover',
+                                                            }}
                                                             onLoad={() => {
                                                                 const chatEnd = document.getElementById('chat-end');
                                                                 chatEnd?.scrollIntoView({ behavior: 'smooth' });
@@ -116,13 +120,9 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
                                     )}
 
                                     {msg.reacciones && msg.reacciones.length > 0 && (
-                                        <motion.div
-                                            className="chat-reacciones"
-                                            whileHover={{ scale: 1.30 }}
-                                            transition={{ type: 'spring', stiffness: 400 }}
-                                        >
+                                        <div className="chat-reacciones">
                                             <ReaccionesChat mensajeId={msg._id} reacciones={msg.reacciones} />
-                                        </motion.div>
+                                        </div>
                                     )}
 
                                     {!yaReacciono && (

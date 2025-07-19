@@ -1,7 +1,6 @@
-// components/chat/ReaccionesChat.tsx
 import { useAuth } from '../../hooks/useAuth';
 import { useChatStore } from '../../store/admin/useChatStore';
-import { Button } from 'react-bootstrap';
+import { ReaccionItem } from './ReaccionItem';
 
 interface Reaccion {
     emoji: string;
@@ -33,17 +32,14 @@ export const ReaccionesChat = ({ mensajeId, reacciones }: ReaccionesChatProps) =
             {Object.entries(agrupadas).map(([emoji, usuarios]) => {
                 const yaReacciono = usuarios.includes(user?._id || '');
                 return (
-                    <Button
+                    <ReaccionItem
                         key={emoji}
-                        size="sm"
-                        variant={yaReacciono ? 'secondary' : 'outline-secondary'}
-                        className="rounded-pill py-1 px-2 d-flex align-items-center"
+                        emoji={emoji}
+                        cantidad={usuarios.length}
+                        yaReacciono={yaReacciono}
                         onClick={() => handleReaccionClick(emoji)}
                         title={usuarios.length > 1 ? `${usuarios.length} reacciones` : '1 reacción'}
-                    >
-                        <span className="me-1">{emoji}</span>
-                        <small>{usuarios.length}</small>
-                    </Button>
+                    />
                 );
             })}
         </div>
