@@ -1,3 +1,4 @@
+// services/chat.ts
 import api from '../api/axios';
 import type { ChatMessage, ChatMessageResponse, NuevoMensaje } from '../types';
 
@@ -32,4 +33,15 @@ export const subirImagenChat = async (file: File): Promise<{ imagenUrl: string; 
     });
 
     return res.data;
+};
+
+// PATCH: Reaccionar a mensaje
+export const reaccionarAMensajeOld = async (mensajeId: string, emoji: string, usuarioId: string): Promise<ChatMessage> => {
+    const { data } = await api.patch<{ mensaje: ChatMessage }>(`/chat/${mensajeId}/reaccion`, { emoji, usuarioId });
+    return data.mensaje;
+};
+
+export const reaccionarAMensaje = async (mensajeId: string, emoji: string): Promise<ChatMessageResponse> => {
+    const { data } = await api.patch<ChatMessageResponse>(`/chat/${mensajeId}/reaccion`, { emoji });
+    return data;
 };

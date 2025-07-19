@@ -171,12 +171,18 @@
 }
 
 .chat-toolbar {
-    display: flex;
+    display: none;
     flex-wrap: wrap;
     gap: 6px;
     background-color: #f3f3f3;
     padding: 6px;
     border-radius: 8px;
+}
+
+@media (min-width: 768px) {
+    .chat-toolbar {
+        display: flex;
+    }
 }
 
 .chat-toolbar button {
@@ -204,6 +210,12 @@
     padding: 0;
     margin: 0 0 0.5rem 0;
     font-size: 0.8rem;
+}
+
+@media (min-width: 768px) {
+    .chat-viewer p {
+        font-size: 1.1rem;
+    }
 }
 
 .chat-user-titulo {
@@ -356,4 +368,69 @@
 .chat-icon-btn:hover {
     color: var(--color-btn-general-hover);
     /* o tu color primario */
+}
+
+.chat-scroll-container {
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+@media (min-width: 640px) {
+    .chat-scroll-container {
+        max-height: 50vh;
+    }
+}
+
+@media (min-width: 768px) {
+    .chat-scroll-container {
+        max-height: 55vh;
+    }
+}
+
+@media (min-width: 1024px) {
+    .chat-scroll-container {
+        max-height: 50vh;
+    }
+}
+
+
+.reacciones-chat button {
+    font-size: 0.9rem;
+}
+
+.chat-reacciones {
+    position: absolute;
+    bottom: 17px;
+    left: 0px;
+    transform: translateY(100%);
+    z-index: 1;
+}
+
+.chat-bubble-container {
+    position: relative;
+}
+
+.chat-reaccion-btn {
+    position: absolute;
+    bottom: -17px;
+    right: 5px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 10;
+    border-radius: 100px;
+}
+
+.chat-bubble-container:hover .chat-reaccion-btn {
+    opacity: 1;
+}
+
+@media (min-width: 769px) {
+    .chat-bubble-container:hover .chat-reaccion-btn {
+        opacity: 1;
+    }
+}
+
+.emoji-flotante {
+    animation-timing-function: ease-out;
+    will-change: transform, opacity;
 }

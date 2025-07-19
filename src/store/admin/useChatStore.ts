@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ChatState } from '../../types';
+import type { ChatMessage, ChatState } from '../../types';
 import {
     obtenerMensajesChat,
     enviarMensajeTexto,
     enviarMensajeArchivo,
-    subirImagenChat
+    subirImagenChat,
+    reaccionarAMensaje
 } from '../../services/chat';
 
 export const useChatStore = create<ChatState>()(
@@ -79,6 +80,33 @@ export const useChatStore = create<ChatState>()(
                 set({ mensajes: [...get().mensajes, mensaje] });
             },
 
+            reaccionarAMensajeEnStore: async (mensajeId, emoji) => {
+                try {
+                    const { mensaje } = await reaccionarAMensaje(mensajeId, emoji);
+
+                    // Actualizar el mensaje con la nueva reacción
+                    const mensajesActuales = get().mensajes;
+
+                    const nuevosMensajes = mensajesActuales.map((msg) =>
+                        msg._id === mensaje._id ? mensaje : msg
+                    );
+
+                    set({ mensajes: nuevosMensajes });
+
+                } catch (error: any) {
+                    console.error('Error al reaccionar al mensaje:', error.message);
+                    set({ error: error.message });
+                }
+            },
+
+            actualizarMensajeReaccion: (mensajeActualizado: ChatMessage) => {
+                set((state) => ({
+                    mensajes: state.mensajes.map((msg) =>
+                        msg._id === mensajeActualizado._id ? mensajeActualizado : msg
+                    )
+                }));
+            },
+
             limpiarMensajes: () => set({ mensajes: [] })
         }),
         {
@@ -86,60 +114,3 @@ export const useChatStore = create<ChatState>()(
         }
     )
 );
-
-
-// import { create } from 'zustand';
-// import { persist } from 'zustand/middleware';
-// import type { ChatState } from '../../types';
-// import {
-//     obtenerMensajesChat,
-//     enviarMensajeTexto,
-//     enviarMensajeArchivo
-// } from '../../services/chat';
-
-// export const useChatStore = create<ChatState>()(
-//     persist(
-//         (set, get) => ({
-//             mensajes: [],
-//             cargando: false,
-//             error: null,
-
-//             fetchMensajes: async () => {
-//                 try {
-//                     set({ cargando: true, error: null });
-//                     const mensajes = await obtenerMensajesChat();
-//                     set({ mensajes, cargando: false });
-//                 } catch (error: any) {
-//                     set({ error: error.message, cargando: false });
-//                 }
-//             },
-
-//             agregarMensajeTexto: async (nuevoMensaje) => {
-//                 const { mensaje } = await enviarMensajeTexto(nuevoMensaje);
-//                 set((state) => ({
-//                     mensajes: [...state.mensajes, mensaje],
-//                 }));
-//             },
-
-//             agregarMensajeArchivo: async (formData) => {
-//                 try {
-//                     set({ cargando: true, error: null });
-//                     await enviarMensajeArchivo(formData);
-//                     const mensajes = await obtenerMensajesChat();
-//                     set({ mensajes, cargando: false });
-//                 } catch (error: any) {
-//                     set({ error: error.message, cargando: false });
-//                 }
-//             },
-
-//             agregarMensajeSocket: (mensaje) => {
-//                 set({ mensajes: [...get().mensajes, mensaje] });
-//             },
-
-//             limpiarMensajes: () => set({ mensajes: [] })
-//         }),
-//         {
-//             name: 'chat-store'
-//         }
-//     )
-// );

@@ -58,11 +58,11 @@ export const AdminDashboardPanel = () => {
                             Logs del sitio
                         </Link>
                     </div>
-                    <div className='d-flex justify-content-center'>
+                    {/* <div className='d-flex justify-content-center'>
                         <Link to={`/admin/chat-group`} className="btn general_btn py-1 px-3 me-2">
                             Chat de Grupo
                         </Link>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className={`${!imagenInicio && 'imagen-inicio-container'} text-center my-3 mt-auto fade-in`}>

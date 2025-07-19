@@ -32,23 +32,25 @@ export const AdminHeader = () => {
             <div className="titulo-nav px-0 d-flex flex-column">
                 <div className="titulo mx-5 text-black d-flex flex-column flex-md-row justify-content-md-between align-items-md-center">
                     <div className="titulo text-center text-md-start">
-                        <h1 className='mb-0'>{settings?.tituloWeb ? settings.tituloWeb : 'Company'} - Admin</h1>
+                        <h1 className='mb-2 mb-lg-0'>{settings?.tituloWeb ? settings.tituloWeb : 'Company'} - Admin</h1>
                     </div>
 
-                    <div className="d-flex align-items-center gap-3">
+                    <div className="d-flex align-items-center justify-content-between justify-content-lg-end gap-3">
                         <p className="titulo mb-1 text-center fs-4 text-md-end">¡Hola {formatearNombre(user.nombre)}!</p>
 
-                        <Button
-                            variant="link"
-                            title="Abrir chat grupal"
-                            onClick={() => navigate('/admin/chat-group')}
-                            className="chat-icon-btn p-0 m-0 border-0 d-flex align-items-center"
-                        >
-                            <FontAwesomeIcon icon={faComments} style={{ fontSize: '1.8rem' }} />
-                        </Button>
+                        <div className='d-flex flex-row gap-3'>
+                            <Button
+                                variant="link"
+                                title="Abrir chat grupal"
+                                onClick={() => navigate('/admin/chat-group')}
+                                className="chat-icon-btn p-0 m-0 border-0 d-flex align-items-center"
+                            >
+                                <FontAwesomeIcon icon={faComments} style={{ fontSize: '1.8rem' }} />
+                            </Button>
 
-                        <div className="d-flex align-items-center">
-                            <UserMenu />
+                            <div className="d-flex align-items-center">
+                                <UserMenu />
+                            </div>
                         </div>
                     </div>
                 </div>

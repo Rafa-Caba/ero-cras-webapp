@@ -92,9 +92,17 @@ body {
 
         .layout-content {
             flex: 1;
-            padding: 1rem;
+            padding: 0.7rem;
             margin: 0.5rem;
             background-color: var(--color-primary);
+        }
+
+        @media (min-width: 768px) {
+            flex-direction: column;
+
+            .layout-content {
+                padding: 1rem;
+            }
         }
 
         @media (min-width: 768px) {

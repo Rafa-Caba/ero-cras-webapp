@@ -32,6 +32,7 @@ export const AdminChatGroup = () => {
         agregarMensajeSocket,
         agregarMensajeTexto,
         fetchMensajesAnteriores,
+        actualizarMensajeReaccion,
         cargando,
     } = useChatStore();
 
@@ -92,6 +93,28 @@ export const AdminChatGroup = () => {
 
         return () => {
             socket.off('nuevo-mensaje', handler); // 👈 asegúrate de usar el mismo nombre
+        };
+    }, []);
+
+    useEffect(() => {
+        const handler = (mensajeActualizado: ChatMessage) => {
+            actualizarMensajeReaccion(mensajeActualizado);
+
+            // ⚠️ Detectar si el mensaje tiene contenido nuevo o solo es una reacción
+            const tieneContenido =
+                mensajeActualizado.contenido?.content?.length ||
+                mensajeActualizado.archivoUrl ||
+                mensajeActualizado.imagenUrl;
+
+            if (!tieneContenido) return; // 🧠 si no hay contenido ni archivos, fue solo una reacción
+
+            scrollChatToBottom(mensajesContainerRef.current);
+        };
+
+        socket.on('mensaje-actualizado', handler);
+
+        return () => {
+            socket.off('mensaje-actualizado', handler); // ✅ función de cleanup válida
         };
     }, []);
 
@@ -158,16 +181,20 @@ export const AdminChatGroup = () => {
 
     return (
         <div className="container p-0 pt-md-2 my-0">
-            <Card className="shadow p-3 chat-container">
-                <div className="botones chat-container-color d-flex flex-column flex-md-row justify-content-center justify-content-md-between align-items-center text-center mb-3">
+            <Card className="shadow p-2 p-lg-3 chat-container">
+                <div className="botones chat-container-color px-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between align-items-center text-center mb-3">
                     <h3 className="mb-1">💬 Chat de Grupo</h3>
                     <Link to="/admin" className="btn general_btn fw-bolder px-3 m-2">Ir al Inicio</Link>
                 </div>
 
                 <div
                     ref={mensajesContainerRef}
-                    style={{ maxHeight: '50vh', overflowY: 'auto', background: '#f9f9f9' }}
-                    className="chat-mensajes-container no_srollbar chat-container-color rounded p-3 mb-3 border"
+                    // style={{ maxHeight: '50vh', overflowY: 'auto', background: '#f9f9f9' }}
+                    // className="chat-scroll-container chat-mensajes-container no_scrollbar chat-container-color rounded p-3 mb-3 border overflow-auto"
+                    className="chat-mensajes-container no_scrollbar chat-container-color rounded p-3 mb-1 mb-lg-2 border overflow-y-auto
+                                min-h-[200px] sm:min-h-[250px] md:min-h-[300px] lg:min-h-[350px]
+                                max-h-[40vh] sm:max-h-[50vh] md:max-h-[60vh] lg:max-h-[55vh]"
+
                 >
                     {/* Spinner arriba mientras se cargan más mensajes */}
                     {noHayMasMensajes && (
@@ -216,7 +243,7 @@ export const AdminChatGroup = () => {
                     <TiptapChatEditor ref={editorRef} content={mensaje} onChange={setMensaje} />
                 </div>
 
-                <div className="d-flex align-items-center justify-content-end gap-2 mt-3 flex-wrap">
+                <div className="d-flex align-items-center justify-content-end gap-2 mt-2 flex-wrap">
                     {/* Botón Adjuntar Imagen */}
                     <Form.Group controlId="chat-file" className="mb-0">
                         <Button variant="secondary" onClick={handleClickAdjuntar}>
