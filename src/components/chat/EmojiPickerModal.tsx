@@ -1,6 +1,5 @@
-import { Modal, Button } from 'react-bootstrap';
-
-const emojis = ['😀', '😂', '😍', '🥳', '😎', '👍', '🙏', '🔥', '💯', '💖', '😢', '🤯'];
+import { Modal } from 'react-bootstrap';
+import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
 
 interface Props {
     show: boolean;
@@ -9,29 +8,27 @@ interface Props {
 }
 
 export const EmojiPickerModal = ({ show, onClose, onSelect }: Props) => {
-
-    const handleSelect = (emoji: string) => {
-        onSelect(emoji);
+    const handleEmojiClick = (emojiData: EmojiClickData) => {
+        onSelect(emojiData.emoji);
         onClose();
     };
 
     return (
-        <Modal show={show} onHide={onClose} centered>
+        <Modal show={show} onHide={onClose} centered size="lg">
             <Modal.Header closeButton>
-                <Modal.Title>Elige un emoji</Modal.Title>
+                <Modal.Title>Selecciona un emoji</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <div className="d-flex flex-wrap gap-2 justify-content-center">
-                    {emojis.map((emoji) => (
-                        <Button
-                            key={emoji}
-                            variant="light"
-                            className="fs-4 border-0"
-                            onClick={() => handleSelect(emoji)}
-                        >
-                            {emoji}
-                        </Button>
-                    ))}
+                <div className="d-flex justify-content-center">
+                    <EmojiPicker
+                        onEmojiClick={handleEmojiClick}
+                        width="100%"
+                        height={400}
+                        lazyLoadEmojis={true}
+                        skinTonesDisabled={false}
+                        searchDisabled={false}
+                        previewConfig={{ showPreview: false }}
+                    />
                 </div>
             </Modal.Body>
         </Modal>

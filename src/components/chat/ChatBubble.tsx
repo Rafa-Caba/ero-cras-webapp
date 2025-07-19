@@ -116,9 +116,13 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
                                     )}
 
                                     {msg.reacciones && msg.reacciones.length > 0 && (
-                                        <div className="chat-reacciones">
+                                        <motion.div
+                                            className="chat-reacciones"
+                                            whileHover={{ scale: 1.30 }}
+                                            transition={{ type: 'spring', stiffness: 400 }}
+                                        >
                                             <ReaccionesChat mensajeId={msg._id} reacciones={msg.reacciones} />
-                                        </div>
+                                        </motion.div>
                                     )}
 
                                     {!yaReacciono && (
