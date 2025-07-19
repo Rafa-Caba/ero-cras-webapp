@@ -361,31 +361,26 @@
     z-index: 100;
 }
 
-.chat-icon-btn {
-    color: var(--color-btn-general);
-}
-
-.chat-icon-btn:hover {
-    color: var(--color-btn-general-hover);
-}
-
 .chat-msg-icon {
+    color: var(--color-btn-general);
     transition: transform 0.2s ease;
 }
 
 .chat-msg-icon:hover {
     transform: scale(1.25);
+    color: var(--color-btn-general-hover);
 }
 
 @media (hover: hover) and (pointer: fine) {
     .chat-msg-icon:hover {
         transform: scale(1.2);
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        color: var(--color-btn-general-hover);
     }
 }
 
 .chat-scroll-container {
-    max-height: 38vh;
+    max-height: 42vh;
     overflow-y: auto;
 }
 
@@ -403,7 +398,7 @@
 
 @media (min-width: 1024px) {
     .chat-scroll-container {
-        max-height: 50vh;
+        max-height: 48vh;
     }
 }
 
