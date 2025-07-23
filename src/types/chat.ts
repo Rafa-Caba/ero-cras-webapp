@@ -10,7 +10,7 @@ export interface ChatMessage {
     _id: string;
     autor: Usuario;
     contenido: JSONContent;
-    tipo: 'texto' | 'imagen' | 'archivo' | 'reaccion';
+    tipo: 'texto' | 'imagen' | 'archivo' | 'media' | 'reaccion';
     archivoUrl?: string;
     archivoNombre?: string;
     imagenUrl?: string;
@@ -22,7 +22,7 @@ export interface ChatMessage {
 export interface NuevoMensaje {
     autor: Usuario;
     contenido: JSONContent;
-    tipo: 'texto' | 'imagen' | 'archivo' | 'reaccion';
+    tipo: 'texto' | 'imagen' | 'archivo' | 'media' | 'reaccion';
     archivoUrl?: string;
     archivoNombre?: string;
     imagenUrl?: string;
@@ -52,6 +52,8 @@ export interface ChatState {
     agregarMensajeSocket: (mensaje: ChatMessage) => void;
     reaccionarAMensajeEnStore: (mensajeId: string, emoji: string) => Promise<void>;
     subirImagenYObtenerUrl: (file: File) => Promise<ImagenSubida | null>;
+    actualizarMensajeReaccion: (mensajeActualizado: ChatMessage) => void;
+    agregarArchivoGeneral: (formData: FormData) => Promise<ChatMessage>;
+    agregarArchivoMedia: (formData: FormData) => Promise<ChatMessage>;
     limpiarMensajes: () => void;
-    actualizarMensajeReaccion: (mensajeActualizado: ChatMessage) => void; // 👈 Agregado
 }

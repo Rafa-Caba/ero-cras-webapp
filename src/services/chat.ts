@@ -36,12 +36,23 @@ export const subirImagenChat = async (file: File): Promise<{ imagenUrl: string; 
 };
 
 // PATCH: Reaccionar a mensaje
-export const reaccionarAMensajeOld = async (mensajeId: string, emoji: string, usuarioId: string): Promise<ChatMessage> => {
-    const { data } = await api.patch<{ mensaje: ChatMessage }>(`/chat/${mensajeId}/reaccion`, { emoji, usuarioId });
-    return data.mensaje;
-};
-
 export const reaccionarAMensaje = async (mensajeId: string, emoji: string): Promise<ChatMessageResponse> => {
     const { data } = await api.patch<ChatMessageResponse>(`/chat/${mensajeId}/reaccion`, { emoji });
     return data;
+};
+
+// Subir archivo general (PDF, DOCX, etc.)
+export const enviarMensajeArchivoGeneral = async (formData: FormData): Promise<ChatMessageResponse> => {
+    const res = await api.post<ChatMessageResponse>('/chat/upload-file', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return res.data;
+};
+
+// Subir archivo de media (audio/video)
+export const enviarMensajeMedia = async (formData: FormData): Promise<ChatMessageResponse> => {
+    const res = await api.post<ChatMessageResponse>('/chat/upload-media', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return res.data;
 };

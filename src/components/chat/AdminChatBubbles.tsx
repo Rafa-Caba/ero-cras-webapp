@@ -5,9 +5,10 @@ interface Props {
     mensajesAgrupados: Record<string, ChatMessage[]>;
     esMensajePropio: (id: string) => boolean;
     setImagenAmpliada: (url: string) => void;
+    onPreviewClick: (tipo: 'imagen' | 'archivo' | 'media', url: string, nombre?: string) => void;
 }
 
-export const AdminChatBubbles = ({ mensajesAgrupados, esMensajePropio, setImagenAmpliada }: Props) => {
+export const AdminChatBubbles = ({ mensajesAgrupados, esMensajePropio, setImagenAmpliada, onPreviewClick }: Props) => {
     const fechas = Object.entries(mensajesAgrupados);
 
     if (fechas.length === 0) {
@@ -37,6 +38,7 @@ export const AdminChatBubbles = ({ mensajesAgrupados, esMensajePropio, setImagen
                             esPropio={esMensajePropio(msg.autor._id)}
                             onImagenClick={setImagenAmpliada}
                             onAvatarClick={setImagenAmpliada}
+                            onPreviewClick={onPreviewClick}
                         />
                     ))}
                 </div>

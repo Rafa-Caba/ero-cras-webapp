@@ -11,6 +11,8 @@ import { useChatStore } from '../../store/admin/useChatStore';
 import { EmojiPickerModal } from './EmojiPickerModal';
 import { useAuth } from '../../hooks/useAuth';
 import { EmojiFloat } from './EmojiFloat';
+import { obtenerIconoArchivo } from '../../utils/functionsFilesNames';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface Props {
     msg: ChatMessage;
@@ -18,9 +20,10 @@ interface Props {
     esPropio: boolean;
     onImagenClick: (url: string) => void;
     onAvatarClick: (url: string) => void;
+    onPreviewClick: (tipo: 'imagen' | 'archivo' | 'media', url: string, nombre?: string) => void;
 }
 
-export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarClick }: Props) => {
+export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarClick, onPreviewClick }: Props) => {
     const { user } = useAuth();
     const [showEmojiModal, setShowEmojiModal] = useState(false);
     const [emojiFlotante, setEmojiFlotante] = useState<string | null>(null);
@@ -40,9 +43,19 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
     };
 
     return (
-        <div className={`w-75 d-flex mb-2 ${esPropio ? 'justify-content-end ms-auto' : 'justify-content-start me-auto'}`}>
-            <div className={`flex items-end gap-2 rounded ${esPropio ? 'flex-row-reverse' : ''}`}>
-                <div className='d-flex flex-row mb-4 gap-2'>
+        <div
+            className={`
+                w-75 d-flex mb-2 
+                ${esPropio ? 'justify-content-end ms-auto' : 'justify-content-start me-auto'}
+            `}
+        >
+            <div
+                className={`
+                    flex items-end gap-2 rounded 
+                    ${esPropio ? 'flex-row-reverse' : ''}
+                `}
+            >
+                <div className={`d-flex flex-row mb-4 gap-2`}>
                     <Button
                         variant="link"
                         className={`p-0 rounded border-0 align-self-start ${esPropio ? 'order-2' : 'order-1'}`}
@@ -76,17 +89,17 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
                             <div
                                 className={`
                                     p-3 transition-all duration-200 shadow-md rounded
-                                    ${esPropio ? 'text-end ms-auto chat_sender' : 'text-start me-auto chat_receiver'}
+                                    ${esPropio ? 'text-end ms-auto chat-sender-container' : 'text-start me-auto chat-receiver-container'}
                                 `}
                             >
                                 {!esMismoAutor && (
                                     <div className="text-xs text-gray-500 mb-1 fw-bold">
-                                        <p className='chat-user-titulo'>{formatearNombre(msg.autor.nombre)}</p>
+                                        <p className='chat-user-titulo chat-text-color'>{formatearNombre(msg.autor.nombre)}</p>
                                         {/* (@{msg.autor.username}) */}
                                     </div>
                                 )}
 
-                                <div className={`mensaje-burbuja ${esPropio ? 'text-end' : 'text-start'}`}>
+                                <div className={`mensaje-burbuja chat-text-color ${esPropio ? 'text-end' : 'text-start'}`}>
                                     {msg.tipo === 'imagen' && (
                                         <>
                                             {msg.imagenUrl && (
@@ -109,10 +122,53 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
                                                     </Figure>
                                                 </Button>
                                             )}
-                                            {Array.isArray(msg.contenido?.content) && msg.contenido.content.length > 0 && (
-                                                <TiptapChatViewer content={msg.contenido} />
-                                            )}
                                         </>
+                                    )}
+
+                                    {msg.tipo === 'archivo' && msg.archivoUrl && (
+                                        <Button
+                                            variant="link"
+                                            className="p-0 border-0"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                onPreviewClick('archivo', msg.archivoUrl!, msg.archivoNombre);
+                                            }}
+                                        >
+                                            <div className="archivo-msg d-flex flex-column align-items-start gap-1">
+                                                <p className="mb-1 fw-semibold chat-text-color d-flex align-items-center gap-2">
+                                                    <FontAwesomeIcon icon={obtenerIconoArchivo(msg.archivoNombre || '')} size="lg" />
+                                                    {msg.archivoNombre}
+                                                </p>
+                                                <span className="btn btn-outline-primary-theme-color btn-sm rounded-pill">Ver archivo</span>
+                                            </div>
+                                        </Button>
+                                    )}
+
+                                    {msg.tipo === 'media' && msg.archivoUrl && (
+                                        <Button
+                                            variant="link"
+                                            className="p-0 border-0"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation(); // 👈 esto evita que llegue a listeners externos
+                                                onPreviewClick('archivo', msg.archivoUrl!, msg.archivoNombre);
+                                            }}
+                                        >
+                                            <div className="media-msg d-flex flex-column align-items-start gap-1">
+                                                <p className="mb-1 fw-semibold chat-text-color d-flex align-items-center gap-2">
+                                                    <FontAwesomeIcon icon={obtenerIconoArchivo(msg.archivoNombre || '')} size="lg" />
+                                                    {msg.archivoNombre}
+                                                </p>
+                                                <span className="btn btn-outline-primary-theme-color btn-sm rounded-pill">Reproducir</span>
+                                            </div>
+                                        </Button>
+                                    )}
+
+                                    {Array.isArray(msg.contenido?.content) && msg.contenido.content.length > 0 && (
+                                        <div className='chat-text-color'>
+                                            <TiptapChatViewer content={msg.contenido} />
+                                        </div>
                                     )}
 
                                     {msg.tipo === 'texto' && (
@@ -138,8 +194,8 @@ export const ChatBubble = ({ msg, anterior, esPropio, onImagenClick, onAvatarCli
                                     )}
                                 </div>
 
-                                <div className="text-[10px] text-gray-400 text-right mt-1">
-                                    <p className='chat-user-fecha'>
+                                <div className="text-[10px] text-right mt-1">
+                                    <p className='chat-user-fecha chat-text-color'>
                                         {format(parseISO(msg.createdAt), 'HH:mm', { locale: es })} hrs
                                     </p>
                                 </div>

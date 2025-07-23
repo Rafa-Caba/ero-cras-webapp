@@ -152,17 +152,6 @@ select:disabled {
     opacity: 0.6;
 }
 
-.btn-outline-morado {
-    color: #7d2181;
-    border-color: #7d2181;
-    background-color: transparent;
-}
-
-.btn-outline-morado:hover {
-    background-color: #7d2181;
-    color: white;
-}
-
 // ===================
 // Table
 // ===================
@@ -248,59 +237,13 @@ select:disabled {
     font-size: 1.2rem;
 }
 
-.canto {
-    background-color: var(--color-header) !important;
-}
-
-// =======================
-// Buttons
-// =======================
-.login_btn,
-.general_btn,
-.destacar_btn {
-    color: #fff;
-    font-size: 1rem;
-    padding: 5px 20px;
-    background: var(--color-btn-general);
-    border-radius: 10px;
-}
-
-.login_btn:hover,
-.general_btn:hover,
-.destacar_btn:hover {
-    background: var(--color-btn-general-hover);
-    color: #fff;
-}
-
-.general_btn:active {
-    background: var(--color-footer);
-    color: #fff;
-}
-
-.general_btn:disabled {
-    opacity: 0.7;
-}
-
-.general_btn:clicked {
+.modal-chat-bg-color {
+    background-color: var(--color-form-color);
     color: var(--color-text-color);
 }
 
-.destacar_btn {
-    font-size: 0.7rem;
-    padding: 4px 15px;
-}
-
-.file_btn {
-    color: #000000;
-    font-size: 1rem;
-    padding: 5px 20px;
-    background: #BDBEBA;
-    border-radius: 10px;
-}
-
-.file_btn:hover {
-    background: #a8a8a8;
-    color: #fff;
+.canto {
+    background-color: var(--color-header) !important;
 }
 
 // =======================

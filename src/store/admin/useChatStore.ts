@@ -6,7 +6,9 @@ import {
     enviarMensajeTexto,
     enviarMensajeArchivo,
     subirImagenChat,
-    reaccionarAMensaje
+    reaccionarAMensaje,
+    enviarMensajeArchivoGeneral,
+    enviarMensajeMedia
 } from '../../services/chat';
 
 export const useChatStore = create<ChatState>()(
@@ -105,6 +107,30 @@ export const useChatStore = create<ChatState>()(
                         msg._id === mensajeActualizado._id ? mensajeActualizado : msg
                     )
                 }));
+            },
+
+            agregarArchivoGeneral: async (formData) => {
+                try {
+                    set({ cargando: true, error: null });
+                    const { mensaje } = await enviarMensajeArchivoGeneral(formData);
+                    set({ cargando: false });
+                    return mensaje;
+                } catch (error: any) {
+                    set({ error: error.message, cargando: false });
+                    throw error;
+                }
+            },
+
+            agregarArchivoMedia: async (formData) => {
+                try {
+                    set({ cargando: true, error: null });
+                    const { mensaje } = await enviarMensajeMedia(formData);
+                    set({ cargando: false });
+                    return mensaje;
+                } catch (error: any) {
+                    set({ error: error.message, cargando: false });
+                    throw error;
+                }
             },
 
             limpiarMensajes: () => set({ mensajes: [] })

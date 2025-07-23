@@ -211,6 +211,7 @@
     margin: 0 0 0.5rem 0;
     font-size: 0.8rem;
     text-align: left !important;
+    color: var(--color-chat-text-color) !important;
 }
 
 @media (min-width: 768px) {
@@ -450,4 +451,25 @@
 .emoji-flotante {
     animation-timing-function: ease-out;
     will-change: transform, opacity;
+}
+
+.archivo-msg p {
+    font-size: 0.95rem;
+}
+
+.media-msg audio,
+.media-msg video {
+    border-radius: 0.5rem;
+}
+
+.chat-receiver-container {
+    background-color: var(--color-chat-receiver-container);
+}
+
+.chat-sender-container {
+    background-color: var(--color-chat-sender-container);
+}
+
+.chat-text-color {
+    color: var(--color-chat-text-color);
 }
