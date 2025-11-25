@@ -6,12 +6,12 @@ import Swal from "sweetalert2";
 import api from "../../api/axios";
 import { useAuth } from "../../hooks/useAuth";
 import { AdminFooter } from "../../components-admin/AdminFooter";
-import type { Usuario } from "../../types";
+import type { User } from "../../types";
 
 interface LoginResponse {
     token: string;
     refreshToken: string;
-    usuario: Usuario;
+    usuario: User;
 }
 
 const AdminLogin = () => {

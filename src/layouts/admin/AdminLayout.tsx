@@ -15,7 +15,7 @@ const AdminLayout = () => {
     return (
         <div className="layout-container m-0 p-0">
             <AdminHeader />
-            <AdminNav />
+            {/* <AdminNav /> */}
 
             <main className="layout-main">
                 <AdminSidebarLeft />

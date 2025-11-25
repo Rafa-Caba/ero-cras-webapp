@@ -121,7 +121,7 @@
 
 .chat-mensajes-container {
     overflow-y: auto;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 500px);
     /* ajusta según tu layout */
     -webkit-overflow-scrolling: touch;
 }

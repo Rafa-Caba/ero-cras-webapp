@@ -57,6 +57,9 @@ export const AdminDashboardPanel = () => {
                         <Link to="/admin/logs-page" className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2">
                             Logs del sitio
                         </Link>
+                        <Link className="btn general_btn mb-2 mb-xxxl-0 py-1 px-3 me-2" to="/?fromAdmin=true">
+                            Página Pública
+                        </Link>
                     </div>
                     {/* <div className='d-flex justify-content-center'>
                         <Link to={`/admin/chat-group`} className="btn general_btn py-1 px-3 me-2">
@@ -70,7 +73,8 @@ export const AdminDashboardPanel = () => {
                         <Image
                             src={imagenInicio.imagenUrl}
                             alt={imagenInicio.titulo}
-                            height={500}
+                            // height={'100%'}
+                            // height={'100%'}
                             width={600}
                             className="imagen-fija-inicio mt-3"
                         />

@@ -4,16 +4,24 @@ import { useNavigate } from 'react-router-dom';
 import { useAvisosStore } from '../../store/admin/useAvisosStore';
 import { TiptapViewer } from '../tiptap-components/TiptapViewer';
 import { emptyEditorContent } from '../../utils/editorDefaults';
+import { useWindowWidth } from '../../hooks/useWindowWidth';
 import { getTextFromTipTapJSON } from '../../utils/handleTextTipTap';
 
 export const AvisosSidebar = () => {
     const navigate = useNavigate();
     const { avisos, fetchAvisos, cargando } = useAvisosStore();
+    const width = useWindowWidth();
+    const breakPoint = width > 780;
     const [avisoActivo, setAvisoActivo] = useState<typeof avisos[0] | null>(null);
-
+    
+    
     useEffect(() => {
-        fetchAvisos(1, 3); // Solo 3 avisos para mostrar en el sidebar
-    }, []);
+        if (breakPoint) {
+            fetchAvisos(1, 3);
+        } else {
+            fetchAvisos(1, 1);
+        }
+    }, [width]);
 
     const modalNavigate = () => {
         setAvisoActivo(null);
@@ -21,7 +29,7 @@ export const AvisosSidebar = () => {
     }
 
     return (
-        <div className="px-2 py-3">
+        <div className={ breakPoint ? "px-2 py-3" : "px-2 py-1" }>
             <h4 className="text-center fw-bold mb-3">📰 Avisos</h4>
 
             {cargando ? (
@@ -31,7 +39,7 @@ export const AvisosSidebar = () => {
             ) : (
                 avisos
                     .filter(aviso => aviso.publicado)
-                    .slice(0, 3)
+                    .slice(0, breakPoint ? 3 : 1)
                     .map((aviso) => (
                         <Card
                             key={aviso._id}
@@ -50,13 +58,16 @@ export const AvisosSidebar = () => {
                                     {new Date(aviso.createdAt!).toLocaleDateString()}
                                 </Card.Text>
 
-                                <Card.Text className="small text-secondary mb-1">
-                                    {getTextFromTipTapJSON(aviso.contenido, 80)}...
-                                </Card.Text>
+                                { width > 780 && 
+                                    <Card.Text className="small text-secondary mb-1">
+                                        {getTextFromTipTapJSON(aviso.contenido, 80)}...
+                                    </Card.Text>
+                                }
 
                                 <Button
                                     variant="link"
                                     className="p-0 small text-decoration-none text-theme-color"
+                                    style={{ color: 'purple', fontWeight: 'bold' }}
                                     onClick={() => setAvisoActivo(aviso)}
                                 >
                                     Ver más →

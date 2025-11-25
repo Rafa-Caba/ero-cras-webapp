@@ -1,6 +1,6 @@
 import type { ThemeGroup } from "./themeGroups";
 
-export interface Usuario {
+export interface User {
     _id: string;
     nombre: string;
     username: string;
@@ -25,7 +25,7 @@ export interface UsuarioForm {
 }
 
 export interface UsuariosResponse {
-    usuarios: Usuario[];
+    usuarios: User[];
     paginaActual: number;
     totalPaginas: number;
     totalUsuarios: number;
@@ -37,12 +37,12 @@ export interface DeleteResponse {
 
 export interface UpdateResponse {
     mensaje: string;
-    usuarioActualizado: Usuario;
+    usuarioActualizado: User;
 }
 
 export interface UsuariosState {
-    usuarios: Usuario[];
-    usuarioSeleccionado: Usuario | null;
+    usuarios: User[];
+    usuarioSeleccionado: User | null;
     cargando: boolean;
     error: string | null;
     paginaActual: number;
@@ -51,11 +51,11 @@ export interface UsuariosState {
 
     // Acciones
     fetchUsuarios: (pagina?: number, limite?: number) => Promise<void>;
-    fetchUsuarioPorId: (id: string) => Promise<Usuario>;
+    fetchUsuarioPorId: (id: string) => Promise<User>;
     crearNuevoUsuario: (formData: FormData) => Promise<void>;
     actualizarUsuarioExistente: (id: string, formData: FormData) => Promise<void>;
-    actualizarUsuarioLogueado: (id: string, data: any) => Promise<Usuario>;
-    actualizarTemaPersonal: (id: string, themeId: string) => Promise<Usuario>;
+    actualizarUsuarioLogueado: (id: string, data: any) => Promise<User>;
+    actualizarTemaPersonal: (id: string, themeId: string) => Promise<User>;
     eliminarUsuarioPorId: (id: string) => Promise<void>;
     buscarUsuariosPorTexto: (q: string) => Promise<void>;
     setPaginaActual: (pagina: number) => void;

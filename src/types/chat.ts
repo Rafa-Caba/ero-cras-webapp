@@ -1,5 +1,5 @@
 import type { JSONContent } from '@tiptap/react';
-import type { Usuario } from './usuarios';
+import type { User } from './usuarios';
 
 export interface ReaccionMensaje {
     emoji: string;
@@ -8,7 +8,7 @@ export interface ReaccionMensaje {
 
 export interface ChatMessage {
     _id: string;
-    autor: Usuario;
+    autor: User;
     contenido: JSONContent;
     tipo: 'texto' | 'imagen' | 'archivo' | 'media' | 'reaccion';
     archivoUrl?: string;
@@ -20,7 +20,7 @@ export interface ChatMessage {
 }
 
 export interface NuevoMensaje {
-    autor: Usuario;
+    autor: User;
     contenido: JSONContent;
     tipo: 'texto' | 'imagen' | 'archivo' | 'media' | 'reaccion';
     archivoUrl?: string;

@@ -1,8 +1,8 @@
-import type { Usuario } from "./usuarios";
+import type { User } from "./usuarios";
 
 export interface CreateUserResponse {
     mensaje: string;
-    usuario: Usuario;
+    usuario: User;
 }
 
 export interface UpdateResponse {

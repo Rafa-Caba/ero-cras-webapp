@@ -9,7 +9,7 @@ import {
     buscarUsuarios,
     updateTemaPersonal
 } from '../../services/usuarios';
-import type { Usuario, UsuariosState } from '../../types';
+import type { User, UsuariosState } from '../../types';
 
 export const useUsuariosStore = create<UsuariosState>()(
     persist(
@@ -104,7 +104,7 @@ export const useUsuariosStore = create<UsuariosState>()(
                 }
             },
 
-            actualizarTemaPersonal: async (id: string, themeId: string): Promise<Usuario> => {
+            actualizarTemaPersonal: async (id: string, themeId: string): Promise<User> => {
                 try {
                     const usuarioActualizado = await updateTemaPersonal(id, themeId);
                     set(state => ({

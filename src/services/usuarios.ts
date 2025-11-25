@@ -1,13 +1,13 @@
 import api from "../api/axios";
-import type { DeleteResponse, UpdateResponse, Usuario, UsuariosResponse } from "../types";
+import type { DeleteResponse, UpdateResponse, User, UsuariosResponse } from "../types";
 
 export const obtenerUsuarios = async (pagina = 1, limit = 5): Promise<UsuariosResponse> => {
     const res = await api.get<UsuariosResponse>(`/usuarios?page=${pagina}&limit=${limit}`);
     return res.data;
 };
 
-export const obtenerUsuarioPorId = async (id: string): Promise<Usuario> => {
-    const res = await api.get<Usuario>(`/usuarios/${id}`);
+export const obtenerUsuarioPorId = async (id: string): Promise<User> => {
+    const res = await api.get<User>(`/usuarios/${id}`);
     return res.data;
 };
 
@@ -35,17 +35,17 @@ export const crearUsuario = async (formData: FormData): Promise<UpdateResponse> 
     return res.data;
 };
 
-export const buscarUsuarios = async (q: string): Promise<Usuario[]> => {
-    const res = await api.get<Usuario[]>(`/usuarios/buscar?q=${encodeURIComponent(q)}`);
+export const buscarUsuarios = async (q: string): Promise<User[]> => {
+    const res = await api.get<User[]>(`/usuarios/buscar?q=${encodeURIComponent(q)}`);
     return res.data;
 };
 
-export const updateUserData = async (id: string, data: Partial<Usuario>) => {
+export const updateUserData = async (id: string, data: Partial<User>) => {
     const res = await api.put(`/usuarios/${id}`, data);
     return res.data.usuarioActualizado;
 };
 
-export const updateTemaPersonal = async (id: string, themePersonal: string): Promise<Usuario> => {
-    const res = await api.put<Usuario>(`/usuarios/usuario/tema/${id}`, { themePersonal });
+export const updateTemaPersonal = async (id: string, themePersonal: string): Promise<User> => {
+    const res = await api.put<User>(`/usuarios/usuario/tema/${id}`, { themePersonal });
     return res.data;
 };

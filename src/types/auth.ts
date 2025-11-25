@@ -1,8 +1,9 @@
-import type { Usuario } from "./usuarios";
+import type { User } from "./usuarios";
 
 export interface LoginResponse {
     token: string;
-    usuario: Usuario;
+    user: User;
+    role: 'ADMIN' | 'EDITOR' | 'USER' // Types of users for this choir app.
 }
 
 export interface LoginForm {
@@ -24,13 +25,13 @@ export interface AuthUsuario {
 }
 
 export interface AuthContextType {
-    user: Usuario | null;
+    user: User | null;
     token: string | null;
     isAuthenticated: boolean;
     loading: boolean;
 
     // Functions
-    login: (userData: Usuario, token: string, refreshToken: string) => void;
+    login: (userData: User, token: string, refreshToken: string) => void;
     logout: () => void;
-    updateUser: (updatedUser: Usuario) => void;
+    updateUser: (updatedUser: User) => void;
 }

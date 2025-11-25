@@ -1,13 +1,13 @@
 import { createContext, useState, useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import type { AuthContextType, Usuario } from '../types';
+import type { AuthContextType, User } from '../types';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const navigate = useNavigate();
-    const [user, setUser] = useState<Usuario | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
     const [loading, setLoading] = useState(true);
 
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (savedUser) setUser(JSON.parse(savedUser));
     }, []);
 
-    const login = (userData: Usuario, accessToken: string, refreshToken: string) => {
+    const login = (userData: User, accessToken: string, refreshToken: string) => {
         setUser(userData);
         setToken(accessToken);
         localStorage.setItem('token', accessToken);
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         navigate('/admin');
     };
 
-    const updateUser = (updatedUser: Usuario) => {
+    const updateUser = (updatedUser: User) => {
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
     };

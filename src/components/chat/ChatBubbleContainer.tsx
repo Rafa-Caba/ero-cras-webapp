@@ -33,9 +33,15 @@ export const ChatBubbleContainer = ({
     return (
         <div
             ref={mensajesContainerRef as React.RefObject<HTMLDivElement>}
-            className="chat-mensajes-container chat-scroll-container no_scrollbar chat-container-color rounded p-2 p-md-3 mb-1 mb-lg-2 border overflow-y-auto
-                        min-h-[200px] sm:min-h-[250px] md:min-h-[300px] lg:min-h-[350px]
-                        max-h-[40vh] sm:max-h-[50vh] md:max-h-[60vh] lg:max-h-[55vh]"
+            className="
+                chat-mensajes-container chat-scroll-container no_scrollbar chat-container-color 
+                rounded p-2 p-md-3 mb-1 mb-lg-2 border overflow-y-auto
+            "
+            style={{
+                minHeight: '400px',
+                maxHeight: '62vh', 
+                overflowY: 'auto', 
+            }}
         >
             {noHayMasMensajes && (
                 <p className="text-center text-theme-color small">No more messages to load.</p>
