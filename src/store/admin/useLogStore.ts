@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getLogs, getUserLogs } from '../../services/admin/log'; // Assume getUserLogs service exists
+import { getLogs } from '../../services/admin/log';
 import type { Log } from '../../types/log';
 
 interface LogState {

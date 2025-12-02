@@ -24,6 +24,8 @@ export const AdminRegister = () => {
         if (name === 'file' && files && files[0]) {
             const selectedFile = files[0];
             setFile(selectedFile);
+            console.log({ file });
+
             setPreviewUrl(URL.createObjectURL(selectedFile));
         } else {
             setFormData({ ...formData, [name]: value });
