@@ -1,50 +1,40 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { obtenerSettings, actualizarSettings } from '../../services/settings';
-import type { Setting } from '../../types/settings';
+import { getAdminSettings, updateAdminSettings } from '../../services/admin/settings';
+import type { AppSettings } from '../../types/settings';
 
-interface SettingsState {
-    settings: Setting | null;
-    cargando: boolean;
-    error: string | null;
+interface AdminSettingsState {
+    settings: AppSettings | null;
+    loading: boolean;
 
     fetchSettings: () => Promise<void>;
-    actualizarSettingsExistente: (id: string, formData: Partial<Setting>) => Promise<void>;
+    updateSettings: (formData: FormData) => Promise<void>;
 }
 
-export const useSettingsStore = create<SettingsState>()(
-    persist(
-        (set) => ({
-            settings: null,
-            cargando: false,
-            error: null,
+export const useAdminSettingsStore = create<AdminSettingsState>((set) => ({
+    settings: null,
+    loading: false,
 
-            fetchSettings: async () => {
-                try {
-                    set({ cargando: true, error: null });
-                    const data = await obtenerSettings();
-                    set({ settings: data, cargando: false });
-                } catch (error: any) {
-                    set({ error: error.message, cargando: false });
-                }
-            },
-
-            actualizarSettingsExistente: async (id, formData) => {
-                try {
-                    set({ cargando: true, error: null });
-                    const res = await actualizarSettings(id, formData);
-                    if (res.settingActualizado) {
-                        set({ settings: res.settingActualizado, cargando: false });
-                    } else {
-                        set({ cargando: false });
-                    }
-                } catch (error: any) {
-                    set({ error: error.message, cargando: false });
-                }
-            },
-        }),
-        {
-            name: 'settings-store', // clave para persistencia local
+    fetchSettings: async () => {
+        set({ loading: true });
+        try {
+            const data = await getAdminSettings();
+            set({ settings: data });
+        } catch (e) {
+            console.error("Failed to fetch settings", e);
+        } finally {
+            set({ loading: false });
         }
-    )
-);
+    },
+
+    updateSettings: async (formData) => {
+        set({ loading: true });
+        try {
+            const updated = await updateAdminSettings(formData);
+            set({ settings: updated });
+        } catch (e) {
+            throw e;
+        } finally {
+            set({ loading: false });
+        }
+    }
+}));

@@ -1,52 +1,50 @@
-// Corregido el tipo para aceptar HTMLDivElement | null en la ref
 import { Spinner } from 'react-bootstrap';
 import { AdminChatBubbles } from './AdminChatBubbles';
-import type { ChatMessage } from '../../types';
-import { obtenerEtiquetaFecha } from '../../utils/chat/obtenerEtiquetaFecha';
+import type { ChatMessage } from '../../types/chat';
+import { getDateTag } from '../../utils/chat/getDateTag';
 
 interface Props {
-    mensajes: ChatMessage[];
-    mensajesContainerRef: React.RefObject<HTMLDivElement | null>; // Aceptamos null
-    cargandoMas: boolean;
-    noHayMasMensajes: boolean;
-    esMensajePropio: (autorId: string) => boolean;
-    setImagenAmpliada: (url: string | null) => void;
-    onPreviewClick: (tipo: 'imagen' | 'archivo' | 'media', url: string, nombre?: string) => void;
+    messages: ChatMessage[];
+    messagesContainerRef: React.RefObject<HTMLDivElement | null>;
+    isLoadingMore: boolean;
+    hasMoreMessages: boolean; // 🆕 New Prop
+    isOwnMessage: (authorId: string) => boolean;
+    onImageClick: (url: string) => void;
+    onPreviewClick: (type: 'image' | 'file' | 'audio' | 'video', url: string, name?: string) => void;
 }
 
 export const ChatBubbleContainer = ({
-    mensajes,
-    mensajesContainerRef,
-    cargandoMas,
-    noHayMasMensajes,
-    esMensajePropio,
-    setImagenAmpliada,
+    messages,
+    messagesContainerRef,
+    isLoadingMore,
+    hasMoreMessages,
+    isOwnMessage,
+    onImageClick,
     onPreviewClick
 }: Props) => {
-    const mensajesAgrupados = mensajes.reduce((acc, mensaje) => {
-        const etiqueta = obtenerEtiquetaFecha(mensaje.createdAt);
-        if (!acc[etiqueta]) acc[etiqueta] = [];
-        acc[etiqueta].push(mensaje);
+    const groupedMessages = messages.reduce((acc, message) => {
+        const label = getDateTag(message.createdAt);
+        if (!acc[label]) acc[label] = [];
+        acc[label].push(message);
         return acc;
     }, {} as Record<string, ChatMessage[]>);
 
     return (
         <div
-            ref={mensajesContainerRef as React.RefObject<HTMLDivElement>}
-            className="
-                chat-mensajes-container chat-scroll-container no_scrollbar chat-container-color 
-                rounded p-2 p-md-3 mb-1 mb-lg-2 border overflow-y-auto
-            "
-            style={{
-                minHeight: '400px',
-                maxHeight: '62vh', 
-                overflowY: 'auto', 
-            }}
+            ref={messagesContainerRef as React.RefObject<HTMLDivElement>}
+            className="chat-mensajes-container chat-scroll-container no_scrollbar chat-container-color rounded p-2 p-md-3 mb-1 mb-lg-2 border overflow-y-auto"
+            style={{ minHeight: '400px', maxHeight: '62vh', overflowY: 'auto' }}
         >
-            {noHayMasMensajes && (
-                <p className="text-center text-theme-color small">No more messages to load.</p>
+            {/* 🆕 Logic for End of Chat */}
+            {!hasMoreMessages && messages.length > 0 && (
+                <div className="text-center my-3">
+                    <span className="badge bg-secondary opacity-50 fw-light" style={{ fontSize: '0.7rem' }}>
+                        Inicio de la conversación
+                    </span>
+                </div>
             )}
-            {cargandoMas && (
+
+            {isLoadingMore && (
                 <div className="text-center text-theme-color small mb-2">
                     <Spinner animation="border" size="sm" className="me-2" />
                     Cargando mensajes anteriores...
@@ -54,9 +52,9 @@ export const ChatBubbleContainer = ({
             )}
 
             <AdminChatBubbles
-                mensajesAgrupados={mensajesAgrupados}
-                esMensajePropio={esMensajePropio}
-                setImagenAmpliada={setImagenAmpliada}
+                groupedMessages={groupedMessages}
+                isOwnMessage={isOwnMessage}
+                setExpandedImage={onImageClick}
                 onPreviewClick={onPreviewClick}
             />
         </div>

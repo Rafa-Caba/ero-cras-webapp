@@ -1,262 +1,214 @@
 import { useEffect, useRef, useState } from 'react';
 import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import type { JSONContent } from '@tiptap/react';
+
 import { useChatStore } from '../../store/admin/useChatStore';
-import { useAuth } from '../../hooks/useAuth';
-import type { ChatMessage, NuevoMensaje } from '../../types';
-import { emptyEditorContent } from '../../utils/editorDefaults';
-import { ChatImageModal } from './index';
-import { socket } from '../../services/socket';
-import { scrollChatToBottom } from '../../utils';
-import { ChatFilePreviewModal } from './ChatFilePreviewModal';
+import { useAuth } from '../../context/AuthContext';
+
 import { ChatBubbleContainer } from './ChatBubbleContainer';
 import { ChatPreviewContainer } from './ChatPreviewContainer';
 import { ChatInputArea } from './ChatInputArea';
-import Swal from 'sweetalert2';
+import { ChatImageModal } from './ChatImageModal';
+import { ChatFilePreviewModal } from './ChatFilePreviewModal';
+import { ChatDirectory } from './ChatDirectory';
+
+import { scrollChatToBottom } from '../../utils';
+
+const getEmptyContent = (): JSONContent => ({
+    type: 'doc',
+    content: [{ type: 'paragraph' }]
+});
 
 export const AdminChatGroup = () => {
-    const { user } = useAuth();
+    const { user, token } = useAuth();
 
     const {
-        mensajes,
-        noHayMasMensajes,
-        fetchMensajes,
-        agregarMensajeArchivo,
-        agregarMensajeSocket,
-        agregarMensajeTexto,
-        fetchMensajesAnteriores,
-        actualizarMensajeReaccion,
-        agregarArchivoGeneral,
-        agregarArchivoMedia,
-        cargando,
+        messages,
+        isSending,
+        hasMoreMessages,
+        connect,
+        sendMessage,
+        loadHistory,
+        loadMoreMessages,
+        fetchDirectory,
+        allUsers,
+        onlineUsers
     } = useChatStore();
 
-    const [mensaje, setMensaje] = useState<JSONContent>(emptyEditorContent);
-    const [imagenAmpliada, setImagenAmpliada] = useState<string | null>(null);
-    const [cargandoMas, setCargandoMas] = useState(false);
+    // Initialize with fresh JSON object
+    const [messageContent, setMessageContent] = useState<JSONContent>(getEmptyContent());
 
-    const [archivoSeleccionado, setArchivoSeleccionado] = useState<File | null>(null);
-    const [archivoTipo, setArchivoTipo] = useState<'imagen' | 'archivo' | 'media' | null>(null);
+    const [expandedImage, setExpandedImage] = useState<string | null>(null);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    const [previewTipo, setPreviewTipo] = useState<'imagen' | 'archivo' | 'media' | null>(null);
+    // File & Preview States
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [fileType, setFileType] = useState<'image' | 'file' | 'audio' | 'video' | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [previewNombre, setPreviewNombre] = useState<string | undefined>();
+    const [previewName, setPreviewName] = useState<string | undefined>();
+    const [previewType, setPreviewType] = useState<'image' | 'file' | 'audio' | 'video' | null>(null);
 
-    const [previewMensajeTipo, setPreviewMensajeTipo] = useState<'imagen' | 'archivo' | 'media' | null>(null);
-    const [previewMensajeUrl, setPreviewMensajeUrl] = useState<string | null>(null);
-    const [previewMensajeNombre, setPreviewMensajeNombre] = useState<string | undefined>();
+    // Modal Preview States
+    const [modalPreviewType, setModalPreviewType] = useState<'image' | 'file' | 'audio' | 'video' | null>(null);
+    const [modalPreviewUrl, setModalPreviewUrl] = useState<string | null>(null);
+    const [modalPreviewName, setModalPreviewName] = useState<string | undefined>();
 
     const editorRef = useRef<{ clear: () => void }>(null);
-    const mensajesContainerRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const lastMessageIdRef = useRef<string | null>(null);
 
     useEffect(() => {
-        fetchMensajes();
-    }, []);
-
-    useEffect(() => {
-        if (mensajes.length >= 5) {
-            scrollChatToBottom(mensajesContainerRef.current);
+        if (token && user) {
+            connect(token, user);
+            loadHistory();
+            fetchDirectory();
         }
-    }, [mensajes]);
+    }, [token, user]);
 
     useEffect(() => {
-        const container = mensajesContainerRef.current;
+        if (messages.length === 0) return;
+        const currentLastId = messages[messages.length - 1].id;
+
+        if (currentLastId !== lastMessageIdRef.current) {
+            lastMessageIdRef.current = currentLastId;
+            scrollChatToBottom(messagesContainerRef.current);
+        }
+    }, [messages]);
+
+    useEffect(() => {
+        const container = messagesContainerRef.current;
         if (!container) return;
 
         const handleScroll = async () => {
-            if (container.scrollTop === 0 && !cargandoMas && !noHayMasMensajes) {
-                setCargandoMas(true);
-                const scrollAlturaAntes = container.scrollHeight;
+            if (container.scrollTop === 0 && !isLoadingMore && messages.length > 0 && hasMoreMessages) {
+                setIsLoadingMore(true);
+                const scrollHeightBefore = container.scrollHeight;
 
-                await fetchMensajesAnteriores();
+                await loadMoreMessages();
 
                 requestAnimationFrame(() => {
-                    const scrollAlturaDespues = container.scrollHeight;
-                    const diferencia = scrollAlturaDespues - scrollAlturaAntes;
-                    container.scrollTop = diferencia;
-                    setCargandoMas(false);
+                    const scrollHeightAfter = container.scrollHeight;
+                    const heightDifference = scrollHeightAfter - scrollHeightBefore;
+                    if (heightDifference > 0) {
+                        container.scrollTop = heightDifference;
+                    }
+                    setIsLoadingMore(false);
                 });
             }
         };
 
         container.addEventListener('scroll', handleScroll);
         return () => container.removeEventListener('scroll', handleScroll);
-    }, [fetchMensajesAnteriores, cargandoMas]);
+    }, [isLoadingMore, messages.length, hasMoreMessages]);
 
-    useEffect(() => {
-        const handler = (nuevoMensaje: ChatMessage) => {
-            agregarMensajeSocket(nuevoMensaje);
-        };
+    const isOwnMessage = (authorId: string) => authorId === user?.id;
 
-        socket.on('nuevo-mensaje', handler);
+    const handleSendMessage = async () => {
+        // Validation: deeply check for any text content
+        const hasText = messageContent?.content?.some((block: any) =>
+            block.content?.some((child: any) => child.text?.trim())
+        );
 
-        return () => {
-            socket.off('nuevo-mensaje', handler);
-        };
-    }, []);
-
-    useEffect(() => {
-        const handler = (mensajeActualizado: ChatMessage) => {
-            actualizarMensajeReaccion(mensajeActualizado);
-
-            const tieneContenido =
-                mensajeActualizado.contenido?.content?.length ||
-                mensajeActualizado.archivoUrl ||
-                mensajeActualizado.imagenUrl;
-
-            if (!tieneContenido) return;
-
-            scrollChatToBottom(mensajesContainerRef.current);
-        };
-
-        socket.on('mensaje-actualizado', handler);
-
-        return () => {
-            socket.off('mensaje-actualizado', handler);
-        };
-    }, []);
-
-    const enviarMensaje = async () => {
-        if ((!mensaje || !mensaje.content?.length) && !archivoSeleccionado) return;
+        if (!hasText && !selectedFile) return;
         if (!user) return;
 
-        const formData = new FormData();
-        formData.append('autor', user._id);
-        formData.append('creadoPor', user._id);
-
         try {
-            if (archivoSeleccionado) {
-                if (archivoTipo === 'imagen') {
-                    formData.append('imagen', archivoSeleccionado);
-                    formData.append('contenido', JSON.stringify(mensaje));
-                    await agregarMensajeArchivo(formData);
-                } else if (archivoTipo === 'archivo') {
-                    formData.append('archivo', archivoSeleccionado);
-                    await agregarArchivoGeneral(formData);
-                } else if (archivoTipo === 'media') {
-                    formData.append('media', archivoSeleccionado);
-                    await agregarArchivoMedia(formData);
-                }
-            } else {
-                const nuevoMensaje: NuevoMensaje = {
-                    autor: user,
-                    contenido: mensaje,
-                    tipo: 'texto',
-                };
-                await agregarMensajeTexto(nuevoMensaje);
-            }
+            // Pass the raw JSON object directly. The Store now handles it correctly.
+            await sendMessage(
+                messageContent,
+                selectedFile || undefined,
+                fileType || undefined
+            );
 
             editorRef.current?.clear();
-            setMensaje(emptyEditorContent);
-            setArchivoSeleccionado(null);
-            setArchivoTipo(null);
+            setMessageContent(getEmptyContent()); // Reset to NEW object
+            setSelectedFile(null);
+            setFileType(null);
             setPreviewUrl(null);
-            setPreviewNombre(undefined);
-            setPreviewTipo(null);
+            setPreviewName(undefined);
+            setPreviewType(null);
         } catch (error) {
-            console.error('Error al enviar mensaje:', error);
+            console.error('Error sending message:', error);
+            Swal.fire('Error', 'Failed to send message', 'error');
         }
     };
 
-    const esMensajePropio = (autorId: string) => autorId === user?._id;
-
-    const handleArchivoSeleccionado = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
         const extension = file.name.split('.').pop()?.toLowerCase() || '';
-        const extensionesImagen = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-        const extensionesArchivo = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx', 'txt', 'zip', 'rar'];
-        const extensionesMedia = ['mp3', 'wav', 'mp4', 'mov', 'webm'];
+        let type: any = null;
 
-        let tipo: 'imagen' | 'archivo' | 'media' | null = null;
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) type = 'image';
+        else if (['mp3', 'wav', 'ogg', 'm4a'].includes(extension)) type = 'audio';
+        else if (['mp4', 'mov', 'webm', 'avi'].includes(extension)) type = 'video';
+        else type = 'file';
 
-        if (extensionesImagen.includes(extension)) tipo = 'imagen';
-        else if (extensionesArchivo.includes(extension)) tipo = 'archivo';
-        else if (extensionesMedia.includes(extension)) tipo = 'media';
-        else {
-            Swal.fire('Alerta!', 'Tipo de archivo no soportado.', 'error');
-            return;
-        }
-
-        setArchivoSeleccionado(file);
-        setArchivoTipo(tipo);
+        setSelectedFile(file);
+        setFileType(type);
         setPreviewUrl(URL.createObjectURL(file));
-        setPreviewNombre(file.name);
-        setPreviewTipo(tipo);
+        setPreviewName(file.name);
+        setPreviewType(type);
     };
 
-    const handleClickAdjuntar = (e?: React.MouseEvent) => {
-        if (e?.defaultPrevented) return;
+    const handleAttachClick = () => fileInputRef.current?.click();
 
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-            fileInputRef.current.click();
-        }
-    };
-
-    const handlePreviewClick = (tipo: 'imagen' | 'archivo' | 'media', url: string, nombre?: string) => {
-        setPreviewMensajeTipo(tipo);
-        setPreviewMensajeUrl(url);
-        setPreviewMensajeNombre(nombre);
+    const handlePreviewClick = (type: any, url: string, name?: string) => {
+        setModalPreviewType(type);
+        setModalPreviewUrl(url);
+        setModalPreviewName(name);
     };
 
     return (
         <div className="container p-0 pt-md-2 my-0">
             <Card className="shadow p-2 p-lg-3 chat-container no_srollbar">
                 <div className="botones chat-container-color px-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between align-items-center text-center mb-3">
-                    <h3 className="mb-1">💬 Chat de Grupo</h3>
-                    <Link to="/admin" className="btn general_btn fw-bolder px-3 m-2">Ir al Inicio</Link>
+                    <div className="d-flex align-items-center justify-content-center my-2">
+                        <h3 className="mb-1">💬 Chat de Grupo</h3>
+                        <ChatDirectory allUsers={allUsers} onlineUsers={onlineUsers} />
+                    </div>
+                    <Link to="/admin" className="d-none d-md-block btn general_btn fw-bolder px-3 m-2">Ir al Inicio</Link>
                 </div>
 
                 <ChatBubbleContainer
-                    mensajes={mensajes}
-                    mensajesContainerRef={mensajesContainerRef}
-                    cargandoMas={cargandoMas}
-                    noHayMasMensajes={noHayMasMensajes}
-                    esMensajePropio={esMensajePropio}
-                    setImagenAmpliada={setImagenAmpliada}
+                    messages={messages}
+                    messagesContainerRef={messagesContainerRef}
+                    isLoadingMore={isLoadingMore}
+                    hasMoreMessages={hasMoreMessages}
+                    isOwnMessage={isOwnMessage}
+                    onImageClick={setExpandedImage}
                     onPreviewClick={handlePreviewClick}
                 />
 
                 <div className='d-flex flex-row align-items-end gap-3 ms-3 mt-1 mb-1'>
                     <ChatPreviewContainer
-                        previewTipo={previewTipo}
+                        previewType={previewType}
                         previewUrl={previewUrl}
-                        previewNombre={previewNombre}
-                        cargando={cargando}
+                        previewName={previewName}
+                        loading={isSending}
                         onPreviewClick={handlePreviewClick}
-                        onImagenClick={setImagenAmpliada}
+                        onImageClick={setExpandedImage}
                     />
                 </div>
 
                 <ChatInputArea
-                    mensaje={mensaje}
-                    setMensaje={setMensaje}
-                    onFileSelect={handleArchivoSeleccionado}
-                    onSend={enviarMensaje}
+                    messageContent={messageContent}
+                    setMessageContent={setMessageContent}
+                    onFileSelect={handleFileSelect}
+                    onSend={handleSendMessage}
                     fileInputRef={fileInputRef}
-                    onClickAdjuntar={handleClickAdjuntar}
+                    onAttachClick={handleAttachClick}
                     editorRef={editorRef}
-                    cargando={cargando}
+                    loading={isSending}
                 />
             </Card>
 
-            <ChatImageModal imagenUrl={imagenAmpliada} onClose={() => setImagenAmpliada(null)} />
-
-            <ChatFilePreviewModal
-                tipo={previewMensajeTipo}
-                archivoUrl={previewMensajeUrl}
-                archivoNombre={previewMensajeNombre}
-                onClose={() => {
-                    setPreviewMensajeTipo(null);
-                    setPreviewMensajeUrl(null);
-                    setPreviewMensajeNombre(undefined);
-                }}
-            />
-
+            <ChatImageModal imageUrl={expandedImage} onClose={() => setExpandedImage(null)} />
+            <ChatFilePreviewModal type={modalPreviewType} fileUrl={modalPreviewUrl} fileName={modalPreviewName} onClose={() => setModalPreviewUrl(null)} />
         </div>
     );
 };

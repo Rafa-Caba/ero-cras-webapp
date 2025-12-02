@@ -27,12 +27,12 @@ export const XlsxPreview = ({ url }: Props) => {
                 const rows: string[][] = [];
 
                 worksheet.eachRow((row) => {
-                    const valores = row.values;
+                    const values = row.values;
 
-                    if (!Array.isArray(valores)) return;
+                    if (!Array.isArray(values)) return;
 
-                    const rowData = valores
-                        .slice(1) // Saltamos el índice 0 que usualmente está vacío
+                    const rowData = values
+                        .slice(1)
                         .map((cell) =>
                             typeof cell === 'object' && cell !== null
                                 ? (cell as any).text || ''

@@ -3,27 +3,27 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { obtenerIconoArchivo } from '../../utils/functionsFilesNames';
 
 interface Props {
-    previewTipo: 'imagen' | 'archivo' | 'media' | null;
+    previewType: 'image' | 'file' | 'audio' | 'video' | null;
     previewUrl: string | null;
-    previewNombre?: string;
-    cargando: boolean;
-    onPreviewClick: (tipo: 'imagen' | 'archivo' | 'media', url: string, nombre?: string) => void;
-    onImagenClick: (url: string) => void;
+    previewName?: string;
+    loading: boolean;
+    onPreviewClick: (type: 'image' | 'file' | 'audio' | 'video', url: string, name?: string) => void;
+    onImageClick: (url: string) => void;
 }
 
 export const ChatPreviewContainer = ({
-    previewTipo,
+    previewType,
     previewUrl,
-    previewNombre,
-    cargando,
+    previewName,
+    loading,
     onPreviewClick,
-    onImagenClick,
+    onImageClick,
 }: Props) => {
-    if (!previewTipo || !previewUrl) return null;
+    if (!previewType || !previewUrl) return null;
 
-    if (previewTipo === 'imagen') {
+    if (previewType === 'image') {
         return (
-            <Button variant="link" className="m-0 p-0 text-start" onClick={() => onImagenClick(previewUrl)}>
+            <Button variant="link" className="m-0 p-0 text-start" onClick={() => onImageClick(previewUrl)}>
                 <Figure className="mb-0">
                     <Figure.Caption className="mb-1">Imagen seleccionada:</Figure.Caption>
                     <Figure.Image width={80} alt="preview" src={previewUrl} className="rounded shadow-sm" />
@@ -32,10 +32,10 @@ export const ChatPreviewContainer = ({
         );
     }
 
-    const icon = obtenerIconoArchivo(previewNombre || '');
+    const icon = obtenerIconoArchivo(previewName || '');
 
-    const caption = previewTipo === 'archivo' ? 'Ver archivo' : 'Reproducir';
-    const captionClass = previewTipo === 'archivo' ? 'btn-outline-morado' : 'btn-outline-success';
+    const caption = previewType === 'file' ? 'Ver archivo' : 'Reproducir';
+    const captionClass = previewType === 'file' ? 'btn-outline-morado' : 'btn-outline-success';
 
     return (
         <>
@@ -45,19 +45,19 @@ export const ChatPreviewContainer = ({
                 onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    onPreviewClick(previewTipo, previewUrl, previewNombre);
+                    onPreviewClick(previewType, previewUrl, previewName);
                 }}
             >
                 <div className="archivo-msg d-flex flex-column align-items-start gap-1 mb-2">
                     <p className="mb-1 fw-semibold text-dark d-flex align-items-center gap-2">
                         <FontAwesomeIcon icon={icon} size="lg" />
-                        {previewNombre}
+                        {previewName}
                     </p>
                     <span className={`btn ${captionClass} btn-sm rounded-pill`}>{caption}</span>
                 </div>
             </Button>
 
-            {cargando && (
+            {loading && (
                 <div className="text-center my-2">
                     <Spinner animation="border" />
                 </div>

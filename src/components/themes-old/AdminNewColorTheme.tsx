@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
-import type { ThemeOld } from '../../types/themes';
+import type { ThemeOld } from '../../types/theme';
 import { useThemesStore } from '../../store/admin/useThemesStore';
 
 export const AdminNewColorTheme = () => {

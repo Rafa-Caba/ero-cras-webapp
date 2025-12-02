@@ -1,108 +1,93 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Spinner } from 'react-bootstrap';
 import Swal from 'sweetalert2';
+import type { JSONContent } from '@tiptap/react';
 
-import { useAvisosStore } from '../../store/admin/useAvisosStore';
-import type { AvisoForm } from '../../types';
+import { useAnnouncementStore } from '../../store/admin/useAnnouncementStore';
+import type { CreateAnnouncementPayload } from '../../types/annoucement';
 
 import { emptyEditorContent } from '../../utils/editorDefaults';
-import { parseTexto, createHandleTextoChange, createUpdateFormData } from '../../utils/handleTextTipTap';
+import { parseText } from '../../utils/handleTextTipTap';
 import { TiptapEditor } from '../tiptap-components/TiptapEditor';
 
-type InputOrSelectEvent = ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
+type InputEvent = ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
 
 export const AdminEditAnnouncement = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
-    const [formData, setFormData] = useState<AvisoForm | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [errores, setErrores] = useState<string[]>([]);
+    const { getAnnouncement, editAnnouncement, loading } = useAnnouncementStore();
 
-    const { fetchAvisoPorId, actualizarAvisoExistente } = useAvisosStore();
-
-    const setFormDataSafe: React.Dispatch<React.SetStateAction<AvisoForm | null>> = setFormData;
-    const updateFormData = createUpdateFormData<AvisoForm>()(setFormData);
-
-    const defaultFormData: AvisoForm = {
-        titulo: '',
-        contenido: emptyEditorContent,
-        publicado: true,
-        imagen: null
+    const defaultFormData: CreateAnnouncementPayload = {
+        title: '',
+        content: emptyEditorContent,
+        isPublic: true,
+        file: undefined
     };
 
-    useEffect(() => {
-        if (!formData) setFormData(defaultFormData);
-    }, []);
+    const [formData, setFormData] = useState<CreateAnnouncementPayload>(defaultFormData);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [errors, setErrors] = useState<string[]>([]);
+    const [initialLoading, setInitialLoading] = useState(true);
 
-    useEffect(() => {
-        if (id) {
-            fetchAvisoPorId(id)
-                .then((aviso) => {
-                    setFormData({
-                        titulo: aviso.titulo,
-                        contenido: parseTexto(aviso.contenido) || emptyEditorContent,
-                        publicado: aviso.publicado,
-                        imagen: null
-                    });
+    const handleContentChange = (newContent: JSONContent) => {
+        setFormData(prev => ({ ...prev, content: newContent as any }));
+    };
 
-                    if (aviso.imagenUrl) {
-                        setPreviewUrl(aviso.imagenUrl);
-                    }
-                })
-                .catch(() => {
-                    Swal.fire('Error', 'No se pudo cargar el aviso', 'error');
-                    navigate('/admin/announcements');
-                });
-        }
-    }, [id]);
-
-    const handleChange = (e: InputOrSelectEvent) => {
+    const handleChange = (e: InputEvent) => {
         const target = e.target as HTMLInputElement;
         const { name, value, type, files, checked } = target;
 
-        if (name === 'imagen' && files && files[0]) {
-            const file = files[0];
-            updateFormData({ imagen: file });
-            setPreviewUrl(URL.createObjectURL(file));
-        } else {
-            const newValue = type === 'checkbox' ? checked : value;
-            updateFormData({ [name]: newValue });
-        }
+        setFormData(prev => {
+            if (name === 'file' && files && files[0]) {
+                const file = files[0];
+                setPreviewUrl(URL.createObjectURL(file));
+                return { ...prev, file: file };
+            }
+            if (type === 'checkbox') {
+                return { ...prev, [name]: checked };
+            }
+            return { ...prev, [name]: value };
+        });
     };
+
+    useEffect(() => {
+        const loadData = async () => {
+            if (id) {
+                const announcement = await getAnnouncement(id);
+                if (announcement) {
+                    setFormData({
+                        title: announcement.title,
+                        content: (parseText(announcement.content) as any) || emptyEditorContent,
+                        isPublic: announcement.isPublic,
+                        file: undefined
+                    });
+                    if (announcement.imageUrl) {
+                        setPreviewUrl(announcement.imageUrl);
+                    }
+                }
+            }
+            setInitialLoading(false);
+        };
+        loadData();
+    }, [id]);
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (!formData) {
-            setErrores(['Error interno: el formulario no está cargado.']);
-            return;
-        }
-
         const newErrors: string[] = [];
-        if (!formData.titulo.trim()) newErrors.push('El título es requerido.');
-        if (!formData.contenido) newErrors.push('El contenido es requerido.');
+        if (!formData.title.trim()) newErrors.push('El título es requerido.');
 
         if (newErrors.length > 0) {
-            setErrores(newErrors);
+            setErrors(newErrors);
             return;
-        }
-
-        const formPayload = new FormData();
-        formPayload.append('titulo', formData.titulo);
-        formPayload.append('contenido', JSON.stringify(formData.contenido));
-        formPayload.append('publicado', formData.publicado ? 'true' : 'false');
-
-        if (formData.imagen) {
-            formPayload.append('imagen', formData.imagen);
         }
 
         try {
             if (id) {
-                await actualizarAvisoExistente(id, formPayload);
+                await editAnnouncement(id, formData);
                 Swal.fire('Actualizado', '✅ El aviso fue actualizado exitosamente.', 'success');
-                setFormData(defaultFormData);
                 navigate('/admin/announcements');
             }
         } catch (error) {
@@ -116,19 +101,21 @@ export const AdminEditAnnouncement = () => {
         };
     }, [previewUrl]);
 
+    if (initialLoading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
+
     return (
-        <article className="m-3 col-md-6 mx-auto">
+        <article className="m-3 col-md-8 mx-auto">
             <div className="form-canto">
                 <h3>Editar Aviso</h3>
 
                 <Form onSubmit={handleSubmit} encType="multipart/form-data">
-                    <Form.Group className="mb-3" controlId="formTitulo">
+                    <Form.Group className="mb-3" controlId="formTitle">
                         <Form.Label>Título</Form.Label>
                         <Form.Control
                             type="text"
-                            name="titulo"
+                            name="title"
                             placeholder="Título del aviso"
-                            value={formData?.titulo}
+                            value={formData.title}
                             onChange={handleChange}
                             required
                         />
@@ -137,17 +124,17 @@ export const AdminEditAnnouncement = () => {
                     <Form.Group className="mb-3">
                         <Form.Label>Descripción</Form.Label>
                         <TiptapEditor
-                            content={parseTexto(formData?.contenido)}
-                            onChange={createHandleTextoChange<AvisoForm>(setFormDataSafe, 'contenido')}
+                            content={parseText(formData.content)}
+                            onChange={handleContentChange}
                         />
                     </Form.Group>
 
-                    <Form.Group className="mb-3" controlId="formPublicado">
+                    <Form.Group className="mb-3" controlId="formPublic">
                         <Form.Check
                             type="checkbox"
-                            name="publicado"
+                            name="isPublic"
                             label="¿Publicado?"
-                            checked={formData?.publicado}
+                            checked={formData.isPublic}
                             onChange={handleChange}
                         />
                     </Form.Group>
@@ -156,7 +143,7 @@ export const AdminEditAnnouncement = () => {
                         <Form.Label>Imagen del aviso</Form.Label>
                         <Form.Control
                             type="file"
-                            name="imagen"
+                            name="file"
                             accept="image/*"
                             onChange={handleChange}
                         />
@@ -174,10 +161,10 @@ export const AdminEditAnnouncement = () => {
                         </div>
                     )}
 
-                    {errores.length > 0 && (
+                    {errors.length > 0 && (
                         <div className="alert alert-danger">
                             <ul className="mb-0">
-                                {errores.map((error, i) => (
+                                {errors.map((error, i) => (
                                     <li key={i}>{error}</li>
                                 ))}
                             </ul>
@@ -185,8 +172,8 @@ export const AdminEditAnnouncement = () => {
                     )}
 
                     <div className="text-center">
-                        <Button type="submit" className="general_btn">
-                            Guardar cambios
+                        <Button type="submit" className="general_btn" disabled={loading}>
+                            {loading ? <Spinner animation="border" size="sm" /> : 'Guardar cambios'}
                         </Button>
                         <Button
                             className="ms-2"

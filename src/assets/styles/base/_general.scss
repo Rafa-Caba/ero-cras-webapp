@@ -1,0 +1,439 @@
+// =======================
+// Reset & Base
+// =======================
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--color-background); // Was --color-secondary
+    color: var(--color-text);
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+
+    a,
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        color: var(--color-text);
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    p {
+        padding: 5px;
+        text-align: center;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        overflow: hidden;
+        resize: none;
+    }
+}
+
+// =======================
+// Layout Containers
+// =======================
+.layout-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+
+    .layout-header,
+    .layout-footer {
+        background: var(--color-primary);
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .layout-nav {
+        padding: 0.5rem 0;
+        text-align: center;
+        color: var(--color-nav);
+    }
+
+    // Header & Footer use the Nav color for consistency, or Primary
+    .layout-header {
+        background: var(--color-primary);
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .layout-footer {
+        background: var(--color-primary);
+        border-top: 1px solid var(--color-border);
+    }
+
+    .layout-nav {
+        background: var(--color-nav);
+        padding: 0.7rem;
+
+        li .nav-link:hover {
+            color: var(--color-button-text);
+            background-color: var(--color-accent);
+            border-radius: 5px;
+            font-weight: 500;
+        }
+    }
+
+    .layout-main {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+
+        .layout-menu-izquierdo,
+        .layout-menu-derecho {
+            display: none;
+        }
+
+        .layout-content {
+            flex: 1;
+            padding: 0.3rem;
+            margin: 0.5rem;
+            background-color: transparent;
+        }
+
+        @media (min-width: 768px) {
+            flex-direction: column;
+
+            .layout-content {
+                padding: 0.5rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            flex-direction: column;
+
+            .layout-menu-izquierdo,
+            .layout-menu-derecho {
+                display: block;
+                width: 200px;
+                background: var(--color-card);
+                padding: 1rem;
+                border-left: 1px solid var(--color-border);
+                border-right: 1px solid var(--color-border);
+            }
+        }
+
+        @media (min-width: 992px) {
+            flex-direction: row;
+        }
+    }
+}
+
+// =======================
+// Forms
+// =======================
+form {
+    background-color: var(--color-card) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 8px;
+    padding: 2rem 2.5rem;
+}
+
+// Disabled Inputs
+.form-control:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled {
+    background-color: var(--color-background) !important; // Darker/Lighter than card
+    color: var(--color-secondary-text) !important;
+    border-color: var(--color-border) !important;
+    opacity: 1 !important;
+}
+
+::placeholder {
+    color: var(--color-secondary-text);
+    opacity: 0.7;
+}
+
+// ===================
+// Table
+// ===================
+.table {
+    background-color: var(--color-card) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-border) !important;
+
+    thead {
+        background-color: var(--color-nav) !important; // Header contrast
+        color: var(--color-text) !important;
+    }
+
+    tbody {
+        background-color: var(--color-card) !important;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid var(--color-border) !important;
+
+        &:hover {
+            // Highlight row on hover
+            background-color: var(--color-background) !important;
+        }
+    }
+
+    th,
+    td {
+        border: 1px solid var(--color-border) !important;
+        padding: 0.75rem !important;
+        vertical-align: middle !important;
+        color: var(--color-text) !important;
+    }
+
+    th {
+        background-color: var(--color-nav) !important;
+    }
+
+    td {
+        background-color: var(--color-card) !important;
+    }
+}
+
+// ======================
+// Accordion
+// ======================
+.accordion-custom {
+    --bs-accordion-bg: var(--color-card);
+    --bs-accordion-color: var(--color-text);
+    --bs-accordion-border-color: var(--color-border);
+    --bs-accordion-btn-bg: var(--color-background); // Slightly different from card
+    --bs-accordion-btn-color: var(--color-text);
+    --bs-accordion-active-bg: var(--color-accent); // Active state
+    --bs-accordion-active-color: var(--color-button-text);
+    --bs-accordion-btn-focus-box-shadow: none;
+
+    .accordion-item {
+        border: 1px solid var(--bs-accordion-border-color);
+        background-color: var(--bs-accordion-bg);
+        color: var(--bs-accordion-color);
+    }
+
+    .accordion-button {
+        background-color: var(--bs-accordion-btn-bg);
+        color: var(--bs-accordion-btn-color);
+        font-weight: bold;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: var(--bs-accordion-active-bg);
+        color: var(--bs-accordion-active-color);
+    }
+
+    .accordion-body {
+        background-color: var(--bs-accordion-bg);
+        color: var(--bs-accordion-color);
+    }
+}
+
+// =======================
+// Modals
+// =======================
+.modal-bg-color,
+.modal-chat-bg-color,
+.modal-content {
+    background-color: var(--color-card);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: var(--color-border);
+    background-color: var(--color-background); // Slight contrast for headers
+}
+
+.canto {
+    background-color: var(--color-card) !important;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+// =======================
+// Animations
+// =======================
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// =======================
+// Scrollable Containers
+// =======================
+.texto-scrollable,
+.usuarios-contenedor,
+.cantos-contenedor,
+.canto-contenedor {
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.texto-scrollable {
+    max-height: 52vh;
+}
+
+.usuarios-contenedor {
+    min-height: 55vh;
+    max-height: 55vh;
+}
+
+.cantos-contenedor {
+    min-height: 68vh;
+    max-height: 68vh;
+}
+
+.canto-contenedor {
+    min-height: 52vh;
+    max-height: 52vh;
+}
+
+// =======================
+// Gallery Images
+// =======================
+.galeria {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.galeria-img {
+    width: 100%;
+    max-width: 300px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+    display: block;
+    margin: 0 auto;
+    border: 2px solid var(--color-border);
+}
+
+.galeria-img:hover {
+    transform: scale(1.05);
+    border-color: var(--color-accent);
+}
+
+// Placeholders for images
+.imagen-inicio-container,
+.imagen-left-container,
+.imagen-right-container,
+.images-carousel,
+.imagen-nosotros-container {
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--color-border);
+    background-color: var(--color-background);
+}
+
+// Dimensions
+.imagen-inicio-container {
+    width: 650px;
+    height: 40vh;
+}
+
+.imagen-left-container,
+.imagen-right-container {
+    width: 150px;
+    height: 220px;
+}
+
+.images-carousel {
+    width: 650px;
+    height: 515px;
+}
+
+.imagen-nosotros-container {
+    width: 650px;
+    height: 380px;
+}
+
+// Fixed Images
+.imagen-fija-carousel,
+.imagen-fija-inicio,
+.imagen-fija-left-menu,
+.imagen-fija-right-menu,
+.imagen-fija {
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+// =======================
+// Posts Styles
+// =======================
+.img-post,
+.img-posts {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.img-post {
+    max-height: 300px;
+    object-fit: contain;
+}
+
+// =======================
+// Dropdown & Profile
+// =======================
+#dropdown-user::after {
+    display: none;
+}
+
+.my-profile {
+    background-color: var(--color-card);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+}
+
+.text-theme-color {
+    color: var(--color-text);
+}
+
+// =======================
+// Utilities
+// =======================
+.primary-color-container {
+    background-color: var(--color-card);
+    border-radius: 8px;
+}
+
+.aviso-sidebar {
+    background-color: var(--color-background); // Contrast inside sidebar
+    border-radius: 5px;
+}
+
+.color-footer {
+    background-color: var(--color-nav);
+}
+
+.text-secondary {
+    color: var(--color-secondary-text);
+}

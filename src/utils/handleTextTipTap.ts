@@ -44,7 +44,7 @@ export const getTextFromTipTapJSON = (json: any, maxLength = 60): string => {
 };
 
 
-export const parseTexto = (texto: any): JSONContent => {
+export const parseText = (texto: any): JSONContent => {
     if (typeof texto === 'string') {
         try {
             const parsed = JSON.parse(texto);

@@ -1,45 +1,43 @@
 import { Modal, Button } from 'react-bootstrap';
-import type { ThemeGroup } from '../../types';
+import type { Theme } from '../../types/theme';
 
 interface Props {
     show: boolean;
     onClose: () => void;
-    themeGroups: ThemeGroup[];
-    onSelect: (grupo: ThemeGroup) => void;
+    themes: Theme[];
+    onSelect: (theme: Theme) => void;
 }
 
-export const ThemeSelectorModal = ({ show, onClose, themeGroups, onSelect }: Props) => {
+export const ThemeSelectorModal = ({ show, onClose, themes, onSelect }: Props) => {
     return (
-        <Modal show={show} onHide={onClose} centered>
+        <Modal show={show} onHide={onClose} centered scrollable>
             <Modal.Header closeButton>
                 <Modal.Title>🎨 Cambiar tema visual</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {themeGroups.map((grupo) => (
-                    <div
-                        key={grupo._id}
-                        onClick={() => onSelect(grupo)}
-                        className="mb-3 p-2 border rounded theme-option cursor-pointer"
-                        style={{ transition: 'all 0.2s' }}
-                    >
-                        <strong>{grupo.nombre}</strong>
-                        <div className="d-flex mt-2 flex-wrap gap-1">
-                            {grupo.colores.map((color) => (
-                                <div
-                                    key={color.colorClass}
-                                    style={{
-                                        width: 20,
-                                        height: 20,
-                                        backgroundColor: color.color,
-                                        borderRadius: 4,
-                                        border: '1px solid #ccc'
-                                    }}
-                                    title={`${color.nombre}: ${color.color}`}
-                                />
-                            ))}
+                {themes.length === 0 ? (
+                    <p className="text-center text-muted">No hay temas disponibles.</p>
+                ) : (
+                    themes.map((theme) => (
+                        <div
+                            key={theme.id}
+                            onClick={() => onSelect(theme)}
+                            className="mb-3 p-3 border rounded theme-option cursor-pointer d-flex align-items-center justify-content-between"
+                            style={{ cursor: 'pointer', transition: 'background 0.2s' }}
+                        >
+                            <div>
+                                <strong className="d-block">{theme.name}</strong>
+                                <small className="text-muted">{theme.isDark ? 'Modo Oscuro' : 'Modo Claro'}</small>
+                            </div>
+
+                            <div className="d-flex gap-1">
+                                <div style={{ width: 24, height: 24, backgroundColor: theme.backgroundColor, border: '1px solid #ccc', borderRadius: 4 }} title="Fondo" />
+                                <div style={{ width: 24, height: 24, backgroundColor: theme.primaryColor, border: '1px solid #ccc', borderRadius: 4 }} title="Primario" />
+                                <div style={{ width: 24, height: 24, backgroundColor: theme.accentColor, border: '1px solid #ccc', borderRadius: 4 }} title="Acento" />
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={onClose}>Cancelar</Button>

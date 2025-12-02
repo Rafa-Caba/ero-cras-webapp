@@ -1,46 +1,30 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Form, Button, Container, Image } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { crearUsuario } from '../../services/usuarios';
+import { registerUser } from '../../services/auth';
 
-interface UsuarioForm {
-    nombre: string;
-    username: string;
-    correo: string;
-    password: string;
-    password2: string,
-    fotoPerfil: File | null;
-}
-
-export const RegisterUser = () => {
+export const AdminRegister = () => {
     const navigate = useNavigate();
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [formData, setFormData] = useState<UsuarioForm>({
-        nombre: '',
+    const [formData, setFormData] = useState({
+        name: '',
         username: '',
-        correo: '',
+        email: '',
         password: '',
-        password2: '',
-        fotoPerfil: null
+        confirmPassword: '',
     });
+    const [file, setFile] = useState<File | undefined>(undefined);
     const [errores, setErrores] = useState<string[]>([]);
-
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value, files } = e.target;
 
-        if (name === 'fotoPerfil' && files) {
-            if (files[0]) {
-                const objectUrl = URL.createObjectURL(files[0]);
-                setPreviewUrl(objectUrl);
-            } else {
-                setPreviewUrl(null);
-            }
-
-            setFormData({ ...formData, fotoPerfil: files[0] });
-
+        if (name === 'file' && files && files[0]) {
+            const selectedFile = files[0];
+            setFile(selectedFile);
+            setPreviewUrl(URL.createObjectURL(selectedFile));
         } else {
             setFormData({ ...formData, [name]: value });
         }
@@ -50,35 +34,34 @@ export const RegisterUser = () => {
         e.preventDefault();
         const newErrors: string[] = [];
 
-        const formPayload = new FormData();
-
-        if (!formData.nombre.trim()) newErrors.push('El nombre es requerido.');
-        if (!formData.username.trim()) newErrors.push('El nombre de usuario es requerido.');
-        if (!formData.password.trim()) newErrors.push('La contraseña es requerida.');
-        if (formData.password !== formData.password2) newErrors.push('Las contraseñas no coinciden.');
+        if (!formData.name.trim()) newErrors.push('El nombre es requerido.');
+        if (!formData.username.trim()) newErrors.push('El usuario es requerido.');
+        if (!formData.email.trim()) newErrors.push('El correo es requerido.');
+        if (!formData.password) newErrors.push('La contraseña es requerida.');
+        if (formData.password !== formData.confirmPassword) newErrors.push('Las contraseñas no coinciden.');
 
         if (newErrors.length > 0) {
             setErrores(newErrors);
             return;
         }
 
-        formPayload.append('nombre', formData.nombre);
-        formPayload.append('username', formData.username);
-        formPayload.append('correo', formData.correo);
-        formPayload.append('password', formData.password);
-
-        if (formData.fotoPerfil) {
-            formPayload.append('fotoPerfil', formData.fotoPerfil);
-        }
-
         try {
-            const { mensaje } = await crearUsuario(formPayload);
+            const payload = {
+                name: formData.name,
+                username: formData.username,
+                email: formData.email,
+                password: formData.password,
+                instrument: ''
+            };
 
-            Swal.fire('¡Usuario registrado!', `✅ ${mensaje}`, 'success');
-            setFormData({ nombre: '', username: '', correo: '', password: '', password2: '', fotoPerfil: null }); // opcional: limpiar formulario
-            navigate('/admin/login');
-        } catch (error) {
-            Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+            await registerUser(payload);
+
+            Swal.fire('¡Registrado!', 'Usuario creado con éxito. Por favor inicia sesión.', 'success');
+            navigate('/auth/login');
+
+        } catch (error: any) {
+            const msg = error.response?.data?.message || 'Error al registrar usuario';
+            Swal.fire('Error', msg, 'error');
         }
     };
 
@@ -86,7 +69,7 @@ export const RegisterUser = () => {
         return () => {
             if (previewUrl) URL.revokeObjectURL(previewUrl);
         };
-    }, [formData.fotoPerfil]);
+    }, [previewUrl]);
 
     return (
         <main className='layout-main primary-color-container mx-3'>
@@ -94,15 +77,11 @@ export const RegisterUser = () => {
                 <Image
                     src={'/images/erocrasLogo.png'}
                     roundedCircle
-                    height={50}
-                    width={50}
+                    height={150}
+                    width={150}
                     alt={`Ero Cras Official`}
                     style={{
                         objectFit: 'cover',
-                        width: '170px',
-                        height: '170px',
-                        minWidth: '170px',
-                        minHeight: '170px',
                         border: '3px solid purple',
                         margin: '.3rem'
                     }}
@@ -110,20 +89,20 @@ export const RegisterUser = () => {
                 />
                 <h3>Registrar Usuario</h3>
 
-                <Form onSubmit={handleSubmit} encType="multipart/form-data">
-                    <Form.Group className="mb-3" controlId="formNombre">
+                <Form onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3" controlId="formName">
                         <Form.Label>Nombre</Form.Label>
                         <Form.Control
                             type="text"
-                            name="nombre"
+                            name="name"
                             placeholder="Nombre Completo"
-                            value={formData.nombre}
+                            value={formData.name}
                             onChange={handleChange}
                             required
                         />
                     </Form.Group>
 
-                    <Form.Group className="mb-3" controlId="formNombre">
+                    <Form.Group className="mb-3" controlId="formUsername">
                         <Form.Label>Usuario</Form.Label>
                         <Form.Control
                             type="text"
@@ -135,13 +114,13 @@ export const RegisterUser = () => {
                         />
                     </Form.Group>
 
-                    <Form.Group className="mb-3" controlId="formCorreo">
+                    <Form.Group className="mb-3" controlId="formEmail">
                         <Form.Label>Correo</Form.Label>
                         <Form.Control
                             type="email"
-                            name="correo"
+                            name="email"
                             placeholder="Correo electrónico"
-                            value={formData.correo}
+                            value={formData.email}
                             onChange={handleChange}
                             required
                         />
@@ -159,56 +138,51 @@ export const RegisterUser = () => {
                         />
                     </Form.Group>
 
-                    <Form.Group className="mb-3" controlId="formPassword2">
+                    <Form.Group className="mb-3" controlId="formConfirmPassword">
                         <Form.Label>Repetir Contraseña</Form.Label>
                         <Form.Control
                             type="password"
-                            name="password2"
+                            name="confirmPassword"
                             placeholder="Repetir Contraseña"
-                            value={formData.password2}
+                            value={formData.confirmPassword}
                             onChange={handleChange}
                             required
                         />
                     </Form.Group>
 
-                    {previewUrl && (
-                        <div className="mt-3 text-center">
-                            <p className="mb-2 fw-bold">Vista previa:</p>
-                            <img
-                                src={previewUrl}
-                                alt={`Vista previa de la imagen: ${formData.username || "sin título"}`}
-                                className="img-fluid rounded"
-                                style={{ maxHeight: "250px" }}
-                            />
-                        </div>
-                    )}
+                    {/* Image Upload (Preview only, actual upload requires auth token usually) */}
+                    {/* If backend supports public registration with image, we need to adjust service */}
                     <Form.Group className="mb-3" controlId="formFile">
-                        <Form.Label>Foto de perfil</Form.Label>
+                        <Form.Label>Foto de perfil (Opcional, se puede agregar después)</Form.Label>
                         <Form.Control
                             type="file"
-                            name="fotoPerfil"
+                            name="file"
                             accept="image/*"
                             onChange={handleChange}
                         />
                     </Form.Group>
 
-                    <div className='text-center mb-3'>
-                        <Button type="submit" className="general_btn">Registrar</Button>
-                    </div>
+                    {previewUrl && (
+                        <div className="text-center mb-3">
+                            <Image src={previewUrl} roundedCircle width={100} height={100} style={{ objectFit: 'cover' }} />
+                        </div>
+                    )}
 
                     {errores.length > 0 && (
                         <div className="alert alert-danger">
                             <ul className="mb-0">
-                                {errores.map((error, i) => (
-                                    <li key={i}>{error}</li>
-                                ))}
+                                {errores.map((error, i) => <li key={i}>{error}</li>)}
                             </ul>
                         </div>
                     )}
 
-                    <p className="d-flex flex-column">
+                    <div className='text-center mb-3'>
+                        <Button type="submit" className="general_btn">Registrar</Button>
+                    </div>
+
+                    <p className="d-flex flex-column text-center">
                         ¿Ya tienes cuenta?
-                        <a className="derecha" href="/admin/login">Iniciar Sesión</a>
+                        <Link className="derecha" to="/auth/login">Iniciar Sesión</Link>
                     </p>
                 </Form>
             </Container>

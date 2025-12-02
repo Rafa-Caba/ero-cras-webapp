@@ -5,11 +5,21 @@ import { customExtensions } from '../../utils/tiptap/extensions';
 import type { JSONContent } from '@tiptap/react';
 
 interface Props {
-    content: JSONContent;
+    content: JSONContent | null;
     onChange: (value: JSONContent) => void;
 }
 
 export const TiptapEditor = ({ content, onChange }: Props) => {
+    if (content == null) {
+        return (
+            <div className='editor-estilo'>
+                <div className="editor-toolbar mb-2">
+                    <p>No hay contenido que mostrar.</p>
+                </div>
+            </div>
+        )
+    }
+
     const editor = useEditor({
         extensions: customExtensions,
         content,
@@ -34,22 +44,22 @@ export const TiptapEditor = ({ content, onChange }: Props) => {
     }, [content]);
 
     return (
-        <div className='editor-estilo'>
+        <div className='editor-estilo tool_buttons'>
             {editor && (
-                <div className="editor-toolbar mb-2">
-                    <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'active' : ''}>B</button>
-                    <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'active' : ''}>I</button>
-                    <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={editor.isActive('underline') ? 'active' : ''}>U</button>
+                <div className="editor-toolbar mb-2 tool_buttons">
+                    <button style={{ color: 'black' }} type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'active' : ''}>B</button>
+                    <button style={{ color: 'black' }} type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'active' : ''}>I</button>
+                    <button style={{ color: 'black' }} type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={editor.isActive('underline') ? 'active' : ''}>U</button>
 
-                    <button type="button" onClick={() => editor.chain().focus().setTextAlign('left').run()} className={editor.isActive({ textAlign: 'left' }) ? 'active' : ''}>Izq</button>
-                    <button type="button" onClick={() => editor.chain().focus().setTextAlign('center').run()} className={editor.isActive({ textAlign: 'center' }) ? 'active' : ''}>Centrado</button>
-                    <button type="button" onClick={() => editor.chain().focus().setTextAlign('right').run()} className={editor.isActive({ textAlign: 'right' }) ? 'active' : ''}>Der</button>
+                    <button style={{ color: 'black' }} type="button" onClick={() => editor.chain().focus().setTextAlign('left').run()} className={editor.isActive({ textAlign: 'left' }) ? 'active' : ''}>Izq</button>
+                    <button style={{ color: 'black' }} type="button" onClick={() => editor.chain().focus().setTextAlign('center').run()} className={editor.isActive({ textAlign: 'center' }) ? 'active' : ''}>Centrado</button>
+                    <button style={{ color: 'black' }} type="button" onClick={() => editor.chain().focus().setTextAlign('right').run()} className={editor.isActive({ textAlign: 'right' }) ? 'active' : ''}>Der</button>
 
-                    <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? 'active' : ''}>H1</button>
-                    <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive('heading', { level: 2 }) ? 'active' : ''}>H2</button>
+                    <button style={{ color: 'black' }} type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? 'active' : ''}>H1</button>
+                    <button style={{ color: 'black' }} type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive('heading', { level: 2 }) ? 'active' : ''}>H2</button>
 
-                    <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? 'active' : ''}>• Lista</button>
-                    <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? 'active' : ''}>1. Lista</button>
+                    <button style={{ color: 'black' }} type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? 'active' : ''}>• Lista</button>
+                    <button style={{ color: 'black' }} type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? 'active' : ''}>1. Lista</button>
                 </div>
             )}
             <EditorContent editor={editor} />

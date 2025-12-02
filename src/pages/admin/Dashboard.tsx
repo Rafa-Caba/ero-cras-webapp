@@ -1,9 +1,7 @@
-import { AdminDashboardPanel } from "../../components-admin/AdminDashboardPanel";
+import { AdminDashboardPanel } from "../../components/components-admin/DashboardPanel";
 
-const Dashboard = () => {
+export const Dashboard = () => {
     return (
         <AdminDashboardPanel />
     );
 }
-
-export default Dashboard

@@ -1,85 +1,73 @@
 import axios from 'axios';
 
+// Create the main instance
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL + '/api',
+    baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:4000') + '/api',
     headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
     },
     timeout: 10000
 });
 
-api.interceptors.response.use((res) => res, async (err) => {
-    const originalRequest = err.config;
-
-    // Solo intentar refresh una vez
-    if (err.response?.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
-
-        try {
-            const refreshToken = localStorage.getItem('refreshToken');
-            if (!refreshToken) throw new Error('No refresh token disponible');
-
-            const res = await api.post('/login/refresh', { token: refreshToken });
-            const nuevoToken = res.data?.accessToken;
-
-            if (!nuevoToken) throw new Error('Token inválido del refresh');
-
-            // Guardar el nuevo token
-            localStorage.setItem('token', nuevoToken);
-
-            // Actualizar headers globales y del request original
-            api.defaults.headers.common['Authorization'] = `Bearer ${nuevoToken}`;
-            originalRequest.headers['Authorization'] = `Bearer ${nuevoToken}`;
-
-            return api(originalRequest);
-        } catch (e) {
-            // Si falla el refresh, limpiar sesión y redirigir
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('user');
-            localStorage.removeItem('tema-admin');
-
-            delete api.defaults.headers.common['Authorization'];
-
-            console.warn('Token expirado. Cerrando sesión...');
-
-            redirectToLoginSafely();
-
-            return Promise.reject(e);
-        }
-    }
-
-    return Promise.reject(err);
-});
-
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
-
-        if (token) {
-            // Asegura que headers exista
-            config.headers = config.headers || {};
-            config.headers['Authorization'] = `Bearer ${token}`;
-        }
-
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
-
 export const publicApi = axios.create({
-    baseURL: (import.meta.env.VITE_API_URL + '/api') || 'http://localhost:10000/api',
+    baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:4000') + '/api',
     headers: {
         'Content-Type': 'application/json'
     }
 });
 
-function redirectToLoginSafely() {
-    if (window.location.pathname !== '/admin/login') {
-        window.location.replace('/admin/login');
+// 1. REQUEST INTERCEPTOR (Always define this first)
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+// 2. RESPONSE INTERCEPTOR
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            try {
+                const refreshToken = localStorage.getItem('refreshToken');
+                if (!refreshToken) throw new Error('No refresh token available');
+
+                const { data } = await publicApi.post('/auth/refresh-token', {
+                    refreshToken
+                });
+
+                const newAccessToken = data.accessToken;
+
+                localStorage.setItem('token', newAccessToken);
+
+                api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+                originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+
+                return api(originalRequest);
+
+            } catch (refreshError) {
+                console.warn('Session expired. Logging out...');
+                localStorage.clear();
+
+                if (window.location.pathname !== '/auth/login') {
+                    window.location.href = '/auth/login';
+                }
+
+                return Promise.reject(refreshError);
+            }
+        }
+
+        return Promise.reject(error);
     }
-}
+);
 
 export default api;

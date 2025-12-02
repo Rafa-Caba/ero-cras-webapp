@@ -1,2 +1,3 @@
-export * from './capitalizar'
-export * from './scrollChatToBottom'
+
+export * from './capitalize';
+export * from './scrollChatToBottom';

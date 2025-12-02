@@ -1,51 +1,50 @@
 import { useEffect, useState } from 'react';
 import { Table, Spinner, Button, Form } from 'react-bootstrap';
-import { useLogsStore } from '../../store/admin/useLogsStore';
-import { capitalizarPalabra } from '../../utils/capitalizar';
-import { Link } from 'react-router-dom';
+import { useLogStore } from '../../store/admin/useLogStore';
+import { capitalizeWord } from '../../utils/capitalize';
 
 export const AdminLogs = () => {
-    const [busqueda, setBusqueda] = useState('');
-    const [filtros, setFiltros] = useState<{ coleccion?: string; accion?: string }>({});
+    const [search, setSearch] = useState('');
+    const [filters, setFilters] = useState<{ collectionName?: string; action?: string }>({});
 
     const {
         logs,
-        cargando,
-        paginaActual,
-        totalPaginas,
+        loading,
+        currentPage,
+        totalPages,
         fetchLogs,
-        setPaginaActual,
-        buscarLogsTexto
-    } = useLogsStore();
+        setPage,
+        searchLogsText
+    } = useLogStore();
 
     useEffect(() => {
-        fetchLogs(paginaActual, filtros);
-    }, [paginaActual, filtros]);
+        fetchLogs(currentPage, filters);
+    }, [currentPage, filters]);
 
-    const handlePagina = (nuevaPagina: number) => {
-        if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
-            setPaginaActual(nuevaPagina);
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setPage(newPage);
         }
     };
 
     useEffect(() => {
         const delay = setTimeout(() => {
-            if (busqueda.trim()) {
-                buscarLogsTexto(busqueda);
+            if (search.trim()) {
+                searchLogsText(search);
             } else {
-                fetchLogs(1, filtros);
+                fetchLogs(1, filters);
             }
         }, 500);
 
         return () => clearTimeout(delay);
-    }, [busqueda]);
+    }, [search]);
 
     return (
         <div className="table-responsive mt-3 px-md-3">
             <div className="d-flex flex-column align-items-center my-1">
                 <h2 className="mb-3 text-center">Bitácora de Cambios</h2>
                 <div className="botones mb-3">
-                    <Link to="/admin" className="btn general_btn px-3 m-2">Ir al Inicio</Link>
+                    {/* <Link to="/admin" className="btn general_btn px-3 m-2">Ir al Inicio</Link> */}
                 </div>
             </div>
 
@@ -54,28 +53,28 @@ export const AdminLogs = () => {
                     type="text"
                     placeholder="Buscar por ID, username, colección..."
                     className="form-control"
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                 />
 
                 <Form.Select
                     className="w-auto"
-                    value={filtros.coleccion || ''}
-                    onChange={(e) => setFiltros(prev => ({ ...prev, coleccion: e.target.value || undefined }))}
+                    value={filters.collectionName || ''}
+                    onChange={(e) => setFilters(prev => ({ ...prev, collectionName: e.target.value || undefined }))}
                 >
                     <option value="">Todas las colecciones</option>
-                    <option value="Cantos">Cantos</option>
-                    <option value="Imagenes">Imágenes</option>
-                    <option value="Miembros">Miembros</option>
-                    <option value="Avisos">Avisos</option>
+                    <option value="Songs">Cantos</option>
+                    <option value="GalleryImages">Imágenes</option>
+                    <option value="Members">Miembros</option>
+                    <option value="Announcements">Avisos</option>
                     <option value="BlogPosts">BlogPosts</option>
                     <option value="Themes">Themes</option>
-                    <option value="Usuarios">Usuarios</option>
+                    <option value="Users">Usuarios</option>
                     <option value="Settings">Settings</option>
                 </Form.Select>
             </div>
 
-            {cargando ? (
+            {loading ? (
                 <div className="d-flex justify-content-center">
                     <Spinner animation="border" />
                 </div>
@@ -98,14 +97,14 @@ export const AdminLogs = () => {
                                 </tr>
                             ) : (
                                 logs.map(log => (
-                                    <tr key={log._id}>
+                                    <tr key={log.id}>
                                         <td>
-                                            <div>{log.usuario.nombre}</div>
-                                            <small>@{log.usuario.username}</small>
+                                            <div>{'name' in log.user ? log.user.name : 'Unknown'}</div>
+                                            <small>@{'username' in log.user ? log.user.username : ''}</small>
                                         </td>
-                                        <td>{log.coleccion}</td>
-                                        <td>{capitalizarPalabra(log.accion)}</td>
-                                        <td>{log.referenciaId}</td>
+                                        <td>{log.collectionName}</td>
+                                        <td>{capitalizeWord(log.action)}</td>
+                                        <td>{log.referenceId}</td>
                                         <td>{new Date(log.createdAt).toLocaleString()}</td>
                                     </tr>
                                 ))
@@ -116,16 +115,16 @@ export const AdminLogs = () => {
                     <div className="d-flex justify-content-center align-items-center gap-3 mt-3">
                         <Button
                             variant="secondary"
-                            onClick={() => handlePagina(paginaActual - 1)}
-                            disabled={paginaActual === 1}
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
                         >
                             Anterior
                         </Button>
-                        <span>Página {paginaActual} de {totalPaginas}</span>
+                        <span>Página {currentPage} de {totalPages}</span>
                         <Button
                             variant="secondary"
-                            onClick={() => handlePagina(paginaActual + 1)}
-                            disabled={paginaActual === totalPaginas}
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
                         >
                             Siguiente
                         </Button>

@@ -12,7 +12,7 @@ export const TiptapChatEditor = forwardRef(({ content, onChange }: {
     content: JSONContent | null;
     onChange: (c: JSONContent) => void;
 }, ref) => {
-    const [mostrarEmojis, setMostrarEmojis] = useState(false);
+    const [showEmojis, setShowEmojis] = useState(false);
     const emojiRef = useRef<HTMLDivElement>(null);
 
     const editor = useEditor({
@@ -22,31 +22,43 @@ export const TiptapChatEditor = forwardRef(({ content, onChange }: {
             Underline,
             Placeholder.configure({ placeholder: 'Escribe tu mensaje…' }),
         ],
-        content,
+        content: content,
         editorProps: {
             attributes: {
                 class:
                     'chat-editor border chat-container-color-textarea-text rounded px-3 py-2 min-h-[70px] max-h-[150px] overflow-y-auto box-border bg-white focus:outline-none',
-            },
+            }
         },
         onUpdate: ({ editor }) => {
             onChange(editor.getJSON());
         },
     });
 
+    useEffect(() => {
+        if (editor && content) {
+            const currentContent = editor.getJSON();
+            if (JSON.stringify(currentContent) !== JSON.stringify(content)) {
+                editor.commands.setContent(content);
+            }
+        } else if (editor && content === null) {
+            editor.commands.clearContent();
+        }
+    }, [content, editor]);
+
+
     const handleEmojiClick = (emojiData: EmojiClickData) => {
         editor?.chain().focus().insertContent(emojiData.emoji).run();
-        setMostrarEmojis(false); // opcional, para ocultar al seleccionar
+        setShowEmojis(false);
     };
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (emojiRef.current && !emojiRef.current.contains(event.target as Node)) {
-                setMostrarEmojis(false);
+                setShowEmojis(false);
             }
         };
 
-        if (mostrarEmojis) {
+        if (showEmojis) {
             document.addEventListener('mousedown', handleClickOutside);
         } else {
             document.removeEventListener('mousedown', handleClickOutside);
@@ -55,7 +67,7 @@ export const TiptapChatEditor = forwardRef(({ content, onChange }: {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [mostrarEmojis]);
+    }, [showEmojis]);
 
     useImperativeHandle(ref, () => ({
         clear: () => {
@@ -69,25 +81,26 @@ export const TiptapChatEditor = forwardRef(({ content, onChange }: {
         <div className="tiptap-chat-wrapper">
             <div className='d-flex justify-content-between'>
                 <div className="chat-toolbar mb-1 chat-container-color-textarea">
-                    <button onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'active' : ''}>B</button>
-                    <button onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'active' : ''}>I</button>
-                    <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={editor.isActive('underline') ? 'active' : ''}>U</button>
-                    <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? 'active' : ''}>H1</button>
-                    <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive('heading', { level: 2 }) ? 'active' : ''}>H2</button>
-                    <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? 'active' : ''}>• Lista</button>
-                    <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? 'active' : ''}>1. Lista</button>
+                    <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'active' : ''}>B</button>
+                    <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'active' : ''}>I</button>
+                    <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={editor.isActive('underline') ? 'active' : ''}>U</button>
+                    <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? 'active' : ''}>H1</button>
+                    <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive('heading', { level: 2 }) ? 'active' : ''}>H2</button>
+                    <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? 'active' : ''}>• Lista</button>
+                    <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? 'active' : ''}>1. Lista</button>
                 </div>
                 <div className='chat-toolbar mb-1 chat-container-color-textarea'>
-                    {mostrarEmojis && (
-                        <div ref={emojiRef} className="emoji-container mt-1">
+                    {showEmojis && (
+                        <div ref={emojiRef} className="emoji-container mt-1" style={{ position: 'absolute', zIndex: 10, bottom: '100%', right: 0 }}>
                             <EmojiPicker onEmojiClick={handleEmojiClick} height={350} width={300} />
                         </div>
                     )}
                     <Button
-                        // variant="light"
-                        className={mostrarEmojis ? 'general_btn' : 'secondary'}
-                        onClick={() => setMostrarEmojis((prev) => !prev)}
+                        variant={showEmojis ? 'primary' : 'secondary'}
+                        onClick={() => setShowEmojis((prev) => !prev)}
+                        style={{ marginTop: 6 }}
                         title="Insert emoji"
+                        size="sm"
                     >
                         😊
                     </Button>

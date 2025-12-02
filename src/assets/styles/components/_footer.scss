@@ -1,18 +1,18 @@
 footer {
-    // background: #b68fe6;
 
     .redes {
-        color: #fff;
+        color: var(--color-button-text);
         font-size: 15px;
         padding: 5px 20px;
-        background: #A966FF;
+        background: var(--color-button);
         border-radius: 5px;
         margin-top: 7px;
         margin-left: 7px;
+        transition: background 0.3s;
     }
 
     .redes:hover {
-        background: #8a36f8;
-        color: #b9b9b9;
+        background: var(--color-accent);
+        color: var(--color-button-text);
     }
 }

@@ -5,31 +5,30 @@
 .login_btn,
 .general_btn,
 .destacar_btn {
-    color: #fff;
+    color: var(--color-button-text);
     font-size: 1rem;
     padding: 5px 20px;
-    background: var(--color-btn-general);
+    background: var(--color-button);
+    border: 1px solid var(--color-button);
     border-radius: 10px;
+    transition: all 0.3s ease;
 }
 
 .login_btn:hover,
 .general_btn:hover,
 .destacar_btn:hover {
-    background: var(--color-btn-general-hover);
-    color: #fff;
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-button-text);
 }
 
 .general_btn:active {
-    background: var(--color-footer);
-    color: #fff;
+    filter: brightness(0.9);
 }
 
 .general_btn:disabled {
-    opacity: 0.7;
-}
-
-.general_btn:clicked {
-    color: var(--color-text-color);
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .destacar_btn {
@@ -38,54 +37,53 @@
 }
 
 .file_btn {
-    color: #000000;
+    color: var(--color-text);
     font-size: 1rem;
     padding: 5px 20px;
-    background: #BDBEBA;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
 }
 
 .file_btn:hover {
-    background: #a8a8a8;
-    color: #fff;
+    background: var(--color-card);
+    border-color: var(--color-text);
 }
-
 
 // Outline Buttons
 .btn-outline-primary-theme-color {
-    color: var(--color-btn-general);
-    border-color: var(--color-btn-general);
+    color: var(--color-button);
+    border: 1px solid var(--color-button);
     background-color: transparent;
     text-decoration: none;
 }
 
 .btn-outline-primary-theme-color:hover {
-    color: var(--color-btn-general-hover);
-    border-color: var(--color-btn-general-hover);
-    background-color: transparent;
+    background-color: var(--color-button);
+    color: var(--color-button-text);
 }
 
 .btn-outline-secondary-theme-color {
-    color: var(--color-secondary);
-    border-color: var(--color-secondary);
+    color: var(--color-secondary-text);
+    border: 1px solid var(--color-secondary-text);
     background-color: transparent;
     text-decoration: none;
 }
 
 .btn-outline-secondary-theme-color:hover {
-    color: var(--color-secondary-hover);
-    border-color: var(--color-nav-link-hover);
-    background-color: transparent;
+    background-color: var(--color-secondary-text);
+    color: var(--color-background);
 }
 
+// Replaced "morado" with "Accent" logic
 .btn-outline-morado {
-    color: #7d2181;
-    border-color: #7d2181;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
     background-color: transparent;
     text-decoration: none;
 }
 
 .btn-outline-morado:hover {
-    background-color: #7d2181;
-    color: white;
+    background-color: var(--color-accent);
+    color: var(--color-button-text);
 }

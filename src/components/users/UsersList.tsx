@@ -1,163 +1,168 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Table, Image, Button, Spinner } from 'react-bootstrap';
+import { Table, Image, Button, Spinner, Form, InputGroup } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { useUsuariosStore } from '../../store/admin/useUsuariosStore';
-import { capitalizarPalabra } from '../../utils';
+import { FaEdit, FaTrash, FaSearch } from 'react-icons/fa';
+import { useUsersStore } from '../../store/admin/useUsersStore';
 
-export const UsersList = () => {
-    const [busqueda, setBusqueda] = useState('');
+export const AdminUsersList = () => {
+    const [searchTerm, setSearchTerm] = useState('');
     const {
-        usuarios,
-        paginaActual,
-        totalPaginas,
-        cargando,
-        fetchUsuarios,
-        eliminarUsuarioPorId,
-        setPaginaActual,
-        buscarUsuariosPorTexto
-    } = useUsuariosStore();
+        users,
+        currentPage,
+        totalPages,
+        loading,
+        fetchUsers,
+        deleteUserById,
+        setCurrentPage
+    } = useUsersStore();
 
     useEffect(() => {
-        fetchUsuarios(paginaActual);
-    }, [paginaActual]);
+        fetchUsers(currentPage);
+    }, [currentPage]);
 
-    const handlePagina = (nuevaPagina: number) => {
-        if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
-            setPaginaActual(nuevaPagina);
-        }
-    };
-
-    const deleteUser = async (id: string) => {
-        const confirmar = await Swal.fire({
+    const handleDelete = async (id: string) => {
+        const result = await Swal.fire({
             title: '¿Estás seguro?',
-            text: 'Esta acción eliminará al usuario y su imagen',
+            text: 'Esta acción eliminará al usuario permanentemente.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6'
         });
 
-        if (!confirmar.isConfirmed) return;
-
-        try {
-            await eliminarUsuarioPorId(id);
-
-            Swal.fire('Eliminado', 'El usuario ha sido eliminado.', 'success');
-        } catch (error) {
-            Swal.fire('Error', 'No se pudo eliminar el usuario', 'error');
+        if (result.isConfirmed) {
+            try {
+                await deleteUserById(id);
+                Swal.fire('Eliminado', 'El usuario ha sido eliminado.', 'success');
+            } catch (error) {
+                Swal.fire('Error', 'No se pudo eliminar el usuario.', 'error');
+            }
         }
     };
 
-    useEffect(() => {
-        if (busqueda.trim() === '') {
-            fetchUsuarios(); // si está vacío, traer todos
-        } else {
-            const delay = setTimeout(() => {
-                buscarUsuariosPorTexto(busqueda);
-            }, 500); // delay para evitar llamadas rápidas
-
-            return () => clearTimeout(delay);
-        }
-    }, [busqueda]);
+    const filteredUsers = users.filter(user =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
-        <div className="table-responsive">
-            <div className="d-flex flex-column align-items-center my-1">
-                <h2 className="mb-4">Usuarios</h2>
-                <div className="botones mb-3">
-                    <Link to="/admin" className="btn general_btn px-3 m-2">Inicio</Link>
-                    <Link to="/admin/users/new_user" className="btn general_btn me-2">Nuevo Usuario</Link>
+        <div className="container mt-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2>Gestión de Usuarios</h2>
+                {/* <Link to="/admin/users/new" className="btn btn-primary">
+                    + Nuevo Usuario
+                </Link> */}
+                <div>
+                    {/* <Link to="/admin" className="btn general_btn px-3 m-2">Inicio</Link> */}
+                    <Link to="/admin/users/new" className="btn general_btn me-2"> + Nuevo Usuario</Link>
                 </div>
             </div>
 
-            <div className="mb-2">
-                <input
-                    type="text"
-                    placeholder="Buscar por nombre, username o correo"
-                    className="form-control mb-2"
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
-                />
+            <div className="mb-4">
+                <InputGroup>
+                    <InputGroup.Text><FaSearch /></InputGroup.Text>
+                    <Form.Control
+                        placeholder="Buscar por nombre, usuario o correo..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </InputGroup>
             </div>
-            <div className='mb-2'>
-                {cargando
-                    ? <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '300px' }}>
-                        <Spinner animation="border" />
-                    </div>
-                    : (
-                        <>
-                            <Table bordered hover responsive className="text-center align-middle mx-auto">
-                                <thead className="table-dark">
-                                    <tr>
-                                        <th>Foto</th>
-                                        <th>Nombre</th>
-                                        <th>Username</th>
-                                        <th>Rol de Usuario</th>
-                                        <th>Correo</th>
-                                        <th>Acciones</th>
+
+            {loading ? (
+                <div className="d-flex justify-content-center py-5">
+                    <Spinner animation="border" variant="primary" />
+                </div>
+            ) : (
+                <div className="table-responsive shadow-sm rounded">
+                    <Table hover bordered className="align-middle mb-0 bg-white">
+                        <thead className="table-light">
+                            <tr>
+                                <th>Avatar</th>
+                                <th>Nombre</th>
+                                <th>Usuario</th>
+                                <th>Rol</th>
+                                <th>Instrumento</th>
+                                <th className="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredUsers.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="text-center py-4 text-muted">
+                                        No se encontraron usuarios.
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredUsers.map(user => (
+                                    <tr key={user.id}>
+                                        <td style={{ width: '80px' }}>
+                                            <Image
+                                                src={user.imageUrl || 'https://via.placeholder.com/50'}
+                                                roundedCircle
+                                                width={40}
+                                                height={40}
+                                                style={{ objectFit: 'cover' }}
+                                                alt={user.username}
+                                            />
+                                        </td>
+                                        <td className="fw-bold">{user.name}</td>
+                                        <td>@{user.username}</td>
+                                        <td>
+                                            <span className={`badge ${user.role === 'ADMIN' ? 'bg-danger' : user.role === 'EDITOR' ? 'bg-warning text-dark' : 'bg-secondary'}`}>
+                                                {user.role}
+                                            </span>
+                                        </td>
+                                        <td>{user.instrument || '-'}</td>
+                                        <td className="text-end">
+                                            <Link
+                                                to={`/admin/users/edit/${user.id}`}
+                                                className="btn btn-sm btn-outline-primary me-2"
+                                            >
+                                                <FaEdit />
+                                            </Link>
+                                            <Button
+                                                variant="outline-danger"
+                                                size="sm"
+                                                onClick={() => handleDelete(user.id)}
+                                            >
+                                                <FaTrash />
+                                            </Button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {usuarios.length === 0 ? (
-                                        <tr><td colSpan={6}>No se encontraron usuarios con ese criterio.</td></tr>
-                                    ) : (
-                                        usuarios.map(usuario => (
-                                            <tr key={usuario._id}>
-                                                <td>
-                                                    <Image
-                                                        src={usuario.fotoPerfilUrl || '/images/default-user.png'}
-                                                        roundedCircle
-                                                        height={50}
-                                                        width={50}
-                                                        style={{ objectFit: 'cover' }}
-                                                        alt={usuario.nombre}
-                                                    />
-                                                </td>
-                                                <td>{usuario.nombre}</td>
-                                                <td>{usuario.username}</td>
-                                                <td>{capitalizarPalabra(usuario.rol)}</td>
-                                                <td>{usuario.correo}</td>
-                                                <td>
-                                                    <Link to={`/admin/users/edit/${usuario._id}`} className="btn general_btn mb-2 mb-md-0 me-2">Editar</Link>
-                                                    <Button
-                                                        variant="danger"
-                                                        onClick={() => deleteUser(usuario._id)}
-                                                    >
-                                                        Eliminar
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </Table>
+                                ))
+                            )}
+                        </tbody>
+                    </Table>
+                </div>
+            )}
 
-                            <div className="d-flex justify-content-center gap-2 mt-3">
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => handlePagina(paginaActual - 1)}
-                                    disabled={paginaActual === 1}
-                                >
-                                    Anterior
-                                </Button>
-
-                                <span className="align-self-center">
-                                    Página {paginaActual} de {totalPaginas}
-                                </span>
-
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => handlePagina(paginaActual + 1)}
-                                    disabled={paginaActual === totalPaginas}
-                                >
-                                    Siguiente
-                                </Button>
-                            </div>
-                        </>
-                    )
-                }
-            </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="d-flex justify-content-center gap-2 mt-4">
+                    <Button
+                        variant="secondary"
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                    >
+                        Anterior
+                    </Button>
+                    <span className="align-self-center px-2">
+                        Página {currentPage} de {totalPages}
+                    </span>
+                    <Button
+                        variant="secondary"
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                    >
+                        Siguiente
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };

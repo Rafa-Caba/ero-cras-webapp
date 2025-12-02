@@ -1,21 +1,21 @@
 import { Modal, Button } from 'react-bootstrap';
 
 interface Props {
-    imagenUrl: string | null;
+    imageUrl: string | null;
     onClose: () => void;
 }
 
-export const ChatImageModal = ({ imagenUrl, onClose }: Props) => {
+export const ChatImageModal = ({ imageUrl, onClose }: Props) => {
     return (
-        <Modal show={!!imagenUrl} onHide={onClose} centered size="lg">
+        <Modal show={!!imageUrl} onHide={onClose} centered size="lg">
             <Modal.Header closeButton>
                 <Modal.Title>Imagen del mensaje</Modal.Title>
             </Modal.Header>
 
             <Modal.Body className="text-center">
-                {imagenUrl && (
+                {imageUrl && (
                     <img
-                        src={imagenUrl}
+                        src={imageUrl}
                         alt="Imagen ampliada"
                         className="img-fluid rounded"
                         style={{ maxHeight: '80vh' }}
@@ -24,16 +24,16 @@ export const ChatImageModal = ({ imagenUrl, onClose }: Props) => {
             </Modal.Body>
 
             <Modal.Footer className="justify-content-between">
-                <Button variant="secondary" onClick={onClose}>
+                <Button variant="secondary" className='px-3' onClick={onClose}>
                     Cerrar
                 </Button>
-                {imagenUrl && (
+                {imageUrl && (
                     <a
-                        href={imagenUrl}
+                        href={imageUrl}
                         download
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn btn-primary"
+                        className="btn general_btn"
                     >
                         Descargar
                     </a>

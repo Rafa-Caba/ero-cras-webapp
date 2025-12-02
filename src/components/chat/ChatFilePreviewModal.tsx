@@ -6,59 +6,69 @@ import * as mammoth from 'mammoth';
 import { obtenerIconoArchivo } from '../../utils/functionsFilesNames';
 
 interface Props {
-    tipo: 'imagen' | 'archivo' | 'media' | null;
-    archivoUrl: string | null;
-    archivoNombre?: string;
+    type: 'image' | 'file' | 'audio' | 'video' | null;
+    fileUrl: string | null;
+    fileName?: string;
     onClose: () => void;
 }
 
-export const ChatFilePreviewModal = ({ tipo, archivoUrl, archivoNombre = '', onClose }: Props) => {
-    const show = !!archivoUrl;
+export const ChatFilePreviewModal = ({ type, fileUrl, fileName = '', onClose }: Props) => {
+    const show = !!fileUrl;
     const [previewContent, setPreviewContent] = useState<string | string[][] | null>(null);
-    const [contenidoArchivo, setContenidoArchivo] = useState('');
+    const [fileContent, setFileContent] = useState('');
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(0);
 
-    const handleDescargar = async () => {
-        if (!archivoUrl) return;
-
+    const handleDownload = async () => {
+        if (!fileUrl) return;
         setProgress(10);
-        const response = await fetch(archivoUrl);
-        setProgress(50);
-        const blob = await response.blob();
-        setProgress(80);
 
-        const enlace = document.createElement('a');
-        enlace.href = URL.createObjectURL(blob);
-        enlace.download = archivoNombre;
-        document.body.appendChild(enlace);
-        enlace.click();
-        document.body.removeChild(enlace);
-        setProgress(100);
-        setTimeout(() => setProgress(0), 1000);
+        try {
+            const response = await fetch(fileUrl);
+            setProgress(50);
+            const blob = await response.blob();
+            setProgress(80);
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName || 'download';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+
+            setProgress(100);
+        } catch (error) {
+            console.warn("Blob download failed (likely CORS), falling back to direct link", error);
+            window.open(fileUrl, '_blank');
+            setProgress(100);
+        } finally {
+            setTimeout(() => setProgress(0), 1000);
+        }
     };
 
     useEffect(() => {
-        const cargarVistaPrevia = async () => {
-            if (!archivoUrl || !archivoNombre || tipo !== 'archivo') return;
+        const loadPreview = async () => {
+            if (!fileUrl || !fileName || type !== 'file') return;
 
-            const lower = archivoNombre.toLowerCase();
-
-            // Limpiar estados al cambiar de archivo
+            const lower = fileName.toLowerCase();
             setPreviewContent(null);
-            setContenidoArchivo('');
+            setFileContent('');
             setLoading(true);
 
             try {
-                const res = await fetch(archivoUrl);
+                if (lower.endsWith('.pdf')) {
+                    setPreviewContent(fileUrl);
+                    setLoading(false);
+                    return;
+                }
+
+                const res = await fetch(fileUrl);
                 const blob = await res.blob();
 
                 if (lower.endsWith('.txt') || lower.endsWith('.csv')) {
                     const text = await blob.text();
                     setPreviewContent(text);
-                } else if (lower.endsWith('.pdf')) {
-                    setPreviewContent(`https://docs.google.com/gview?url=${archivoUrl}&embedded=true`);
-
                 } else if (lower.endsWith('.xlsx')) {
                     const buffer = await blob.arrayBuffer();
                     const workbook = new ExcelJS.Workbook();
@@ -79,158 +89,156 @@ export const ChatFilePreviewModal = ({ tipo, archivoUrl, archivoNombre = '', onC
 
                     setPreviewContent(rows);
                 } else if (lower.endsWith('.docx')) {
-                    // const arrayBuffer = await blob.arrayBuffer();
-                    // const result = await mammoth.convertToHtml({ arrayBuffer });
-                    // setContenidoArchivo(result.value);
-
                     try {
                         const arrayBuffer = await blob.arrayBuffer();
                         const result = await mammoth.convertToHtml({ arrayBuffer });
 
                         if (result.value.trim()) {
-                            setContenidoArchivo(result.value);
+                            setFileContent(result.value);
                         } else {
-                            throw new Error('Documento vacío o no procesable por Mammoth');
+                            throw new Error('Empty document');
                         }
                     } catch {
-                        const fallbackUrl = `https://docs.google.com/gview?url=${archivoUrl}&embedded=true`;
-                        setPreviewContent(fallbackUrl); // usamos gview como respaldo
+                        const fallbackUrl = `https://docs.google.com/gview?url=${fileUrl}&embedded=true`;
+                        setPreviewContent(fallbackUrl);
                     }
                 }
             } catch (error) {
-                console.error('Error cargando vista previa:', error);
+                console.error('Error loading preview:', error);
                 setPreviewContent('Error al cargar la vista previa.');
             } finally {
                 setLoading(false);
             }
         };
 
-        cargarVistaPrevia();
-    }, [archivoUrl, archivoNombre, tipo]);
-
-    useEffect(() => {
-        return () => {
-            if (typeof previewContent === 'string' && previewContent.startsWith('blob:')) {
-                URL.revokeObjectURL(previewContent);
-            }
-        };
-    }, [previewContent]);
+        loadPreview();
+    }, [fileUrl, fileName, type]);
 
     return (
-        <Modal show={show} onHide={onClose} centered size="lg">
+        <Modal show={show} onHide={onClose} centered size="xl">
             <Modal.Header className='modal-chat-bg-color' closeButton>
                 <Modal.Title>Vista del mensaje</Modal.Title>
             </Modal.Header>
 
-            <Modal.Body className="text-center modal-chat-bg-color">
-                {progress > 0 && progress < 100 && <ProgressBar animated now={progress} className="mb-3" />}
+            <Modal.Body className="text-center modal-chat-bg-color p-0">
+                {progress > 0 && progress < 100 && <ProgressBar animated now={progress} className="m-3" />}
 
-                {/* VISTA IMAGEN */}
-                {tipo === 'imagen' && archivoUrl && (
-                    <img
-                        src={archivoUrl}
-                        alt="Imagen del mensaje"
-                        className="img-fluid rounded"
-                        style={{ maxHeight: '80vh' }}
-                    />
+                {type === 'image' && fileUrl && (
+                    <div className="p-3">
+                        <img
+                            src={fileUrl}
+                            alt="Imagen del mensaje"
+                            className="img-fluid rounded"
+                            style={{ maxHeight: '80vh' }}
+                        />
+                    </div>
                 )}
 
-                {/* VISTA MEDIA (audio/video) */}
-                {tipo === 'media' && archivoUrl && (
-                    <>
-                        {archivoUrl.endsWith('.mp3') || archivoUrl.endsWith('.wav') ? (
+                {(type === 'audio' || type === 'video') && fileUrl && (
+                    <div className="p-3">
+                        {type === 'audio' ? (
                             <audio controls className="w-100">
-                                <source src={archivoUrl} />
+                                <source src={fileUrl} />
                                 Tu navegador no soporta audio.
                             </audio>
                         ) : (
                             <video controls className="w-100 rounded shadow-sm" style={{ maxHeight: '60vh' }}>
-                                <source src={archivoUrl} />
+                                <source src={fileUrl} />
                                 Tu navegador no soporta video.
                             </video>
                         )}
-                        <p className="mt-2 small text-muted">{archivoNombre}</p>
-                    </>
+                        <p className="mt-2 small text-muted">{fileName}</p>
+                    </div>
                 )}
 
-                {/* VISTA ARCHIVO */}
-                {tipo === 'archivo' && archivoUrl && (
-                    <div className="d-flex flex-column align-items-center gap-2 w-100">
-                        <FontAwesomeIcon icon={obtenerIconoArchivo(archivoNombre)} size="4x" />
-                        <p className="fw-semibold">{archivoNombre}</p>
+                {type === 'file' && fileUrl && (
+                    <div className="d-flex flex-column align-items-center w-100 h-100">
 
-                        {/* DOCX */}
-                        {archivoNombre.endsWith('.docx') && (
-                            <div className="text-start w-100" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                        {!fileName.toLowerCase().endsWith('.pdf') && (
+                            <div className="p-3 border-bottom w-100 bg-light bg-opacity-10">
+                                <FontAwesomeIcon icon={obtenerIconoArchivo(fileName)} size="3x" className="mb-2" />
+                                <p className="fw-semibold m-0">{fileName}</p>
+                            </div>
+                        )}
+
+                        {fileName.toLowerCase().endsWith('.docx') && (
+                            <div className="text-start w-100 p-4 bg-white text-dark" style={{ maxHeight: '65vh', overflowY: 'auto' }}>
                                 {loading ? (
                                     <div className='d-flex justify-content-center align-items-center my-2'>
                                         <Spinner animation="border" />
                                     </div>
-                                ) : contenidoArchivo ? (
-                                    <div dangerouslySetInnerHTML={{ __html: contenidoArchivo }} />
+                                ) : fileContent ? (
+                                    <div dangerouslySetInnerHTML={{ __html: fileContent }} />
                                 ) : typeof previewContent === 'string' ? (
                                     <iframe
                                         src={previewContent}
-                                        style={{ width: '100%', height: '500px' }}
+                                        style={{ width: '100%', height: '600px' }}
                                         frameBorder="0"
+                                        title="Docx Preview"
                                     ></iframe>
                                 ) : (
-                                    <p className="text-muted">No se pudo mostrar el contenido del archivo.</p>
+                                    <p className="text-muted">No se pudo mostrar el contenido.</p>
                                 )}
                             </div>
-                            // <div className="text-start w-100" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-                            //     {contenidoArchivo ? (
-                            //         <div dangerouslySetInnerHTML={{ __html: contenidoArchivo }} />
-                            //     ) : (
-                            //         <p className="text-muted">No se pudo mostrar el contenido del archivo.</p>
-                            //     )}
-                            // </div>
                         )}
 
-                        {/* PDF */}
-                        {!loading && archivoNombre.endsWith('.pdf') && typeof previewContent === 'string' && (
-                            <iframe
-                                src={previewContent}
-                                style={{ width: '100%', height: '500px' }}
-                                frameBorder="0"
-                            ></iframe>
+                        {!loading && fileName.toLowerCase().endsWith('.pdf') && typeof previewContent === 'string' && (
+                            <div className="w-100" style={{ height: '75vh' }}>
+                                <object
+                                    data={previewContent}
+                                    type="application/pdf"
+                                    width="100%"
+                                    height="100%"
+                                    className="rounded-bottom"
+                                >
+                                    <div className="d-flex flex-column align-items-center justify-content-center h-100 bg-light">
+                                        <p>Tu navegador no puede mostrar este PDF directamente.</p>
+                                        <Button onClick={handleDownload}>Descargar PDF</Button>
+                                    </div>
+                                </object>
+                            </div>
                         )}
 
-                        {/* TXT o CSV */}
-                        {!loading && typeof previewContent === 'string' && !archivoNombre.endsWith('.docx') && (
-                            <pre className="text-start small bg-light p-2 rounded w-100 overflow-auto" style={{ maxHeight: '40vh' }}>
+                        {!loading && typeof previewContent === 'string' && (fileName.toLowerCase().endsWith('.txt') || fileName.toLowerCase().endsWith('.csv')) && (
+                            <pre className="text-start small bg-light p-3 w-100 overflow-auto m-0" style={{ maxHeight: '60vh' }}>
                                 {previewContent}
                             </pre>
                         )}
 
-                        {/* XLSX */}
                         {!loading && Array.isArray(previewContent) && (
-                            <table className="table table-sm table-bordered w-100 small">
-                                <tbody>
-                                    {previewContent.map((row, i) => (
-                                        <tr key={i}>
-                                            {row.map((cell, j) => (
-                                                <td key={j}>{cell}</td>
-                                            ))}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                            <div className="table-responsive w-100 p-0" style={{ maxHeight: '70vh' }}>
+                                <table className="table table-striped table-bordered table-hover mb-0 text-nowrap">
+                                    <tbody>
+                                        {previewContent.map((row, i) => (
+                                            <tr key={i}>
+                                                {row.map((cell, j) => (
+                                                    <td key={j} style={{ minWidth: '100px', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        {cell}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
 
-                        {loading && !archivoNombre.endsWith('.docx') && (
-                            <p className="text-muted">Cargando vista previa...</p>
+                        {loading && !fileName.toLowerCase().endsWith('.docx') && !fileName.toLowerCase().endsWith('.pdf') && (
+                            <div className="p-5">
+                                <Spinner animation="border" variant="primary" />
+                                <p className="mt-2 text-muted">Cargando vista previa...</p>
+                            </div>
                         )}
                     </div>
                 )}
             </Modal.Body>
 
             <Modal.Footer className="justify-content-between modal-chat-bg-color">
-                <Button variant="secondary" onClick={onClose}>
+                <Button variant="secondary" className='px-3' onClick={onClose}>
                     Cerrar
                 </Button>
-                {archivoUrl && archivoNombre && (
-                    <Button onClick={handleDescargar} className="btn btn-primary">
+                {fileUrl && (
+                    <Button onClick={handleDownload} className="btn general_btn">
                         Descargar
                     </Button>
                 )}

@@ -1,35 +1,36 @@
 import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { usePublicGaleriaStore, usePublicSettingsStore } from '../../store/public';
-import { Header } from '../../components-public/Header';
-import { NavBar } from '../../components-public/NavBar';
-import { SidebarLeft } from '../../components-public/SidebarLeft';
-import { SidebarRight } from '../../components-public/SidebarRight';
-import { Footer } from '../../components-public/Footer';
+import { useGalleryStore, useSettingsStore } from '../../store/public';
+import { Header } from '../../components/components-public/Header';
+import { NavBar } from '../../components/components-public/NavBar';
+import { SidebarLeft } from '../../components/components-public/SidebarLeft';
+import { SidebarRight } from '../../components/components-public/SidebarRight';
+import { Footer } from '../../components/components-public/Footer';
+
 
 const PublicLayout = () => {
-    const { settings, fetchSettingsPublicos } = usePublicSettingsStore();
-    const { imagenes, fetchImagenesPublicas } = usePublicGaleriaStore();
+    const { settings, fetchSettings } = useSettingsStore();
+    const { images, fetchGallery } = useGalleryStore();
 
     useEffect(() => {
-        fetchSettingsPublicos();
-        fetchImagenesPublicas();
+        fetchSettings();
+        fetchGallery();
     }, []);
 
     useEffect(() => {
-        if (settings?.tituloWeb) {
-            document.title = settings.tituloWeb;
+        if (settings?.webTitle) {
+            document.title = settings.webTitle;
         } else {
             document.title = 'Ero Cras Oficial';
         }
 
-        const imagenLogo = imagenes.find(img => img.imagenLogo);
+        const logoImage = images.find(img => img.imageLogo);
         const favicon = document.querySelector("link[rel='icon']") as HTMLLinkElement;
 
-        if (favicon && imagenLogo) {
-            favicon.href = imagenLogo?.imagenUrl || '/images/erocrasLogo.png';
+        if (favicon && logoImage) {
+            favicon.href = logoImage.imageUrl || '/images/erocrasLogo.png';
         }
-    }, [settings, imagenes]);
+    }, [settings, images]);
 
     return (
         <div className="layout-container">

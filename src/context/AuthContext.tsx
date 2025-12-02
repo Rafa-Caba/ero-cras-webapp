@@ -1,77 +1,148 @@
-import { createContext, useState, useEffect, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/axios';
-import type { AuthContextType, User } from '../types';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { loginUser, registerUser, getUserProfile } from '../services/auth';
+import { useChatStore } from '../store/admin/useChatStore';
+import { applyThemeToDocument } from '../utils/applyThemeToDocument';
+import type { User, LoginPayload, RegisterPayload } from '../types/auth';
+
+interface AuthContextType {
+    user: User | null;
+    token: string | null;
+    role: string | null;
+    loading: boolean;
+
+    login: (data: LoginPayload) => Promise<void>;
+    register: (data: RegisterPayload) => Promise<void>;
+    logout: () => void;
+    checkAuth: () => Promise<void>;
+    updateUser: (userData: User) => void;
+}
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const navigate = useNavigate();
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
-    const [loading, setLoading] = useState(true);
+    const [role, setRole] = useState<string | null>(localStorage.getItem('role'));
+    const [loading, setLoading] = useState<boolean>(true);
 
-    const isAuthenticated = !!token;
-
-    useEffect(() => {
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) {
-            setUser(JSON.parse(savedUser));
-        }
-        setLoading(false); // ✅ después de intentar cargar
-    }, []);
+    const { connect, disconnect } = useChatStore();
 
     useEffect(() => {
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) setUser(JSON.parse(savedUser));
-    }, []);
-
-    const login = (userData: User, accessToken: string, refreshToken: string) => {
-        setUser(userData);
-        setToken(accessToken);
-        localStorage.setItem('token', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
-        localStorage.setItem('user', JSON.stringify(userData));
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-        navigate('/admin');
-    };
-
-    const updateUser = (updatedUser: User) => {
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-    };
-
-    const logout = async () => {
-        try {
-            const refreshToken = localStorage.getItem('refreshToken');
-            if (refreshToken) {
-                await api.post('/login/logout', { token: refreshToken });
+        const initAuth = async () => {
+            const storedToken = localStorage.getItem('token');
+            if (storedToken) {
+                setToken(storedToken);
+                await checkAuth();
+            } else {
+                setLoading(false);
             }
-        } catch (error) {
-            console.warn('Error al cerrar sesión en backend:', error);
+        };
+
+        initAuth();
+
+        return () => {
+            disconnect();
+        };
+    }, []);
+
+    useEffect(() => {
+        if (user && user.themeId && typeof user.themeId === 'object') {
+            applyThemeToDocument(user.themeId as any);
         }
+    }, [user]);
 
-        // Limpiar tokens y datos del usuario
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('tema-admin');
+    const checkAuth = async () => {
+        const storedToken = localStorage.getItem('token');
+        if (!storedToken) {
+            setLoading(false);
+            return;
+        }
+        try {
+            const userData = await getUserProfile();
+            setUser(userData);
+            setRole(userData.role);
 
-        // Limpiar headers globales
-        delete api.defaults.headers.common['Authorization'];
+            connect(storedToken, userData);
+        } catch (error) {
+            console.error("Auth Check Failed", error);
+            logout();
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        // Limpiar estado React
-        setUser(null);
+    const login = async (data: LoginPayload) => {
+        try {
+            const response = await loginUser(data);
+            localStorage.setItem('token', response.accessToken);
+            localStorage.setItem('refreshToken', response.refreshToken);
+            localStorage.setItem('role', response.role);
+
+            setToken(response.accessToken);
+            setRole(response.role);
+            setUser(response.user);
+
+            connect(response.accessToken, response.user);
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    const register = async (data: RegisterPayload) => {
+        try {
+            const response = await registerUser(data);
+            localStorage.setItem('token', response.accessToken);
+            localStorage.setItem('refreshToken', response.refreshToken);
+            localStorage.setItem('role', response.role);
+
+            setToken(response.accessToken);
+            setRole(response.role);
+            setUser(response.user);
+
+            connect(response.accessToken, response.user);
+        } catch (error) {
+            throw error;
+        }
+    };
+
+    const logout = () => {
+        localStorage.clear();
         setToken(null);
+        setUser(null);
+        setRole(null);
+        disconnect();
+    };
 
-        // Redirigir al login
-        navigate('/admin/login');
+    const updateUser = (userData: User) => {
+        setUser(prev => ({ ...prev, ...userData }));
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, isAuthenticated, login, logout, updateUser, loading }}>
+        <AuthContext.Provider value={{
+            user,
+            token,
+            role,
+            loading,
+            login,
+            register,
+            logout,
+            checkAuth,
+            updateUser
+        }}>
             {children}
         </AuthContext.Provider>
     );
+};
+
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) throw new Error('useAuth must be used within an AuthProvider');
+
+    const { user } = context;
+
+    // 🛡️ Role Helpers
+    const isAdmin = user?.role === 'ADMIN';
+    const canEdit = user?.role === 'ADMIN' || user?.role === 'EDITOR';
+
+    return { ...context, isAdmin, canEdit };
 };

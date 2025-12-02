@@ -15,7 +15,7 @@ export const TiptapChatViewer = ({ content }: { content: JSONContent }) => {
         ],
         editorProps: {
             attributes: {
-                class: 'chat-viewer ProseMirror chat-text-color', // importante para aplicar estilos desde fuera
+                class: 'chat-viewer ProseMirror chat-text-color',
             },
         },
     });

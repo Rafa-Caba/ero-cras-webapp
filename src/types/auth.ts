@@ -1,37 +1,42 @@
-import type { User } from "./usuarios";
-
-export interface LoginResponse {
-    token: string;
-    user: User;
-    role: 'ADMIN' | 'EDITOR' | 'USER' // Types of users for this choir app.
-}
-
-export interface LoginForm {
-    usernameOrEmail: string;
-    password: string;
-}
-
-export interface AuthUsuario {
-    _id: string;
-
-    nombre: string;
+export interface User {
+    id: string;
+    name: string;
     username: string;
-    correo: string;
-    password: string;
-    password2?: string;
-    rol: 'admin' | 'editor' | 'viewer';
-    fotoPerfil: File | null;
-    fotoPerfilUrl?: string;
+    email: string;
+    role: 'ADMIN' | 'EDITOR' | 'VIEWER';
+
+    imageUrl?: string;
+    imagePublicId?: string;
+
+    instrument?: string;
+    voice?: boolean;
+    bio?: string;
+
+    themeId?: any;
+    pushToken?: string;
+    lastAccess?: string;
+
+    createdAt?: string;
+    updatedAt?: string;
 }
 
-export interface AuthContextType {
-    user: User | null;
-    token: string | null;
-    isAuthenticated: boolean;
-    loading: boolean;
+export interface AuthResponse {
+    message?: string;
+    accessToken: string;
+    refreshToken: string;
+    role: string;
+    user: User;
+}
 
-    // Functions
-    login: (userData: User, token: string, refreshToken: string) => void;
-    logout: () => void;
-    updateUser: (updatedUser: User) => void;
+export interface LoginPayload {
+    username: string;
+    password: string;
+}
+
+export interface RegisterPayload {
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+    instrument?: string;
 }

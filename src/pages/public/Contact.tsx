@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ContactSection } from "../../components-public/ContactSection";
+import { ContactSection } from "../../components/components-public/ContactSection";
 
-const Contact = () => {
+export const Contact = () => {
 
     const [email, setEmail] = useState('');
     const [emailMessage, setEmailMessage] = useState('');
@@ -29,5 +29,3 @@ const Contact = () => {
         />
     );
 }
-
-export default Contact

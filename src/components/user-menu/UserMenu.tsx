@@ -1,44 +1,47 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dropdown } from 'react-bootstrap';
-import { useAuth } from '../../hooks/useAuth';
-
-import { useThemeGroupsStore } from '../../store/admin/useThemeGroupsStore';
-import { ThemeSelectorModal } from './ThemeSelectorModal';
-import type { ThemeGroup } from '../../types';
 import Swal from 'sweetalert2';
-import { useUsuariosStore } from '../../store/admin/useUsuariosStore';
+
+import { useThemeStore } from '../../store/admin/useThemeStore';
+import { useUsersStore } from '../../store/admin/useUsersStore';
+import { ThemeSelectorModal } from './ThemeSelectorModal';
+import { applyThemeToDocument } from '../../utils/applyThemeToDocument';
+import type { Theme } from '../../types/theme';
+import { useAuth } from '../../context/AuthContext';
 
 export const UserMenu = () => {
     const navigate = useNavigate();
     const { user, updateUser, logout } = useAuth();
-    const { actualizarTemaPersonal } = useUsuariosStore();
-    const { grupos } = useThemeGroupsStore();
 
-    const [mostrarModal, setMostrarModal] = useState(false);
+    const { updateMyTheme } = useUsersStore();
+    const { themes, fetchThemes } = useThemeStore();
+
+    const [showModal, setShowModal] = useState(false);
+
+    useEffect(() => {
+        fetchThemes();
+    }, []);
 
     const handleLogout = () => {
         logout();
-        navigate('/admin/login');
+        navigate('/auth/login');
     };
 
-    const handleSeleccionarTema = async (grupo: ThemeGroup) => {
+    const handleSelectTheme = async (theme: Theme) => {
         try {
-            if (!grupo?._id || !user?._id) return;
+            if (!theme.id || !user?.id) return;
 
-            const actualizado = await actualizarTemaPersonal(user._id, grupo._id);
+            const updatedUser = await updateMyTheme(theme.id);
 
-            if (!actualizado) {
-                Swal.fire('Error', 'No se pudo guardar el tema. Intenta más tarde.', 'error');
-                return;
-            }
+            updateUser(updatedUser);
 
-            updateUser(actualizado);
+            applyThemeToDocument(theme);
 
-            setMostrarModal(false);
-            Swal.fire('¡Tema aplicado!', `Se ha guardado tu preferencia de tema`, 'success');
+            setShowModal(false);
+            Swal.fire('¡Tema aplicado!', `Se ha guardado tu preferencia.`, 'success');
         } catch (error) {
-            console.error('Error al guardar tema personal:', error);
+            console.error('Error applying theme:', error);
             Swal.fire('Error', 'No se pudo guardar el tema. Intenta más tarde.', 'error');
         }
     };
@@ -53,7 +56,7 @@ export const UserMenu = () => {
                     style={{ width: '42px', height: '42px', overflow: 'hidden' }}
                 >
                     <img
-                        src={user?.fotoPerfilUrl || '/default-avatar.png'}
+                        src={user?.imageUrl || '/default-avatar.png'}
                         alt="Perfil"
                         className="rounded-circle"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -61,27 +64,24 @@ export const UserMenu = () => {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                    <Dropdown.Header>👋 ¡Hola, {user?.nombre?.split(' ')[0]}!</Dropdown.Header>
+                    <Dropdown.Header>👋 ¡Hola, {user?.name?.split(' ')[0]}!</Dropdown.Header>
 
                     <Dropdown.Item onClick={() => navigate('/admin')}>
                         Ir a Inicio
                     </Dropdown.Item>
 
-                    <Dropdown.Item onClick={() => navigate('/admin/settings-user')}>
+                    <Dropdown.Item onClick={() => navigate('/admin/edit-profile')}>
                         👤 Ajustes de usuario
                     </Dropdown.Item>
 
-                    <Dropdown.Item onClick={() => navigate('/admin/mi-perfil')}>
+                    <Dropdown.Item onClick={() => navigate('/admin/profile')}>
                         📄 Ver mi perfil
                     </Dropdown.Item>
 
                     <Dropdown.Item
                         onClick={() => {
-                            if (user?._id) {
-                                setMostrarModal(true);
-                            } else {
-                                Swal.fire('Usuario no disponible', 'No se puede cambiar el tema en este momento.', 'warning');
-                            }
+                            if (user?.id) setShowModal(true);
+                            else Swal.fire('Aviso', 'Usuario no disponible.', 'warning');
                         }}
                     >
                         🎨 Cambiar tema del admin
@@ -99,12 +99,11 @@ export const UserMenu = () => {
                 </Dropdown.Menu>
             </Dropdown>
 
-            {/* Modal para seleccionar tema */}
             <ThemeSelectorModal
-                show={mostrarModal}
-                onClose={() => setMostrarModal(false)}
-                themeGroups={grupos}
-                onSelect={handleSeleccionarTema}
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                themes={themes}
+                onSelect={handleSelectTheme}
             />
         </>
     );

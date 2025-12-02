@@ -1,59 +1,38 @@
-import type { JSONContent } from '@tiptap/react';
-import type { User } from './usuarios';
+import type { User } from './auth';
+import type { TipTapContent } from './annoucement';
 
-export interface ReaccionMensaje {
+export type MessageType = 'TEXT' | 'IMAGE' | 'FILE' | 'MEDIA' | 'REACTION' | 'AUDIO' | 'VIDEO';
+
+export interface MessageReaction {
     emoji: string;
-    usuario: string;
+    user: User | string;
 }
 
 export interface ChatMessage {
-    _id: string;
-    autor: User;
-    contenido: JSONContent;
-    tipo: 'texto' | 'imagen' | 'archivo' | 'media' | 'reaccion';
-    archivoUrl?: string;
-    archivoNombre?: string;
-    imagenUrl?: string;
-    imagenPublicId?: string;
-    reacciones?: ReaccionMensaje[];
+    id: string;
+
+    author: User;
+    content: TipTapContent;
+    type: MessageType;
+
+    // Media fields
+    fileUrl?: string;
+    filename?: string;
+    imageUrl?: string;
+    audioUrl?: string;
+
+    reactions: MessageReaction[];
+    replyTo?: ChatMessage | null;
+
     createdAt: string;
+    updatedAt: string;
 }
 
-export interface NuevoMensaje {
-    autor: User;
-    contenido: JSONContent;
-    tipo: 'texto' | 'imagen' | 'archivo' | 'media' | 'reaccion';
-    archivoUrl?: string;
-    archivoNombre?: string;
-    imagenUrl?: string;
-    imagenPublicId?: string;
-}
-
-export interface ChatMessageResponse {
-    msg: string;
-    mensaje: ChatMessage;
-}
-
-export interface ImagenSubida {
-    imagenUrl: string;
-    imagenPublicId: string;
-}
-
-export interface ChatState {
-    mensajes: ChatMessage[];
-    noHayMasMensajes: boolean;
-    cargando: boolean;
-    error: string | null;
-
-    fetchMensajes: () => Promise<void>;
-    fetchMensajesAnteriores: () => Promise<void>;
-    agregarMensajeTexto: (nuevoMensaje: NuevoMensaje) => Promise<ChatMessage>;
-    agregarMensajeArchivo: (formData: FormData) => Promise<ChatMessage>;
-    agregarMensajeSocket: (mensaje: ChatMessage) => void;
-    reaccionarAMensajeEnStore: (mensajeId: string, emoji: string) => Promise<void>;
-    subirImagenYObtenerUrl: (file: File) => Promise<ImagenSubida | null>;
-    actualizarMensajeReaccion: (mensajeActualizado: ChatMessage) => void;
-    agregarArchivoGeneral: (formData: FormData) => Promise<ChatMessage>;
-    agregarArchivoMedia: (formData: FormData) => Promise<ChatMessage>;
-    limpiarMensajes: () => void;
+export interface NewMessagePayload {
+    username: string;
+    content: any;
+    type: MessageType;
+    fileUrl?: string;
+    filename?: string;
+    replyToId?: string;
 }

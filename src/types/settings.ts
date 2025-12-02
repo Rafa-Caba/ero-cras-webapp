@@ -1,27 +1,36 @@
-import type { JSONContent } from '@tiptap/react';
+import type { TipTapContent } from './annoucement';
 
-export interface Setting {
-    _id: string;
-    tituloWeb: string;
-    socialLinks: {
-        facebook: string;
-        instagram: string;
-        youtube: string;
-        whatsapp: string;
-        correo: string;
-    };
-    leyendasInicio: {
-        principal: string;
-        secundaria: string;
-    };
-    historiaNosotros: JSONContent;
-    telefonoContacto: string;
-    createdAt?: string;
-    updatedAt?: string;
+export interface SocialLinks {
+    facebook: string;
+    instagram: string;
+    youtube: string;
+    whatsapp: string;
+    email: string;
 }
 
-export interface SettingsUpdateResponse {
-    ok: boolean;
-    mensaje: string;
-    settingActualizado?: Setting;
+export interface HomeLegends {
+    principal: string;
+    secondary: string;
+}
+
+export interface AppSettings {
+    id: string;
+    webTitle: string;
+    contactPhone: string;
+
+    logoUrl?: string;
+
+    socials: SocialLinks;
+    homeLegends: HomeLegends;
+    history: TipTapContent;
+
+    updatedAt: string;
+}
+
+export interface UpdateSettingsPayload {
+    webTitle?: string;
+    contactPhone?: string;
+    socials?: SocialLinks;
+    homeLegends?: HomeLegends;
+    history?: TipTapContent;
 }

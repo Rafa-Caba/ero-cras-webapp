@@ -1,33 +1,34 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Form, Button, Container, Image } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { useUsuariosStore } from '../../store/admin/useUsuariosStore';
-import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
+
+import { useUsersStore } from '../../store/admin/useUsersStore';
+import { useAuth } from '../../context/AuthContext';
 
 export const UserSettings = () => {
     const { user, updateUser } = useAuth();
-    const { actualizarUsuarioLogueado } = useUsuariosStore();
+    const { updateMyProfile } = useUsersStore();
 
     const [formData, setFormData] = useState({
-        nombre: '',
+        name: '',
         username: '',
-        correo: '',
-        fotoPerfilUrl: ''
+        email: '',
+        imageUrl: ''
     });
 
-    const [fotoPerfil, setFotoPerfil] = useState<File | null>(null);
+    const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     useEffect(() => {
         if (user) {
             setFormData({
-                nombre: user.nombre || '',
+                name: user.name || '',
                 username: user.username || '',
-                correo: user.correo || '',
-                fotoPerfilUrl: user.fotoPerfilUrl || ''
+                email: user.email || '',
+                imageUrl: user.imageUrl || ''
             });
-            setPreviewUrl(user.fotoPerfilUrl || null);
+            setPreviewUrl(user.imageUrl || null);
         }
     }, [user]);
 
@@ -35,10 +36,10 @@ export const UserSettings = () => {
         const target = e.target;
 
         if (target.type === 'file') {
-            const file = target.files?.[0];
-            if (file) {
-                setFotoPerfil(file);
-                setPreviewUrl(URL.createObjectURL(file));
+            const selectedFile = target.files?.[0];
+            if (selectedFile) {
+                setFile(selectedFile);
+                setPreviewUrl(URL.createObjectURL(selectedFile));
             }
         } else {
             const { name, value } = target;
@@ -49,33 +50,39 @@ export const UserSettings = () => {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (!user?._id) return;
+        if (!user?.id) return;
 
-        const formPayload = new FormData();
-        formPayload.append('nombre', formData.nombre);
-        formPayload.append('username', formData.username);
-        formPayload.append('correo', formData.correo);
-        if (fotoPerfil) formPayload.append('fotoPerfil', fotoPerfil);
+        const payload = new FormData();
+        payload.append('name', formData.name);
+        payload.append('username', formData.username);
+        payload.append('email', formData.email);
+
+        if (file) {
+            payload.append('file', file);
+        }
 
         try {
-            const actualizado = await actualizarUsuarioLogueado(user._id, formPayload);
-            updateUser(actualizado);
+            const updatedUser = await updateMyProfile(payload);
+
+            updateUser(updatedUser);
+
             Swal.fire('Actualizado', '✅ Datos actualizados con éxito', 'success');
         } catch (error) {
+            console.error(error);
             Swal.fire('Error', '❌ No se pudo actualizar el usuario', 'error');
         }
     };
 
     return (
-        <Container className="m-3 col-md-6 mx-auto">
+        <Container className="m-3 col-md-8 mt-4 mx-auto">
             <h3>Ajustes del Usuario</h3>
             <Form onSubmit={handleSubmit} encType="multipart/form-data">
                 <Form.Group className="mb-3">
                     <Form.Label>Nombre</Form.Label>
                     <Form.Control
                         type="text"
-                        name="nombre"
-                        value={formData.nombre}
+                        name="name"
+                        value={formData.name}
                         onChange={handleChange}
                         required
                     />
@@ -96,8 +103,8 @@ export const UserSettings = () => {
                     <Form.Label>Correo</Form.Label>
                     <Form.Control
                         type="email"
-                        name="correo"
-                        value={formData.correo}
+                        name="email"
+                        value={formData.email}
                         onChange={handleChange}
                         required
                     />
@@ -105,7 +112,7 @@ export const UserSettings = () => {
 
                 {previewUrl && (
                     <div className="mb-3 mt-4 text-center">
-                        <Image src={previewUrl} roundedCircle width={150} alt="Vista previa" />
+                        <Image src={previewUrl} roundedCircle width={200} height={200} alt="Vista previa" />
                     </div>
                 )}
 
@@ -113,7 +120,7 @@ export const UserSettings = () => {
                     <Form.Label>Foto de perfil (opcional)</Form.Label>
                     <Form.Control
                         type="file"
-                        name="fotoPerfil"
+                        name="file"
                         accept="image/*"
                         onChange={handleChange}
                     />

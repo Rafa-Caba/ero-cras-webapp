@@ -1,17 +1,17 @@
-import type { ChatMessage } from '../../types';
-import { ChatBubble } from './index';
+import type { ChatMessage } from '../../types/chat';
+import { ChatBubble } from './ChatBubble';
 
 interface Props {
-    mensajesAgrupados: Record<string, ChatMessage[]>;
-    esMensajePropio: (id: string) => boolean;
-    setImagenAmpliada: (url: string) => void;
-    onPreviewClick: (tipo: 'imagen' | 'archivo' | 'media', url: string, nombre?: string) => void;
+    groupedMessages: Record<string, ChatMessage[]>;
+    isOwnMessage: (id: string) => boolean;
+    setExpandedImage: (url: string) => void;
+    onPreviewClick: (type: 'image' | 'file' | 'audio' | 'video', url: string, name?: string) => void;
 }
 
-export const AdminChatBubbles = ({ mensajesAgrupados, esMensajePropio, setImagenAmpliada, onPreviewClick }: Props) => {
-    const fechas = Object.entries(mensajesAgrupados);
+export const AdminChatBubbles = ({ groupedMessages, isOwnMessage, setExpandedImage, onPreviewClick }: Props) => {
+    const dates = Object.entries(groupedMessages);
 
-    if (fechas.length === 0) {
+    if (dates.length === 0) {
         return (
             <div className='d-flex justify-content-center'>
                 <p>No hay mensajes</p>
@@ -21,23 +21,23 @@ export const AdminChatBubbles = ({ mensajesAgrupados, esMensajePropio, setImagen
 
     return (
         <>
-            {fechas.map(([fecha, msgsDelDia]) => (
-                <div key={fecha}>
+            {dates.map(([date, msgsOfDay]) => (
+                <div key={date}>
                     <div className="relative my-3 text-center">
                         <hr className="border-t border-gray-300" />
                         <span className="absolute left-1/2 -translate-x-1/2 -top-3 dark:bg-gray-900 px-3 text-theme-color fw-bold text-sm">
-                            {fecha}
+                            {date}
                         </span>
                     </div>
 
-                    {msgsDelDia.map((msg, i) => (
+                    {msgsOfDay.map((msg, i) => (
                         <ChatBubble
-                            key={msg._id}
+                            key={msg.id}
                             msg={msg}
-                            anterior={msgsDelDia[i - 1]}
-                            esPropio={esMensajePropio(msg.autor._id)}
-                            onImagenClick={setImagenAmpliada}
-                            onAvatarClick={setImagenAmpliada}
+                            previous={msgsOfDay[i - 1]}
+                            isOwn={isOwnMessage(msg.author.id)}
+                            onImageClick={setExpandedImage}
+                            onAvatarClick={setExpandedImage}
                             onPreviewClick={onPreviewClick}
                         />
                     ))}

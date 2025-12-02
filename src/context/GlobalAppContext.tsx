@@ -1,97 +1,97 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useGaleriaStore } from '../store/admin/useGaleriaStore';
-import { useCantosStore } from '../store/admin/useCantosStore';
-import { useUsuariosStore } from '../store/admin/useUsuariosStore';
-import { useMiembrosStore } from '../store/admin/useMiembrosStore';
-import { useAvisosStore } from '../store/admin/useAvisosStore';
-import { useBlogPostsStore } from '../store/admin/useBlogPostsStore';
-import { useSettingsStore } from '../store/admin/useSettingsStore';
-import { useThemeGroupsStore } from '../store/admin/useThemeGroupsStore';
+// import { createContext, useContext, useEffect, useState } from 'react';
+// import { useAuth } from '../hooks/useAuth';
+// import { useGaleriaStore } from '../store/admin/useGalleryStore';
+// import { useCantosStore } from '../store/admin/useSongStore';
+// import { useUsuariosStore } from '../store/admin/useUsersStore';
+// import { useMiembrosStore } from '../store/admin/useMiembrosStore';
+// import { useAvisosStore } from '../store/admin/useAnnouncementStore';
+// import { useBlogPostsStore } from '../store/admin/useBlogStore';
+// import { useSettingsStore } from '../store/admin/useSettingsStore';
+// import { useThemeGroupsStore } from '../store/admin/useThemeGroupsStore';
 
-interface GlobalAppContextProps {
-    cargado: boolean;
-}
+// interface GlobalAppContextProps {
+//     cargado: boolean;
+// }
 
-const GlobalAppContext = createContext<GlobalAppContextProps>({ cargado: false });
+// const GlobalAppContext = createContext<GlobalAppContextProps>({ cargado: false });
 
-const GlobalAppProvider = ({ children }: { children: React.ReactNode }) => {
-    const [cargado, setCargado] = useState(false);
-    const { user } = useAuth();
+// const GlobalAppProvider = ({ children }: { children: React.ReactNode }) => {
+//     const [cargado, setCargado] = useState(false);
+//     const { user } = useAuth();
 
-    const { fetchImagenes } = useGaleriaStore();
-    const { obtenerTodos } = useCantosStore();
-    const { fetchUsuarios } = useUsuariosStore();
-    const { fetchMiembros } = useMiembrosStore();
-    const { fetchAvisos } = useAvisosStore();
-    const { fetchPosts } = useBlogPostsStore();
-    const { fetchSettings } = useSettingsStore();
-    const { fetchGrupos, temaActivo, fetchTemaActivo } = useThemeGroupsStore();
+//     const { fetchImagenes } = useGaleriaStore();
+//     const { obtenerTodos } = useCantosStore();
+//     const { fetchUsuarios } = useUsuariosStore();
+//     const { fetchMiembros } = useMiembrosStore();
+//     const { fetchAvisos } = useAvisosStore();
+//     const { fetchPosts } = useBlogPostsStore();
+//     const { fetchSettings } = useSettingsStore();
+//     const { fetchGrupos, temaActivo, fetchTemaActivo } = useThemeGroupsStore();
 
-    useEffect(() => {
-        if (!user) return;
+//     useEffect(() => {
+//         if (!user) return;
 
-        const cargarDatos = async () => {
-            try {
-                await Promise.all([
-                    fetchImagenes(1),
-                    obtenerTodos(),
-                    fetchUsuarios(1),
-                    fetchMiembros(1),
-                    fetchAvisos(1),
-                    fetchPosts(1),
-                    fetchSettings(),
-                    fetchGrupos(1),
-                ]);
-                setCargado(true);
-            } catch (error) {
-                console.error('Error al cargar datos globales:', error);
-            }
-        };
+//         const cargarDatos = async () => {
+//             try {
+//                 await Promise.all([
+//                     fetchImagenes(1),
+//                     obtenerTodos(),
+//                     fetchUsuarios(1),
+//                     fetchMiembros(1),
+//                     fetchAvisos(1),
+//                     fetchPosts(1),
+//                     fetchSettings(),
+//                     fetchGrupos(1),
+//                 ]);
+//                 setCargado(true);
+//             } catch (error) {
+//                 console.error('Error al cargar datos globales:', error);
+//             }
+//         };
 
-        cargarDatos();
-    }, [user]);
+//         cargarDatos();
+//     }, [user]);
 
-    useEffect(() => {
-        const grupo = user?.themePersonal && typeof user.themePersonal === 'object'
-            ? user.themePersonal
-            : temaActivo;
+//     useEffect(() => {
+//         const grupo = user?.themePersonal && typeof user.themePersonal === 'object'
+//             ? user.themePersonal
+//             : temaActivo;
 
-        if (grupo && grupo.colores) {
-            const root = document.documentElement;
-            grupo.colores.forEach(({ colorClass, color }) => {
-                root.style.setProperty(`--color-${colorClass}`, color);
-            });
-        }
-    }, [user?.themePersonal, temaActivo]);
+//         if (grupo && grupo.colores) {
+//             const root = document.documentElement;
+//             grupo.colores.forEach(({ colorClass, color }) => {
+//                 root.style.setProperty(`--color-${colorClass}`, color);
+//             });
+//         }
+//     }, [user?.themePersonal, temaActivo]);
 
-    useEffect(() => {
-        const cargarTemaActivo = async () => {
-            try {
-                await fetchTemaActivo();
-            } catch (err) {
-                console.warn('Error al obtener tema activo desde backend', err);
-            }
-        };
+//     useEffect(() => {
+//         const cargarTemaActivo = async () => {
+//             try {
+//                 await fetchTemaActivo();
+//             } catch (err) {
+//                 console.warn('Error al obtener tema activo desde backend', err);
+//             }
+//         };
 
-        cargarTemaActivo();
-    }, []);
+//         cargarTemaActivo();
+//     }, []);
 
-    return (
-        <GlobalAppContext.Provider value={{ cargado }}>
-            {cargado ? children : (
-                <div className="pantalla-cargando d-flex justify-content-center align-items-center vh-100">
-                    <div className="text-center">
-                        <div className="spinner-border text-primary" role="status">
-                            <span className="visually-hidden">Cargando...</span>
-                        </div>
-                        <p className="mt-3">Cargando recursos...</p>
-                    </div>
-                </div>
-            )}
-        </GlobalAppContext.Provider>
-    );
-};
+//     return (
+//         <GlobalAppContext.Provider value={{ cargado }}>
+//             {cargado ? children : (
+//                 <div className="pantalla-cargando d-flex justify-content-center align-items-center vh-100">
+//                     <div className="text-center">
+//                         <div className="spinner-border text-primary" role="status">
+//                             <span className="visually-hidden">Cargando...</span>
+//                         </div>
+//                         <p className="mt-3">Cargando recursos...</p>
+//                     </div>
+//                 </div>
+//             )}
+//         </GlobalAppContext.Provider>
+//     );
+// };
 
-export default GlobalAppProvider; // ✅ default
-export const useGlobalApp = () => useContext(GlobalAppContext); // ✅ ok, sin cambio necesario
+// export default GlobalAppProvider; // ✅ default
+// export const useGlobalApp = () => useContext(GlobalAppContext); // ✅ ok, sin cambio necesario

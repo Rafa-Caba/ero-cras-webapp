@@ -1,101 +1,46 @@
 main {
     .sidebar {
-        background: var(--color-side-menus);
+        background: var(--color-card);
+        border-right: 1px solid var(--color-border);
     }
 
-    .meaning {
-        background: rgb(245, 236, 255);
-        border: 2px solid #CFAEF9;
-    }
-
-    .logo {
-        background: #EAD4FF;
-
-    }
-
-    .canto {
-        background: #EAD4FF;
-
-    }
-
-    .logo {
-        background: #EAD4FF;
-
-    }
-
-    .galeria {
-        background: #EAD4FF;
-
+    .meaning,
+    .logo,
+    .canto,
+    .galeria,
+    .codigo_login,
+    .form-contenedor {
+        background: var(--color-card);
+        border: 2px solid var(--color-border);
+        color: var(--color-text);
+        border-radius: 8px;
+        padding: 1rem;
     }
 
     .botones-titulo {
-        background: #CFAEF9;
-
+        background: var(--color-nav);
+        color: var(--color-text);
     }
 
     .icono {
-        color: black;
-
+        color: var(--color-primary);
     }
 
     .canto-single-link {
-        color: #000;
+        color: var(--color-text);
 
         &:hover {
-            color: #8a36f8;
+            color: var(--color-accent);
         }
     }
 
-    .codigo_login {
-        background: #EAD4FF;
-
-    }
-
-    .form-contenedor {
-        background: #EAD4FF;
-        border: 2px solid #CFAEF9;
-
-    }
-
-    .form-contenedor {
-        border: 2px solid #CFAEF9;
-        background: #EAD4FF;
-
-        .icono {
-            cursor: pointer;
-        }
-
-        &hover {
-            background: #b68fe6;
-        }
-
-    }
-
-    .izquierda,
-    .derecha {
-        color: #000;
-
-        &:hover {
-            color: #8a36f8;
-
-        }
-    }
-
-    .images-carousel {
-        width: 100%;
-        max-width: 1200px;
-        margin: 0 auto;
-
-        .carousel,
-        .carousel-inner,
-        .carousel-item,
-        img {
-            width: 100%;
-        }
+    .form-contenedor:hover {
+        border-color: var(--color-accent);
     }
 
     h2 {
         overflow: hidden;
         resize: none;
+        color: var(--color-text);
     }
 }

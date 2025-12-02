@@ -1,11 +1,11 @@
 import { createContext, useContext, useEffect } from 'react';
 import {
-    usePublicGaleriaStore,
-    usePublicCantosStore,
-    usePublicSettingsStore,
-    usePublicMiembrosStore,
+    useGalleryStore,
+    useSongStore,
+    useSettingsStore,
+    useMemberStore,
+    useThemeStore
 } from '../store/public';
-import { usePublicThemeGroupsStore } from '../store/public/usePublicThemeGroupsStore';
 
 interface Props {
     children: React.ReactNode;
@@ -14,45 +14,51 @@ interface Props {
 const PublicGlobalContext = createContext({});
 
 export const PublicGlobalProvider = ({ children }: Props) => {
-    const { fetchImagenesPublicas } = usePublicGaleriaStore();
-    const { fetchCantosPublicos } = usePublicCantosStore();
-    const { fetchSettingsPublicos } = usePublicSettingsStore();
-    const { fetchMiembrosPublicos } = usePublicMiembrosStore();
-    const {
-        fetchThemeGroupsPublicos,
-        fetchTemaActivoPublico,
-        temaActivo
-    } = usePublicThemeGroupsStore();
+    const { fetchGallery } = useGalleryStore();
+    const { fetchSongs } = useSongStore();
+    const { fetchSettings } = useSettingsStore();
+    const { fetchMembers } = useMemberStore();
+    const { themes, fetchThemes } = useThemeStore();
 
     useEffect(() => {
-        fetchImagenesPublicas();
-        fetchCantosPublicos();
-        fetchSettingsPublicos();
-        fetchMiembrosPublicos();
-        fetchThemeGroupsPublicos();
-        fetchTemaActivoPublico();
-    }, []);
-
-    useEffect(() => {
-        const cargarTemaActivoPublico = async () => {
+        const loadGlobalData = async () => {
             try {
-                await fetchTemaActivoPublico();
-            } catch (err) {
-                console.warn('Error al obtener grupo activo público', err);
+                await Promise.all([
+                    fetchGallery(),
+                    fetchSongs(),
+                    fetchSettings(),
+                    fetchMembers(),
+                    fetchThemes()
+                ]);
+            } catch (error) {
+                console.warn("Error loading global public data", error);
             }
         };
 
-        cargarTemaActivoPublico();
+        loadGlobalData();
     }, []);
 
     useEffect(() => {
-        if (temaActivo) {
-            const root = document.documentElement;
-            temaActivo.colores.forEach(({ colorClass, color }) => {
-                root.style.setProperty(`--color-${colorClass}`, color);
-            });
+        if (themes.length > 0) {
+            const defaultTheme = themes.find(t => t.name === 'Default');
+
+            if (defaultTheme) {
+                const root = document.documentElement;
+
+                root.style.setProperty('--color-primary', defaultTheme.primaryColor);
+                root.style.setProperty('--color-accent', defaultTheme.accentColor);
+                root.style.setProperty('--color-background', defaultTheme.backgroundColor);
+                root.style.setProperty('--color-text', defaultTheme.textColor);
+                root.style.setProperty('--color-card', defaultTheme.cardColor);
+                root.style.setProperty('--color-button', defaultTheme.buttonColor);
+                root.style.setProperty('--color-nav', defaultTheme.navColor);
+
+                root.style.setProperty('--color-button-text', defaultTheme.buttonTextColor);
+                root.style.setProperty('--color-secondary-text', defaultTheme.secondaryTextColor);
+                root.style.setProperty('--color-border', defaultTheme.borderColor);
+            }
         }
-    }, [temaActivo]);
+    }, [themes]);
 
     return (
         <PublicGlobalContext.Provider value={{}}>

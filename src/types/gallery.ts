@@ -1,52 +1,27 @@
+export interface GalleryImage {
+    id: string;
+    title: string;
+    description: string;
+    imageUrl: string;
+    mediaType: 'IMAGE' | 'VIDEO';
 
-export interface ImagenGaleria {
-    _id: string;
-    titulo: string;
-    descripcion: string;
-    imagenUrl: string;
-    imagenInicio: string;
-    imagenLeftMenu: string;
-    imagenRightMenu: string;
-    imagenNosotros: string;
-    imagenGaleria?: boolean;
-    imagenLogo: string;
-    createdAt?: string;
+    // Flags
+    imageStart: boolean;
+    imageTopBar: boolean;
+    imageUs: boolean;
+    imageLogo: boolean;
+    imageGallery: boolean;
+    imageLeftMenu?: boolean;
+    imageRightMenu?: boolean;
+
+    createdAt: string;
+    updatedAt: string;
 }
 
-export interface ImagenResponse {
-    mensaje: string;
-    imagen: ImagenGaleria;
-}
-
-export interface ImagenesResponse {
-    imagenes: ImagenGaleria[];
-    totalPaginas: number;
-    paginaActual: number;
-}
-
-export interface NuevaImagenForm {
-    titulo: string;
-    descripcion: string;
-    imagen: File | null;
-}
-
-export interface GaleriaState {
-    imagenes: ImagenGaleria[];
-    imagenSeleccionada: ImagenGaleria | null;
-    paginaActual: number;
-    totalPaginas: number;
-    cargando: boolean;
-    error: string | null;
-
-    // Acciones
-    fetchImagenes: (pagina?: number) => Promise<void>;
-    fetchImagenPorId: (id: string) => Promise<void>;
-    crearNuevaImagen: (formData: FormData) => Promise<void>;
-    actualizarImagenExistente: (id: string, formData: FormData) => Promise<void>;
-    marcarCampo: (
-        id: string,
-        campo: 'imagenInicio' | 'imagenLeftMenu' | 'imagenRightMenu' | 'imagenNosotros' | 'imagenLogo' | 'imagenGaleria'
-    ) => Promise<ImagenResponse>;
-    toggleGaleria: (id: string, valor: boolean) => Promise<ImagenResponse>;
-    eliminarImagenPorId: (id: string) => Promise<void>;
+export interface CreateGalleryPayload {
+    title: string;
+    description: string;
+    imageGallery: boolean;
+    file?: File;
+    imageUri?: string;
 }

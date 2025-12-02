@@ -1,8 +1,8 @@
 
-import '../../assets/styles/layout/_main.scss'; // Adjust if needed
-import { MyCarousel } from '../../components-public/MyCarousel';
+import '../../assets/styles/layout/_main.scss';
+import { MyCarousel } from '../../components/components-public/MyCarousel';
 
-const HomePage = () => {
+export const HomePage = () => {
     return (
         <div className="px-md-3">
             <div className="carousel-container acronym-labels w-100 d-flex flex-column align-items-center">
@@ -27,5 +27,3 @@ const HomePage = () => {
         </div>
     );
 };
-
-export default HomePage;

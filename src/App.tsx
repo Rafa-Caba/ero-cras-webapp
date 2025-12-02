@@ -1,65 +1,85 @@
 import { Routes, Route } from 'react-router-dom';
+
+// Layouts
 import PublicLayout from './layouts/public/PublicLayout';
 import AdminLayout from './layouts/admin/AdminLayout';
 
-import HomePage from './pages/public/Home';
-import Contact from './pages/public/Contact';
-import { Miembros } from './pages/public/Miembros';
-import { MisaPage } from './pages/public/Misa';
-
-import Dashboard from './pages/admin/Dashboard';
-import AdminLogin from './pages/admin/AdminLogin';
-import NosotrosPage from './pages/public/Nosotros';
-
+// Context & Styles
+import { PublicGlobalProvider } from './context/PublicGlobalContext';
+import { AuthProvider } from './context/AuthContext';
+import { PrivateRoute } from './components/PrivateRoute';
 import './assets/styles/global.scss';
 
-import { AdminRegister } from './pages/admin/AdminRegister';
-import { Canto } from './pages/admin/Canto';
-import { EditCanto } from './pages/admin/EditCanto';
-import { Gallery } from './pages/admin/Gallery';
-import { Photo } from './pages/admin/Photo';
-import { NewImage } from './pages/admin/NewImage';
-import { NewSong } from './pages/admin/NewSong';
-import { Users } from './pages/admin/Users';
-import { NewUser } from './pages/admin/NewUser';
-import { EditUser } from './pages/admin/EditUser';
-import { PrivateRoute } from './components/PrivateRoute';
-import { EditPhoto } from './pages/admin/EditPhoto';
-import { Cantos } from './pages/admin/Cantos';
-import { ThemesPage } from './pages/admin/ThemesPage';
-import { NewColorTheme } from './pages/admin/NewColorTheme';
-import { AdminEditColorTheme } from './components/themes-old/AdminEditColorTheme';
-import { Members } from './pages/admin/Members';
-import { EditMember } from './pages/admin/EditMember';
-import { NewMember } from './pages/admin/NewMember';
-import { BlogPosts } from './pages/admin/BlogPosts';
-import { EditBlogPost } from './pages/admin/EditBlogPost';
-import { NewBlogPost } from './pages/admin/NewBlogPost';
-import { Announcements } from './pages/admin/Announcements';
-import { EditAnnouncement } from './pages/admin/EditAnnouncement';
-import { NewAnnouncement } from './pages/admin/NewAnnouncement';
-import { BlogPostsView } from './pages/admin/BlogPostsView';
-import { AdminBlogPostSingleView } from './components/blogPosts/AdminBlogPostSingleView';
-import { WebsiteSettings } from './pages/admin/WebsiteSettings';
-import { PublicGlobalProvider } from './context/PublicGlobalContext';
-import { PublicTestDashboard } from './pages/admin/PublicTestDashboard';
-import GlobalAppProvider from './context/GlobalAppContext';
-import { MyProfilePage } from './pages/admin/MyProfilePage';
-import { UserSettings } from './components/user-menu/UserSettings';
-import { LogsPage } from './pages/admin/Logs';
-import { TiposCanto } from './pages/admin/TiposCanto';
-import { EditTipoCanto } from './pages/admin/EditTipoCanto';
-import { NewTipoCanto } from './pages/admin/NewTipoCanto';
-import { ThemeGroupsList } from './pages/admin/ThemeGroupsList';
-import { EditThemeGroupList } from './pages/admin/EditThemeGroupList';
-import { NewThemeGroupList } from './pages/admin/NewThemeGroupList';
-import { ChatGroup } from './pages/admin/ChatGroup';
+// --- Public Pages (English Filenames) ---
+import { HomePage } from './pages/public/Home';
+import { Contact } from './pages/public/Contact';
+import { Members as MembersPublic } from './pages/public/Members';
+import { Songs } from './pages/public/Songs';
+import { AboutUs } from './pages/public/AboutUs';
+
+// --- Auth Pages (English Filenames) ---
+import { Login } from './pages/auth/Login';
+import { Register } from './pages/auth/Register';
+
+// --- Admin Pages (English Filenames) ---
+import { Dashboard } from './pages/admin/Dashboard';
+
+// Users
+import { UsersList } from './pages/admin/user/UsersList';
+import { UserForm } from './pages/admin/user/UserForm';
+
+// Songs (Cantos)
+import { SongList } from './pages/admin/songs/SongList';
+import { Song } from './pages/admin/songs/Song';
+import { NewSong } from './pages/admin/songs/NewSong';
+import { EditSong } from './pages/admin/songs/EditSong';
+
+// Song Types (Tipos Canto)
+import { SongTypeList } from './pages/admin/songs/SongTypeList';
+import { EditSongType } from './pages/admin/songs/EditSongType';
+import { NewSongType } from './pages/admin/songs/NewSongType';
+
+// Gallery
+import { GalleryList } from './pages/admin/gallery/GalleryList';
+import { Media } from './pages/admin/gallery/Media';
+import { NewMedia } from './pages/admin/gallery/NewMedia';
+import { EditMedia } from './pages/admin/gallery/EditMedia';
+
+// Themes
+import { ThemeList } from './pages/admin/theme/ThemeList';
+import { NewTheme } from './pages/admin/theme/NewTheme';
+import { EditTheme } from './pages/admin/theme/EditTheme';
+
+// Members (Choir Members)
+import { Members } from './pages/admin/members/Members';
+import { NewMember } from './pages/admin/members/NewMember';
+import { EditMember } from './pages/admin/members/EditMember';
+
+// Blog
+import { BlogList } from './pages/admin/blog/BlogList';
+import { NewBlogPost } from './pages/admin/blog/NewBlogPost';
+import { EditBlogPost } from './pages/admin/blog/EditBlogPost';
+import { BlogPostsView } from './pages/admin/blog/BlogPostsView';
+import { BlogPostSingleView } from './pages/admin/blog/BlogPostSingleView';
+
+// Announcements (Avisos)
+import { AnnouncementList } from './pages/admin/announcements/AnnouncementList';
+import { NewAnnouncement } from './pages/admin/announcements/NewAnnouncement';
+import { EditAnnouncement } from './pages/admin/announcements/EditAnnouncement';
+
+// Settings & Logs
+import { WebsiteSettings } from './pages/admin/settings/WebsiteSettings';
+import { MyProfilePage } from './pages/admin/user/MyProfilePage';
+import { LogsPage } from './pages/admin/log/Logs';
+import { ChatGroup } from './pages/admin/chat/ChatGroup';
+import { EditProfile } from './pages/admin/user/EditProfile';
+import { PublicTestDashboard } from './pages/admin/log/PublicTestDashboard';
 
 function App() {
     return (
         <div>
             <Routes>
-                {/* Public Section */}
+                {/* --- Public Section --- */}
                 <Route path="/" element={
                     <PublicGlobalProvider>
                         <PublicLayout />
@@ -67,75 +87,85 @@ function App() {
                 }>
                     <Route index element={<HomePage />} />
                     <Route path="contact" element={<Contact />} />
-                    <Route path="miembros" element={<Miembros />} />
-                    <Route path="misa" element={<MisaPage />} />
-                    <Route path="nosotros" element={<NosotrosPage />} />
+                    <Route path="members" element={<MembersPublic />} />
+                    <Route path="songs" element={<Songs />} />
+                    <Route path="about" element={<AboutUs />} />
                 </Route>
 
-                {/* Admin Section */}
+                {/* --- Admin Section --- */}
                 <Route path="/admin" element={
-                    <GlobalAppProvider>
+                    <AuthProvider>
                         <PrivateRoute>
                             <AdminLayout />
                         </PrivateRoute>
-                    </GlobalAppProvider>
+                    </AuthProvider>
                 }>
                     <Route index element={<Dashboard />} />
 
-                    <Route path="users" element={<Users />} />
-                    <Route path="users/edit/:id" element={<EditUser />} />
-                    <Route path="users/new_user" element={<NewUser />} />
+                    {/* Users */}
+                    <Route path="users" element={<UsersList />} />
+                    <Route path="users/new" element={<UserForm />} />
+                    <Route path="users/edit/:id" element={<UserForm />} />
 
-                    <Route path="cantos" element={<Cantos />} />
-                    <Route path="canto/:id" element={<Canto />} />
-                    <Route path="cantos/edit/:id" element={<EditCanto />} />
-                    <Route path="cantos/new_song" element={<NewSong />} />
+                    {/* Songs */}
+                    <Route path="songs" element={<SongList />} />
+                    <Route path="song/:id" element={<Song />} />
+                    <Route path="songs/new" element={<NewSong />} />
+                    <Route path="songs/edit/:id" element={<EditSong />} />
 
-                    <Route path="gallery" element={<Gallery />} />
-                    <Route path="photo/:id" element={<Photo />} />
-                    <Route path="gallery/edit/:id" element={<EditPhoto />} />
-                    <Route path="gallery/new_image" element={<NewImage />} />
+                    {/* Song Types */}
+                    <Route path="song-types" element={<SongTypeList />} />
+                    <Route path="song-types/new" element={<NewSongType />} />
+                    <Route path="song-types/edit/:id" element={<EditSongType />} />
 
-                    <Route path="themes" element={<ThemesPage />} />
-                    <Route path="edit_class_color/:id" element={<AdminEditColorTheme />} />
-                    <Route path="themes/new_class_color" element={<NewColorTheme />} />
+                    {/* Gallery */}
+                    <Route path="gallery" element={<GalleryList />} />
+                    <Route path="gallery/media/:id" element={<Media />} />
+                    <Route path="gallery/new" element={<NewMedia />} />
+                    <Route path="gallery/edit/:id" element={<EditMedia />} />
 
-                    <Route path="theme-groups" element={<ThemeGroupsList />} />
-                    <Route path="theme-groups/edit/:id" element={<EditThemeGroupList />} />
-                    <Route path="theme-groups/new" element={<NewThemeGroupList />} />
+                    {/* Themes */}
+                    <Route path="themes" element={<ThemeList />} />
+                    <Route path="themes/new" element={<NewTheme />} />
+                    <Route path="themes/edit/:id" element={<EditTheme />} />
 
+                    {/* Members */}
                     <Route path="members" element={<Members />} />
+                    <Route path="members/new" element={<NewMember />} />
                     <Route path="members/edit/:id" element={<EditMember />} />
-                    <Route path="members/new_member" element={<NewMember />} />
 
-                    <Route path="blogposts" element={<BlogPosts />} />
-                    <Route path="blogposts/edit/:id" element={<EditBlogPost />} />
-                    <Route path="blogposts/new_blogpost" element={<NewBlogPost />} />
+                    {/* Blog */}
+                    <Route path="blog" element={<BlogList />} />
+                    <Route path="blog/view" element={<BlogPostsView />} />
+                    <Route path="blog/view/:id" element={<BlogPostSingleView />} />
+                    <Route path="blog/new" element={<NewBlogPost />} />
+                    <Route path="blog/edit/:id" element={<EditBlogPost />} />
 
-                    <Route path="announcements" element={<Announcements />} />
+                    {/* Announcements */}
+                    <Route path="announcements" element={<AnnouncementList />} />
+                    <Route path="announcements/new" element={<NewAnnouncement />} />
                     <Route path="announcements/edit/:id" element={<EditAnnouncement />} />
-                    <Route path="announcements/new_announcement" element={<NewAnnouncement />} />
 
-                    <Route path="blog_posts" element={<BlogPostsView />} />
-                    <Route path="blog_posts/:id" element={<AdminBlogPostSingleView />} />
-
-                    <Route path="website_settings" element={<WebsiteSettings />} />
-
-                    <Route path="mi-perfil" element={<MyProfilePage />} />
-                    <Route path="public-test" element={<PublicTestDashboard />} />
-                    <Route path="settings-user" element={<UserSettings />} />
-                    <Route path="logs-page" element={<LogsPage />} />
-
-                    <Route path="tipos-canto" element={<TiposCanto />} />
-                    <Route path="tipos-canto/edit/:id" element={<EditTipoCanto />} />
-                    <Route path="tipos-canto/new" element={<NewTipoCanto />} />
-
+                    {/* Settings & Tools */}
+                    <Route path="settings" element={<WebsiteSettings />} />
+                    <Route path="profile" element={<MyProfilePage />} />
+                    <Route path="edit-profile" element={<EditProfile />} />
+                    <Route path="logs" element={<LogsPage />} />
                     <Route path="chat-group" element={<ChatGroup />} />
+                    <Route path="public-test" element={<PublicTestDashboard />} />
                 </Route>
 
-                {/* Login (outside layout) */}
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/registrate" element={<AdminRegister />} />
+                {/* --- Auth Section (Wrapped in Provider) --- */}
+                <Route path="/auth/login" element={
+                    <AuthProvider>
+                        <Login />
+                    </AuthProvider>
+                } />
+                <Route path="/auth/register" element={
+                    <AuthProvider>
+                        <Register />
+                    </AuthProvider>
+                } />
 
             </Routes>
         </div>
