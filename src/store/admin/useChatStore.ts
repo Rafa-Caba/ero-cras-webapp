@@ -5,7 +5,7 @@ import { getChatHistory, sendTextMessage, uploadChatMedia, toggleReaction } from
 import { getUserDirectory } from '../../services/admin/users';
 import type { ChatMessage } from '../../types/chat';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000';
 
 interface ConnectedUser {
     id: string;

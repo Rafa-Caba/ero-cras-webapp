@@ -62,6 +62,46 @@
     color: var(--color-text) !important;
 }
 
+
+.tiptap {
+    font-size: 18px;
+
+    p,
+    h1,
+    h2,
+    span,
+    div {
+        color: var(--color-text) !important;
+        text-align: center !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .ProseMirror {
+        color: var(--color-text) !important;
+        caret-color: #000000;
+        min-height: 100%;
+        text-align: left !important;
+
+        p,
+        h1,
+        h2,
+        span,
+        div {
+            color: #333333 !important;
+            text-align: left !important;
+        }
+
+        p.is-editor-empty:first-child::before {
+            color: #888888 !important;
+        }
+    }
+
+    @media (max-width: 768px) {
+        font-size: 15px;
+    }
+}
+
 // =======================
 // Chats
 // =======================

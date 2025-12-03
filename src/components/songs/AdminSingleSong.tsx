@@ -60,7 +60,7 @@ export const AdminSingleSong = () => {
                 <h2 className="titulo">{song.title}</h2>
                 <p className="fst-italic">{song.songTypeName}</p>
 
-                <div className="texto-scrollable">
+                <div className="texto-scrollable my-2">
                     <div className="d-md-block text-center mb-3 fs-4">
                         <TiptapViewer content={parseText(song.content)} />
                     </div>

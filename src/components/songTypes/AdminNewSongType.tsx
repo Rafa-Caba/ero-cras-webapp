@@ -41,14 +41,13 @@ export const AdminNewSongType = () => {
 
         const { name, order, isParent, parentId } = formData;
 
-        if (!name.trim()) {
-            Swal.fire('Campo requerido', 'El nombre es obligatorio.', 'warning');
-            return;
-        }
+        const exists = types.some(t =>
+            t.name.toLowerCase() === name.trim().toLowerCase() &&
+            (t.parentId || "") === (parentId || "")
+        );
 
-        const exists = types.some(t => t.name.toLowerCase() === name.trim().toLowerCase());
         if (exists) {
-            Swal.fire('Duplicado', 'Ya existe un tipo de canto con ese nombre.', 'warning');
+            Swal.fire('Duplicado', 'Ya existe un tipo de canto con ese nombre en esta carpeta.', 'warning');
             return;
         }
 
@@ -117,9 +116,13 @@ export const AdminNewSongType = () => {
                 )}
 
                 <div className="d-flex justify-content-center">
+                    <Button variant="secondary" className='px-3' style={{ borderRadius: 10 }} onClick={() => navigate('/admin/song-types')}>
+                        Cancelar
+                    </Button>
+
                     <Button
                         type="submit"
-                        className="general_btn"
+                        className="general_btn ms-2"
                         disabled={loading}
                     >
                         {loading ? <Spinner animation="border" size="sm" /> : 'Crear Tipo'}

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create the main instance
 const api = axios.create({
-    baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:4000') + '/api',
+    baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:10000') + '/api',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -10,7 +10,7 @@ const api = axios.create({
 });
 
 export const publicApi = axios.create({
-    baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:4000') + '/api',
+    baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:10000') + '/api',
     headers: {
         'Content-Type': 'application/json'
     }

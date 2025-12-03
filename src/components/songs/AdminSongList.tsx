@@ -55,9 +55,9 @@ export const AdminSongList = () => {
                             <Accordion.Header className="small-header">
                                 <span className="fw-bold">{song.title}</span>
                             </Accordion.Header>
-                            <Accordion.Body>
+                            <Accordion.Body className='px-2 px-md-3'>
                                 <div>
-                                    <p>
+                                    <p className='pb-0 pb-md-2'>
                                         <Link
                                             className="fw-bolder fs-5 text-decoration-none text-theme-color"
                                             to={`/admin/song/${song.id}`}
@@ -65,7 +65,7 @@ export const AdminSongList = () => {
                                             - {song.title} -
                                         </Link>
                                     </p>
-                                    <div className="border rounded p-2 bg-light">
+                                    <div className="border rounded py-3 py-md-5 px-1 px-md-3 bg-light">
                                         <TiptapViewer content={parseText(song.content)} />
                                     </div>
                                 </div>
@@ -78,11 +78,10 @@ export const AdminSongList = () => {
     };
 
     return (
-        <div className="d-flex flex-column justify-content-center px-3 px-md-5 mb-0">
+        <div className="d-flex flex-column justify-content-center px-2 px-md-5 mb-0">
             <div className="d-flex flex-column align-items-center w-100 my-2">
                 <p className="fw-bold m-0 fs-1">Cantos</p>
                 <div className="botones mb-1">
-                    {/* <Link to="/admin" className="btn general_btn px-3 m-2">Inicio</Link> */}
                     {canEdit && <Link to="/admin/songs/new" className="btn general_btn me-2">Nuevo Canto</Link>}
                 </div>
             </div>
@@ -100,7 +99,7 @@ export const AdminSongList = () => {
                                     <Accordion.Header>
                                         {root.isParent ? `📂 ${capitalizeWord(root.name)}` : capitalizeWord(root.name)}
                                     </Accordion.Header>
-                                    <Accordion.Body className={root.isParent ? "bg-light p-2" : ""}>
+                                    <Accordion.Body className={root.isParent ? "bg-light p-2 p-md-3" : ""}>
 
                                         {root.isParent && childTypes.length > 0 && (
                                             <Accordion alwaysOpen className="accordion-custom mb-3">
@@ -109,7 +108,7 @@ export const AdminSongList = () => {
                                                         <Accordion.Header>
                                                             {capitalizeWord(child.name)}
                                                         </Accordion.Header>
-                                                        <Accordion.Body>
+                                                        <Accordion.Body className='p-2 p-md-3'>
                                                             <SongListRenderer songList={getSongsByType(child.name)} />
                                                         </Accordion.Body>
                                                     </Accordion.Item>
@@ -118,7 +117,7 @@ export const AdminSongList = () => {
                                         )}
 
                                         {rootSongs.length > 0 && (
-                                            <div className={root.isParent ? "mt-3 border-top pt-2" : ""}>
+                                            <div className={root.isParent ? "mt-3 border-top p-2" : ""}>
                                                 {root.isParent && <p className="text-muted small">Cantos directos en esta carpeta:</p>}
                                                 <SongListRenderer songList={rootSongs} />
                                             </div>
@@ -135,7 +134,7 @@ export const AdminSongList = () => {
                         {uncategorizedSongs.length > 0 && (
                             <Accordion.Item eventKey="no-type">
                                 <Accordion.Header className="text-danger">⚠️ Sin tipo de Canto</Accordion.Header>
-                                <Accordion.Body>
+                                <Accordion.Body className='p-0 p-md-3'>
                                     <SongListRenderer songList={uncategorizedSongs} />
                                 </Accordion.Body>
                             </Accordion.Item>

@@ -32,11 +32,19 @@ export const AdminEditSong = () => {
             await fetchTypes();
 
             const data = await getSong(id);
+
             if (data) {
                 setTitle(data.title);
                 setContent(parseText(data.content));
                 setComposer(data.composer || "");
-                setSongTypeId(data.songTypeId || "");
+
+                let typeId = data.songTypeId || "";
+                if (!typeId && data.songTypeName) {
+                    const matchingType = types.find(t => t.name === data.songTypeName);
+                    if (matchingType) typeId = matchingType.id;
+                }
+
+                setSongTypeId(typeId);
             }
         };
 

@@ -6,7 +6,7 @@ import { useSongTypeStore } from '../../store/admin/useSongTypeStore';
 
 interface FormState {
     name: string;
-    order: number;
+    order: number | string;
     isParent: boolean;
     parentId: string;
 }
@@ -64,7 +64,7 @@ export const AdminEditSongType = () => {
 
         setFormData((prev) => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : (name === 'order' ? Number(value) : value)
+            [name]: type === 'checkbox' ? checked : (name === 'order' ? (value === '' ? '' : parseInt(value)) : value)
         }));
     };
 
@@ -72,18 +72,21 @@ export const AdminEditSongType = () => {
         e.preventDefault();
 
         // Duplicate check
-        const exists = types.some(t =>
-            t.id !== id &&
-            t.name.toLowerCase().trim() === formData.name.toLowerCase().trim()
+        const exists = types.some(tipo =>
+            tipo.id !== id &&
+            tipo.name.toLowerCase().trim() === formData.name.toLowerCase().trim() &&
+            (tipo.parentId || "") === (formData.parentId || "")
         );
 
         if (exists) {
-            Swal.fire('Duplicado', 'Ya existe un tipo de canto con ese nombre.', 'warning');
+            Swal.fire('Duplicado', 'Ya existe un tipo de canto con ese nombre en esta carpeta.', 'warning');
             return;
         }
 
         try {
-            await editType(id!, formData.name, formData.order, formData.isParent);
+            const finalOrder = formData.order === '' ? 0 : Number(formData.order);
+
+            await editType(id!, formData.name, finalOrder, formData.isParent);
 
             Swal.fire('Actualizado', 'El tipo de canto se actualizó con éxito.', 'success');
             navigate('/admin/song-types');
@@ -157,7 +160,7 @@ export const AdminEditSongType = () => {
                 )}
 
                 <div className="d-flex justify-content-between">
-                    <Button variant="secondary" onClick={() => navigate('/admin/song-types')}>
+                    <Button variant="secondary" className='px-3' style={{ borderRadius: 10 }} onClick={() => navigate('/admin/song-types')}>
                         Cancelar
                     </Button>
                     <Button type="submit" className="general_btn">

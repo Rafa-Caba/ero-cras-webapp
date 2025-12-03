@@ -14,7 +14,6 @@ export const Contact = () => {
             return;
         }
 
-        // Aquí podrías hacer algo con los datos
         console.log('Correo: ', email);
         console.log('Mensaje: ', emailMessage);
     };
