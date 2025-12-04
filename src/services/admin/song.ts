@@ -1,12 +1,18 @@
 import api from '../../api/axios';
 import type { Song, CreateSongPayload, SongType } from '../../types/song';
 
-const createFormData = (payload: any, file?: File) => {
+const createFormData = (payload: any, file?: File | null): FormData => {
     const formData = new FormData();
+
     formData.append('data', JSON.stringify(payload));
-    if (file) formData.append('file', file);
+
+    if (file instanceof File) {
+        formData.append('file', file);
+    }
+
     return formData;
 };
+
 
 export const getAllSongs = async (): Promise<Song[]> => {
     const { data } = await api.get<Song[]>('/songs');
@@ -25,17 +31,26 @@ export const getSongTypeById = async (id: string): Promise<SongType> => {
 
 export const createSong = async (payload: CreateSongPayload): Promise<Song> => {
     const { file, ...dataPayload } = payload;
-    const formData = createFormData(dataPayload, file);
-    const { data } = await api.post<Song>('/songs', formData);
+    const formData = createFormData(dataPayload, file ?? null);
+
+    const { data } = await api.post<Song>('/songs', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
     return data;
 };
 
 export const updateSong = async (id: string, payload: Partial<CreateSongPayload>): Promise<Song> => {
     const { file, ...dataPayload } = payload;
-    const formData = createFormData(dataPayload, file);
-    const { data } = await api.put<Song>(`/songs/${id}`, formData);
+    const formData = createFormData(dataPayload, file ?? null);
+
+    const { data } = await api.put<Song>(`/songs/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
     return data;
 };
+
 
 export const deleteSong = async (id: string): Promise<void> => {
     await api.delete(`/songs/${id}`);

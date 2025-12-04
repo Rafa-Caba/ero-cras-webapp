@@ -1,13 +1,14 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Spinner } from "react-bootstrap";
 import Swal from "sweetalert2";
-import type { JSONContent } from '@tiptap/react';
+import type { JSONContent } from "@tiptap/react";
+
+import { TiptapEditor } from "../tiptap-components/TiptapEditor";
 import { useSongStore } from "../../store/admin/useSongStore";
 import { useSongTypeStore } from "../../store/admin/useSongTypeStore";
 import { emptyEditorContent } from "../../utils/editorDefaults";
 import type { CreateSongPayload } from "../../types";
-import { TiptapEditor } from "../tiptap-components/TiptapEditor";
 import { parseText } from "../../utils/handleTextTipTap";
 import { capitalizeWord } from "../../utils";
 
@@ -21,24 +22,42 @@ export const AdminNewSong = () => {
     const [content, setContent] = useState<JSONContent | null>(emptyEditorContent);
     const [songTypeId, setSongTypeId] = useState("");
     const [composer, setComposer] = useState("");
+    const [audioFile, setAudioFile] = useState<File | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         fetchTypes();
     }, []);
 
+    const handleAudioChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        const input = e.target as HTMLInputElement;
+        const file = input.files?.[0] ?? null;
+        setAudioFile(file);
+    };
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         if (!title || !content || !songTypeId) {
-            Swal.fire("Campos requeridos", "Título, Contenido y Tipo son obligatorios", "warning");
+            Swal.fire(
+                "Campos requeridos",
+                "Título, Contenido y Tipo son obligatorios",
+                "warning"
+            );
             return;
         }
+
+        if (isSaving) return;
+        setIsSaving(true);
 
         const payload: CreateSongPayload = {
             title,
             content: content as any,
             songTypeId,
-            composer
+            composer,
+            ...(audioFile ? { file: audioFile } : {})
         };
 
         try {
@@ -46,13 +65,21 @@ export const AdminNewSong = () => {
             Swal.fire("¡Éxito!", "Canto guardado correctamente", "success");
             navigate("/admin/songs");
         } catch (err) {
+            console.error(err);
             Swal.fire("Error", "Ocurrió un error inesperado", "error");
+        } finally {
+            setIsSaving(false);
         }
     };
 
-    const rootTypes = types.filter(t => !t.parentId).sort((a, b) => a.order - b.order);
+    const rootTypes = types
+        .filter((t) => !t.parentId)
+        .sort((a, b) => a.order - b.order);
 
-    const getChildren = (parentId: string) => types.filter(t => t.parentId === parentId).sort((a, b) => a.order - b.order);
+    const getChildren = (parentId: string) =>
+        types
+            .filter((t) => t.parentId === parentId)
+            .sort((a, b) => a.order - b.order);
 
     return (
         <article className="m-3 col-md-8 mx-auto">
@@ -85,31 +112,34 @@ export const AdminNewSong = () => {
                         >
                             <option value="">-- Seleccionar Tipo --</option>
 
-                            {rootTypes.map(root => {
+                            {rootTypes.map((root) => {
                                 const children = getChildren(root.id);
 
                                 if (root.isParent && children.length > 0) {
                                     return (
-                                        <optgroup key={root.id} label={capitalizeWord(root.name)}>
-                                            {children.map(child => (
+                                        <optgroup
+                                            key={root.id}
+                                            label={capitalizeWord(root.name)}
+                                        >
+                                            {children.map((child) => (
                                                 <option key={child.id} value={child.id}>
                                                     {capitalizeWord(child.name)}
                                                 </option>
                                             ))}
                                         </optgroup>
                                     );
-                                } else {
-                                    return (
-                                        <option key={root.id} value={root.id}>
-                                            {capitalizeWord(root.name)}
-                                        </option>
-                                    );
                                 }
+
+                                return (
+                                    <option key={root.id} value={root.id}>
+                                        {capitalizeWord(root.name)}
+                                    </option>
+                                );
                             })}
                         </Form.Select>
                     </Form.Group>
 
-                    <Form.Group className="mb-4" controlId="composer">
+                    <Form.Group className="mb-3" controlId="composer">
                         <Form.Label>Compositor</Form.Label>
                         <Form.Control
                             type="text"
@@ -119,9 +149,45 @@ export const AdminNewSong = () => {
                         />
                     </Form.Group>
 
-                    <div className='text-center'>
-                        <Button type="submit" className="general_btn me-2">Guardar Canto</Button>
-                        <Button variant="secondary" onClick={() => navigate("/admin/songs")}>Cancelar</Button>
+                    <Form.Group className="mb-4" controlId="audio">
+                        <Form.Label>Audio (opcional)</Form.Label>
+                        <Form.Control
+                            type="file"
+                            accept="audio/*"
+                            onChange={handleAudioChange}
+                            disabled={isSaving}
+                        />
+                        <Form.Text muted>
+                            Puedes subir un archivo de audio para este canto.
+                        </Form.Text>
+                    </Form.Group>
+
+                    <div className="text-center">
+                        <Button
+                            type="submit"
+                            className="general_btn me-2"
+                            disabled={isSaving}
+                        >
+                            {isSaving ? (
+                                <>
+                                    <Spinner
+                                        animation="border"
+                                        size="sm"
+                                        className="me-2"
+                                    />
+                                    Guardando...
+                                </>
+                            ) : (
+                                "Guardar Canto"
+                            )}
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            onClick={() => navigate("/admin/songs")}
+                            disabled={isSaving}
+                        >
+                            Cancelar
+                        </Button>
                     </div>
                 </Form>
             </div>
