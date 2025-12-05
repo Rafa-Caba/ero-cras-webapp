@@ -88,7 +88,7 @@ export const AdminDashboardPanel = () => {
                             fluid
                             style={{
                                 width: '100%',
-                                maxHeight: '80vh',
+                                maxHeight: '52vh',
                                 objectFit: 'contain'
                             }}
                             className="imagen-fija-inicio mt-3"
