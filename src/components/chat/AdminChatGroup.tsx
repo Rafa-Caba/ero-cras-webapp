@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Card } from 'react-bootstrap';
+import { Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import type { JSONContent } from '@tiptap/react';
@@ -15,6 +15,7 @@ import { ChatFilePreviewModal } from './ChatFilePreviewModal';
 import { ChatDirectory } from './ChatDirectory';
 
 import { scrollChatToBottom } from '../../utils';
+import type { ChatMessage } from '../../types/chat';
 
 const getEmptyContent = (): JSONContent => ({
     type: 'doc',
@@ -37,7 +38,6 @@ export const AdminChatGroup = () => {
         onlineUsers
     } = useChatStore();
 
-    // Initialize with fresh JSON object
     const [messageContent, setMessageContent] = useState<JSONContent>(getEmptyContent());
 
     const [expandedImage, setExpandedImage] = useState<string | null>(null);
@@ -51,9 +51,13 @@ export const AdminChatGroup = () => {
     const [previewType, setPreviewType] = useState<'image' | 'file' | 'audio' | 'video' | null>(null);
 
     // Modal Preview States
-    const [modalPreviewType, setModalPreviewType] = useState<'image' | 'file' | 'audio' | 'video' | null>(null);
+    const [modalPreviewType, setModalPreviewType] =
+        useState<'image' | 'file' | 'audio' | 'video' | null>(null);
     const [modalPreviewUrl, setModalPreviewUrl] = useState<string | null>(null);
     const [modalPreviewName, setModalPreviewName] = useState<string | undefined>();
+
+    // Reply-to state
+    const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
 
     const editorRef = useRef<{ clear: () => void }>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -116,20 +120,21 @@ export const AdminChatGroup = () => {
         if (!user) return;
 
         try {
-            // Pass the raw JSON object directly. The Store now handles it correctly.
             await sendMessage(
                 messageContent,
                 selectedFile || undefined,
-                fileType || undefined
+                fileType || undefined,
+                replyTo?.id
             );
 
             editorRef.current?.clear();
-            setMessageContent(getEmptyContent()); // Reset to NEW object
+            setMessageContent(getEmptyContent());
             setSelectedFile(null);
             setFileType(null);
             setPreviewUrl(null);
             setPreviewName(undefined);
             setPreviewType(null);
+            setReplyTo(null); // ✅ clear reply after sending
         } catch (error) {
             console.error('Error sending message:', error);
             Swal.fire('Error', 'Failed to send message', 'error');
@@ -163,6 +168,25 @@ export const AdminChatGroup = () => {
         setModalPreviewName(name);
     };
 
+    const handleReplyClick = (message: ChatMessage) => {
+        setReplyTo(message);
+    };
+
+    const handleCancelReply = () => {
+        setReplyTo(null);
+    };
+
+    // Small helper for preview text in the reply bar
+    const getReplyPreviewText = (msg: ChatMessage | null): string => {
+        if (!msg) return '';
+        if (typeof msg.content === 'string') return msg.content;
+
+        const doc: any = msg.content;
+        const firstBlock = doc?.content?.[0];
+        const firstChild = firstBlock?.content?.[0];
+        return firstChild?.text || '';
+    };
+
     return (
         <div className="container p-0 pt-md-2 my-0">
             <Card className="shadow p-2 p-lg-3 chat-container no_srollbar">
@@ -171,7 +195,12 @@ export const AdminChatGroup = () => {
                         <h3 className="mb-1">💬 Chat de Grupo</h3>
                         <ChatDirectory allUsers={allUsers} onlineUsers={onlineUsers} />
                     </div>
-                    <Link to="/admin" className="d-none d-md-block btn general_btn fw-bolder px-3 m-2">Ir al Inicio</Link>
+                    <Link
+                        to="/admin"
+                        className="d-none d-md-block btn general_btn fw-bolder px-3 m-2"
+                    >
+                        Ir al Inicio
+                    </Link>
                 </div>
 
                 <ChatBubbleContainer
@@ -182,9 +211,31 @@ export const AdminChatGroup = () => {
                     isOwnMessage={isOwnMessage}
                     onImageClick={setExpandedImage}
                     onPreviewClick={handlePreviewClick}
+                    onReply={handleReplyClick}
                 />
 
-                <div className='d-flex flex-row align-items-end gap-3 ms-3 mt-1 mb-1'>
+                {replyTo && (
+                    <div className="d-flex align-items-center justify-content-between mx-3 mt-1 mb-2 px-3 py-2 rounded bg-light border small">
+                        <div className="me-2 text-truncate">
+                            <div className="fw-semibold">
+                                Respondiendo a{' '}
+                                {replyTo.author?.name || replyTo.author?.username || replyTo.author?.id}
+                            </div>
+                            <div className="text-muted text-truncate" style={{ maxWidth: '100%' }}>
+                                {getReplyPreviewText(replyTo)}
+                            </div>
+                        </div>
+                        <Button
+                            variant="link"
+                            className="text-muted p-0 ms-2"
+                            onClick={handleCancelReply}
+                        >
+                            ✕
+                        </Button>
+                    </div>
+                )}
+
+                <div className="d-flex flex-row align-items-end gap-3 ms-3 mt-1 mb-1">
                     <ChatPreviewContainer
                         previewType={previewType}
                         previewUrl={previewUrl}
@@ -208,7 +259,12 @@ export const AdminChatGroup = () => {
             </Card>
 
             <ChatImageModal imageUrl={expandedImage} onClose={() => setExpandedImage(null)} />
-            <ChatFilePreviewModal type={modalPreviewType} fileUrl={modalPreviewUrl} fileName={modalPreviewName} onClose={() => setModalPreviewUrl(null)} />
+            <ChatFilePreviewModal
+                type={modalPreviewType}
+                fileUrl={modalPreviewUrl}
+                fileName={modalPreviewName}
+                onClose={() => setModalPreviewUrl(null)}
+            />
         </div>
     );
 };

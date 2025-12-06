@@ -8,6 +8,12 @@ export interface MessageReaction {
     user: User | string;
 }
 
+export interface ChatReplyPreview {
+    id: string;
+    username: string;
+    textPreview: string;
+}
+
 export interface ChatMessage {
     id: string;
 
@@ -22,7 +28,7 @@ export interface ChatMessage {
     audioUrl?: string;
 
     reactions: MessageReaction[];
-    replyTo?: ChatMessage | null;
+    replyTo?: ChatReplyPreview | null;
 
     createdAt: string;
     updatedAt: string;

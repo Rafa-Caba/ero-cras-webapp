@@ -7,10 +7,15 @@ interface Props {
     messages: ChatMessage[];
     messagesContainerRef: React.RefObject<HTMLDivElement | null>;
     isLoadingMore: boolean;
-    hasMoreMessages: boolean; // 🆕 New Prop
+    hasMoreMessages: boolean;
     isOwnMessage: (authorId: string) => boolean;
     onImageClick: (url: string) => void;
-    onPreviewClick: (type: 'image' | 'file' | 'audio' | 'video', url: string, name?: string) => void;
+    onPreviewClick: (
+        type: 'image' | 'file' | 'audio' | 'video',
+        url: string,
+        name?: string
+    ) => void;
+    onReply: (message: ChatMessage) => void;
 }
 
 export const ChatBubbleContainer = ({
@@ -20,10 +25,22 @@ export const ChatBubbleContainer = ({
     hasMoreMessages,
     isOwnMessage,
     onImageClick,
-    onPreviewClick
+    onPreviewClick,
+    onReply
 }: Props) => {
     const groupedMessages = messages.reduce((acc, message) => {
-        const label = getDateTag(message.createdAt);
+        let label = 'Sin fecha';
+
+        if (message.createdAt) {
+            try {
+                label = getDateTag(message.createdAt);
+            } catch (err) {
+                console.warn('Invalid createdAt in message', message.id, message.createdAt, err);
+            }
+        } else {
+            console.warn('Message without createdAt:', message);
+        }
+
         if (!acc[label]) acc[label] = [];
         acc[label].push(message);
         return acc;
@@ -35,10 +52,12 @@ export const ChatBubbleContainer = ({
             className="chat-mensajes-container chat-scroll-container no_scrollbar chat-container-color rounded p-2 p-md-3 mb-1 mb-lg-2 border overflow-y-auto"
             style={{ minHeight: '400px', maxHeight: '62vh', overflowY: 'auto' }}
         >
-            {/* 🆕 Logic for End of Chat */}
             {!hasMoreMessages && messages.length > 0 && (
                 <div className="text-center my-3">
-                    <span className="badge bg-secondary opacity-50 fw-light" style={{ fontSize: '0.7rem' }}>
+                    <span
+                        className="badge bg-secondary opacity-50 fw-light"
+                        style={{ fontSize: '0.7rem' }}
+                    >
                         Inicio de la conversación
                     </span>
                 </div>
@@ -56,6 +75,7 @@ export const ChatBubbleContainer = ({
                 isOwnMessage={isOwnMessage}
                 setExpandedImage={onImageClick}
                 onPreviewClick={onPreviewClick}
+                onReply={onReply}
             />
         </div>
     );

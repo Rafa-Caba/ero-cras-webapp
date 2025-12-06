@@ -188,6 +188,7 @@
 .chat-sender-container p,
 .chat-sender-container .chat-viewer p {
     color: var(--color-button-text) !important;
+    text-align: left !important;
     margin: 0;
     padding: 0;
 }
@@ -196,6 +197,7 @@
 .chat-receiver-container p,
 .chat-receiver-container .chat-viewer p {
     color: var(--color-button-text) !important;
+    text-align: left !important;
     margin: 0;
     padding: 0;
 }

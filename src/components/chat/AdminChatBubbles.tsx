@@ -5,15 +5,26 @@ interface Props {
     groupedMessages: Record<string, ChatMessage[]>;
     isOwnMessage: (id: string) => boolean;
     setExpandedImage: (url: string) => void;
-    onPreviewClick: (type: 'image' | 'file' | 'audio' | 'video', url: string, name?: string) => void;
+    onPreviewClick: (
+        type: 'image' | 'file' | 'audio' | 'video',
+        url: string,
+        name?: string
+    ) => void;
+    onReply: (message: ChatMessage) => void;
 }
 
-export const AdminChatBubbles = ({ groupedMessages, isOwnMessage, setExpandedImage, onPreviewClick }: Props) => {
+export const AdminChatBubbles = ({
+    groupedMessages,
+    isOwnMessage,
+    setExpandedImage,
+    onPreviewClick,
+    onReply
+}: Props) => {
     const dates = Object.entries(groupedMessages);
 
     if (dates.length === 0) {
         return (
-            <div className='d-flex justify-content-center'>
+            <div className="d-flex justify-content-center">
                 <p>No hay mensajes</p>
             </div>
         );
@@ -30,17 +41,27 @@ export const AdminChatBubbles = ({ groupedMessages, isOwnMessage, setExpandedIma
                         </span>
                     </div>
 
-                    {msgsOfDay.map((msg, i) => (
-                        <ChatBubble
-                            key={msg.id}
-                            msg={msg}
-                            previous={msgsOfDay[i - 1]}
-                            isOwn={isOwnMessage(msg.author.id)}
-                            onImageClick={setExpandedImage}
-                            onAvatarClick={setExpandedImage}
-                            onPreviewClick={onPreviewClick}
-                        />
-                    ))}
+                    {msgsOfDay.map((msg, i) => {
+                        if (!msg || !(msg as any).author) {
+                            console.warn('Skipping invalid chat message in AdminChatBubbles:', msg);
+                            return null;
+                        }
+
+                        const previous = i > 0 ? msgsOfDay[i - 1] : undefined;
+
+                        return (
+                            <ChatBubble
+                                key={msg.id || i}
+                                msg={msg}
+                                previous={previous}
+                                isOwn={isOwnMessage(msg.author.id)}
+                                onImageClick={setExpandedImage}
+                                onAvatarClick={setExpandedImage}
+                                onPreviewClick={onPreviewClick}
+                                onReply={onReply}
+                            />
+                        );
+                    })}
                 </div>
             ))}
         </>

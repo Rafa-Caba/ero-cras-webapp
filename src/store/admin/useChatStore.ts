@@ -1,9 +1,15 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { io, Socket } from "socket.io-client";
-import { getChatHistory, sendTextMessage, uploadChatMedia, toggleReaction } from '../../services/admin/chat';
+import { io, type Socket } from 'socket.io-client';
+
+import {
+    getChatHistory,
+    sendTextMessage,
+    uploadChatMedia,
+    toggleReaction
+} from '../../services/admin/chat';
 import { getUserDirectory } from '../../services/admin/users';
-import type { ChatMessage } from '../../types/chat';
+import type { ChatMessage, MessageType } from '../../types/chat';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000';
 
@@ -34,7 +40,14 @@ interface ChatState {
 
     connect: (token: string, user: any) => void;
     disconnect: () => void;
-    sendMessage: (textInput: any, file?: File, type?: 'image' | 'video' | 'audio' | 'file') => Promise<void>;
+
+    sendMessage: (
+        textInput: any,
+        file?: File,
+        type?: 'image' | 'video' | 'audio' | 'file',
+        replyToId?: string
+    ) => Promise<void>;
+
     sendTyping: (isTyping: boolean) => void;
     reactToMessage: (messageId: string, emoji: string) => Promise<void>;
 
@@ -42,6 +55,42 @@ interface ChatState {
     loadMoreMessages: () => Promise<boolean>;
     fetchDirectory: () => Promise<void>;
 }
+
+// --- Normalizer -------------------------------------------------------------
+
+const normalizeChatMessage = (raw: any): ChatMessage => {
+    const base = raw?.message ?? raw;
+
+    if (!base) {
+        return {
+            id: '',
+            author: { id: '', name: '', username: '', imageUrl: '' } as any,
+            content: base?.content ?? '',
+            type: (base?.type ?? 'TEXT') as MessageType,
+            reactions: [],
+            replyTo: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+    }
+
+    const id = base.id ?? base._id ?? '';
+    const createdAt = base.createdAt ?? new Date().toISOString();
+    const updatedAt = base.updatedAt ?? createdAt;
+
+    return {
+        ...base,
+        id,
+        createdAt,
+        updatedAt,
+        fileUrl: base.fileUrl ?? '',
+        filename: base.filename ?? '',
+        reactions: base.reactions ?? [],
+        replyTo: base.replyTo ?? null
+    } as ChatMessage;
+};
+
+// --- Store ------------------------------------------------------------------
 
 export const useChatStore = create<ChatState>()(
     persist(
@@ -60,9 +109,10 @@ export const useChatStore = create<ChatState>()(
                 set({ loading: true, hasMoreMessages: true });
                 try {
                     const history = await getChatHistory(50);
-                    set({ messages: history });
+                    const normalized = history.map((m: any) => normalizeChatMessage(m));
+                    set({ messages: normalized });
                 } catch (error) {
-                    console.error("Failed to load chat history");
+                    console.error('Failed to load chat history', error);
                 } finally {
                     set({ loading: false });
                 }
@@ -82,10 +132,11 @@ export const useChatStore = create<ChatState>()(
                         return false;
                     }
 
-                    set({ messages: [...moreMessages, ...messages] });
+                    const normalized = moreMessages.map((m: any) => normalizeChatMessage(m));
+                    set({ messages: [...normalized, ...messages] });
                     return true;
                 } catch (error) {
-                    console.error("Failed to load more messages");
+                    console.error('Failed to load more messages', error);
                     return false;
                 } finally {
                     set({ loading: false });
@@ -96,7 +147,9 @@ export const useChatStore = create<ChatState>()(
                 try {
                     const data = await getUserDirectory();
                     set({ allUsers: data });
-                } catch (e) { console.error("Directory fetch failed", e); }
+                } catch (e) {
+                    console.error('Directory fetch failed', e);
+                }
             },
 
             connect: (token, user) => {
@@ -106,27 +159,39 @@ export const useChatStore = create<ChatState>()(
                 const socket = io(SOCKET_URL, {
                     auth: { token, user },
                     transports: ['websocket'],
-                    reconnection: true,
+                    reconnection: true
                 });
 
                 socket.on('connect', () => set({ connected: true }));
-                socket.on('disconnect', () => set({ connected: false, onlineUsers: [] }));
 
-                socket.on('new-message', (newMessage: ChatMessage) => {
+                socket.on('disconnect', () =>
+                    set({
+                        connected: false,
+                        onlineUsers: []
+                    })
+                );
+
+                socket.on('new-message', (incoming: any) => {
+                    const newMessage = normalizeChatMessage(incoming);
                     set((current) => {
-                        if (current.messages.some(m => m.id === newMessage.id)) return current;
+                        if (current.messages.some((m) => m.id === newMessage.id)) return current;
                         return { messages: [...current.messages, newMessage] };
                     });
                 });
 
-                socket.on('message-updated', (updatedMessage: ChatMessage) => {
+                socket.on('message-updated', (incoming: any) => {
+                    const updatedMessage = normalizeChatMessage(incoming);
                     set((current) => ({
-                        messages: current.messages.map(m => m.id === updatedMessage.id ? updatedMessage : m)
+                        messages: current.messages.map((m) =>
+                            m.id === updatedMessage.id ? updatedMessage : m
+                        )
                     }));
                 });
 
                 socket.on('online-users', (users: ConnectedUser[]) => {
-                    const uniqueUsers = users.filter((v, i, a) => a.findIndex(v2 => v2.id === v.id) === i);
+                    const uniqueUsers = users.filter(
+                        (v, i, a) => a.findIndex((v2) => v2.id === v.id) === i
+                    );
                     set({ onlineUsers: uniqueUsers });
                 });
 
@@ -136,7 +201,7 @@ export const useChatStore = create<ChatState>()(
                         if (isTyping) {
                             if (!newTyping.includes(username)) newTyping.push(username);
                         } else {
-                            newTyping = newTyping.filter(u => u !== username);
+                            newTyping = newTyping.filter((u) => u !== username);
                         }
                         return { typingUsers: newTyping };
                     });
@@ -157,52 +222,96 @@ export const useChatStore = create<ChatState>()(
 
             reactToMessage: async (messageId, emoji) => {
                 try {
-                    await toggleReaction(messageId, emoji);
-                } catch (e) { console.error("Reaction failed", e); }
+                    const updated = await toggleReaction(messageId, emoji);
+                    const normalized = normalizeChatMessage(updated);
+                    set((current) => ({
+                        messages: current.messages.map((m) =>
+                            m.id === normalized.id ? normalized : m
+                        )
+                    }));
+                } catch (e) {
+                    console.error('Reaction failed', e);
+                }
             },
 
-            sendMessage: async (textInput, file, type) => {
+            sendMessage: async (textInput, file, fileKind, replyToId) => {
                 const { socket } = get();
-                if (!socket) { alert("No connection."); return; }
+                if (!socket) {
+                    alert('No hay conexión de chat.');
+                    return;
+                }
 
                 set({ isSending: true });
+
                 try {
                     get().sendTyping(false);
-                    let uploadedUrl = '';
-                    let messageType = 'TEXT';
 
-                    if (file && type) {
-                        uploadedUrl = await uploadChatMedia(file, type);
-                        switch (type) {
-                            case 'video': messageType = 'VIDEO'; break;
-                            case 'image': messageType = 'IMAGE'; break;
-                            case 'audio': messageType = 'AUDIO'; break;
-                            case 'file': messageType = 'FILE'; break;
+                    let uploadedUrl = '';
+                    let messageType: MessageType = 'TEXT';
+
+                    if (file && fileKind) {
+                        uploadedUrl = await uploadChatMedia(file, fileKind);
+
+                        switch (fileKind) {
+                            case 'video':
+                                messageType = 'VIDEO';
+                                break;
+                            case 'image':
+                                messageType = 'IMAGE';
+                                break;
+                            case 'audio':
+                                messageType = 'AUDIO';
+                                break;
+                            case 'file':
+                                messageType = 'FILE';
+                                break;
+                            default:
+                                messageType = 'TEXT';
+                                break;
                         }
                     }
 
-                    let finalContent = {};
+                    let finalContent: any = {};
+
                     if (typeof textInput === 'string') {
                         finalContent = {
                             type: 'doc',
-                            content: textInput ? [{ type: 'paragraph', content: [{ type: 'text', text: textInput }] }] : []
+                            content: textInput
+                                ? [
+                                    {
+                                        type: 'paragraph',
+                                        content: [
+                                            {
+                                                type: 'text',
+                                                text: textInput
+                                            }
+                                        ]
+                                    }
+                                ]
+                                : []
                         };
                     } else {
                         finalContent = textInput;
                     }
 
-                    const payload: any = {
+                    const payload = {
                         content: finalContent,
                         type: messageType,
-                        ...(uploadedUrl ? { fileUrl: uploadedUrl } : {}),
+                        ...(uploadedUrl ? { fileUrl: uploadedUrl, filename: file?.name } : {}),
+                        ...(replyToId ? { replyToId } : {})
                     };
 
-                    if (!file && textInput) {
-                        await sendTextMessage(payload.content);
-                    }
+                    const sentRaw = await sendTextMessage(payload);
+                    const sentMessage = normalizeChatMessage(sentRaw);
 
+                    set((current) => {
+                        if (current.messages.some((m) => m.id === sentMessage.id)) {
+                            return current;
+                        }
+                        return { messages: [...current.messages, sentMessage] };
+                    });
                 } catch (err) {
-                    console.error("Send Error:", err);
+                    console.error('Send Error:', err);
                 } finally {
                     set({ isSending: false });
                 }
@@ -211,7 +320,9 @@ export const useChatStore = create<ChatState>()(
         {
             name: 'chat-storage',
             storage: createJSONStorage(() => localStorage),
-            partialize: (state) => ({ messages: state.messages }),
+            partialize: (state) => ({
+                messages: state.messages
+            })
         }
     )
 );

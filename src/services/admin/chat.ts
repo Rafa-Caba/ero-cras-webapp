@@ -1,5 +1,5 @@
 import api from '../../api/axios';
-import type { ChatMessage } from '../../types/chat';
+import type { ChatMessage, MessageType } from '../../types/chat';
 
 const createChatFormData = (file: File, type: 'image' | 'video' | 'audio' | 'file') => {
     const formData = new FormData();
@@ -24,16 +24,28 @@ export const uploadChatMedia = async (file: File, type: 'image' | 'video' | 'aud
     const { data } = await api.post(endpoint, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     });
-    const msg = data.message;
-    return msg?.fileUrl || msg?.imageUrl || msg?.audioUrl || data.url || "";
+    const msg = (data as any).message ?? data;
+    return msg?.fileUrl || msg?.imageUrl || msg?.audioUrl || (data as any).url || '';
 };
 
-export const sendTextMessage = async (content: any): Promise<ChatMessage> => {
-    const { data } = await api.post<ChatMessage>('/chat', { content, type: 'TEXT' });
-    return data;
+interface SendMessageRequest {
+    content: any;
+    type: MessageType;
+    fileUrl?: string;
+    filename?: string;
+    replyToId?: string;
+}
+
+export const sendTextMessage = async (body: SendMessageRequest): Promise<ChatMessage> => {
+    const { data } = await api.post('/chat', body);
+
+    // API might return { message: ChatMessage } or ChatMessage directly
+    const msg = (data as any).message ?? data;
+    return msg as ChatMessage;
 };
 
 export const toggleReaction = async (messageId: string, emoji: string): Promise<ChatMessage> => {
-    const { data } = await api.patch<{ message: ChatMessage }>(`/chat/${messageId}/reaction`, { emoji });
-    return data.message;
+    const { data } = await api.patch(`/chat/${messageId}/reaction`, { emoji });
+    const msg = (data as any).message ?? data;
+    return msg as ChatMessage;
 };
