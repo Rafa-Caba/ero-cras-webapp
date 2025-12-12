@@ -3,19 +3,26 @@ export interface User {
     name: string;
     username: string;
     email: string;
-    role: 'ADMIN' | 'EDITOR' | 'VIEWER';
+    role: 'ADMIN' | 'EDITOR' | 'VIEWER' | 'USER' | 'SUPER_ADMIN';
 
     imageUrl?: string;
     imagePublicId?: string;
 
     instrument?: string;
+    instrumentId?: string | null;
+    instrumentLabel?: string;
+
     voice?: boolean;
     bio?: string;
 
     themeId?: any;
-    pushToken?: string;
-    lastAccess?: string;
+    pushToken?: string | null;
 
+    choirId?: string;
+    choirName?: string;
+    choirCode?: string;
+
+    lastAccess?: string;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -26,11 +33,16 @@ export interface AuthResponse {
     refreshToken: string;
     role: string;
     user: User;
+
+    choirId?: string;
+    choirCode?: string;
 }
 
 export interface LoginPayload {
     username: string;
     password: string;
+
+    choirCode?: string;
 }
 
 export interface RegisterPayload {
@@ -39,4 +51,6 @@ export interface RegisterPayload {
     email: string;
     password: string;
     instrument?: string;
+
+    choirCode?: string;
 }

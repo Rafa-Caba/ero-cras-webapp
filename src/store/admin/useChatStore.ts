@@ -10,6 +10,7 @@ import {
 } from '../../services/admin/chat';
 import { getUserDirectory } from '../../services/admin/users';
 import type { ChatMessage, MessageType } from '../../types/chat';
+import { normalizeChatMessage } from '../../utils/chat/normalizeChatMessage';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:10000';
 
@@ -28,6 +29,8 @@ interface SocketProps {
 
 interface ChatState {
     messages: ChatMessage[];
+    currentChoirId: string | null;
+
     connected: boolean;
     socket: Socket | null;
     loading: boolean;
@@ -56,46 +59,12 @@ interface ChatState {
     fetchDirectory: () => Promise<void>;
 }
 
-// --- Normalizer -------------------------------------------------------------
-
-const normalizeChatMessage = (raw: any): ChatMessage => {
-    const base = raw?.message ?? raw;
-
-    if (!base) {
-        return {
-            id: '',
-            author: { id: '', name: '', username: '', imageUrl: '' } as any,
-            content: base?.content ?? '',
-            type: (base?.type ?? 'TEXT') as MessageType,
-            reactions: [],
-            replyTo: null,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-    }
-
-    const id = base.id ?? base._id ?? '';
-    const createdAt = base.createdAt ?? new Date().toISOString();
-    const updatedAt = base.updatedAt ?? createdAt;
-
-    return {
-        ...base,
-        id,
-        createdAt,
-        updatedAt,
-        fileUrl: base.fileUrl ?? '',
-        filename: base.filename ?? '',
-        reactions: base.reactions ?? [],
-        replyTo: base.replyTo ?? null
-    } as ChatMessage;
-};
-
-// --- Store ------------------------------------------------------------------
-
 export const useChatStore = create<ChatState>()(
     persist(
         (set, get) => ({
             messages: [],
+            currentChoirId: null,
+
             onlineUsers: [],
             allUsers: [],
             typingUsers: [],
@@ -156,6 +125,22 @@ export const useChatStore = create<ChatState>()(
                 const state = get();
                 if (!token || (state.socket && state.socket.connected)) return;
 
+                const newChoirId: string | null = (user as any)?.choirId
+                    ? String((user as any).choirId)
+                    : null;
+
+                const { currentChoirId } = state;
+
+                if (newChoirId && currentChoirId && newChoirId !== currentChoirId) {
+                    set({
+                        messages: [],
+                        hasMoreMessages: true,
+                        currentChoirId: newChoirId
+                    });
+                } else if (!currentChoirId && newChoirId) {
+                    set({ currentChoirId: newChoirId });
+                }
+
                 const socket = io(SOCKET_URL, {
                     auth: { token, user },
                     transports: ['websocket'],
@@ -173,6 +158,11 @@ export const useChatStore = create<ChatState>()(
 
                 socket.on('new-message', (incoming: any) => {
                     const newMessage = normalizeChatMessage(incoming);
+
+                    if (newChoirId && newMessage.choirId && newMessage.choirId !== newChoirId) {
+                        return;
+                    }
+
                     set((current) => {
                         if (current.messages.some((m) => m.id === newMessage.id)) return current;
                         return { messages: [...current.messages, newMessage] };
@@ -181,6 +171,11 @@ export const useChatStore = create<ChatState>()(
 
                 socket.on('message-updated', (incoming: any) => {
                     const updatedMessage = normalizeChatMessage(incoming);
+
+                    if (newChoirId && updatedMessage.choirId && updatedMessage.choirId !== newChoirId) {
+                        return;
+                    }
+
                     set((current) => ({
                         messages: current.messages.map((m) =>
                             m.id === updatedMessage.id ? updatedMessage : m
@@ -212,7 +207,15 @@ export const useChatStore = create<ChatState>()(
 
             disconnect: () => {
                 get().socket?.disconnect();
-                set({ connected: false, socket: null, onlineUsers: [] });
+                set({
+                    connected: false,
+                    socket: null,
+                    onlineUsers: [],
+                    typingUsers: [],
+                    messages: [],
+                    currentChoirId: null,
+                    hasMoreMessages: true
+                });
             },
 
             sendTyping: (isTyping) => {
@@ -321,7 +324,8 @@ export const useChatStore = create<ChatState>()(
             name: 'chat-storage',
             storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({
-                messages: state.messages
+                messages: state.messages,
+                currentChoirId: state.currentChoirId
             })
         }
     )

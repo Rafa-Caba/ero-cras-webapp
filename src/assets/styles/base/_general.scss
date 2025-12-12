@@ -78,13 +78,63 @@ body {
 
     .layout-nav {
         background: var(--color-nav);
-        padding: 0.7rem;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 
         li .nav-link:hover {
             color: var(--color-button-text);
             background-color: var(--color-accent);
             border-radius: 5px;
             font-weight: 500;
+        }
+    }
+
+    .admin-nav-link {
+        border-radius: 999px;
+        padding: 0.4rem 1.8rem;
+        font-weight: 700;
+        font-size: 0.95rem;
+
+        background-color: transparent;
+        color: var(--color-text);
+        border: 2px solid transparent;
+
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease,
+            box-shadow 0.2s ease,
+            transform 0.1s ease;
+    }
+
+    /* Active tab = solid button */
+    .admin-nav-link.active {
+        background-color: var(--color-button);
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Hover state: same family color, just a bit darker using color-mix */
+    .admin-nav-link:not(.active):hover,
+    .admin-nav-link:not(.active):focus {
+        /* Light “pill” on hover */
+        background-color: color-mix(in srgb,
+                var(--color-button) 80%,
+                var(--color-background) 20%);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Small tweak so wrapped rows don't look glued together */
+    .admin-nav-links-wrapper {
+        row-gap: 0.4rem;
+    }
+
+    /* Optional: make nav compact on small screens */
+    @media (max-width: 768px) {
+        .admin-nav-link {
+            padding: 0.35rem 1.2rem;
+            font-size: 0.9rem;
         }
     }
 
@@ -260,6 +310,13 @@ select:disabled {
     background-color: var(--color-card) !important;
     border: 1px solid var(--color-border);
     border-radius: 8px;
+    margin: auto;
+    max-width: 50vw;
+    min-height: 50vh;
+
+    @media (max-width: 900px) {
+        max-width: 100vw;
+    }
 }
 
 // =======================
@@ -354,7 +411,7 @@ select:disabled {
 // Dimensions
 .imagen-inicio-container {
     width: 650px;
-    height: 40vh;
+    height: 35vh;
 }
 
 .imagen-left-container,

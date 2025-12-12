@@ -4,7 +4,8 @@ import {
     useSongStore,
     useSettingsStore,
     useMemberStore,
-    useThemeStore
+    useThemeStore,
+    usePublicInstrumentsStore
 } from '../store/public';
 
 interface Props {
@@ -19,44 +20,45 @@ export const PublicGlobalProvider = ({ children }: Props) => {
     const { fetchSettings } = useSettingsStore();
     const { fetchMembers } = useMemberStore();
     const { themes, fetchThemes } = useThemeStore();
+    const { fetchPublicInstruments } = usePublicInstrumentsStore();
 
     useEffect(() => {
-        const loadGlobalData = async () => {
+        const loadData = async () => {
             try {
                 await Promise.all([
                     fetchGallery(),
                     fetchSongs(),
                     fetchSettings(),
                     fetchMembers(),
-                    fetchThemes()
+                    fetchThemes(),
+                    fetchPublicInstruments()
                 ]);
             } catch (error) {
-                console.warn("Error loading global public data", error);
+                console.warn('Error loading public global data:', error);
             }
         };
 
-        loadGlobalData();
+        loadData();
     }, []);
 
     useEffect(() => {
         if (themes.length > 0) {
             const defaultTheme = themes.find(t => t.name === 'Default');
+            if (!defaultTheme) return;
 
-            if (defaultTheme) {
-                const root = document.documentElement;
+            const root = document.documentElement;
 
-                root.style.setProperty('--color-primary', defaultTheme.primaryColor);
-                root.style.setProperty('--color-accent', defaultTheme.accentColor);
-                root.style.setProperty('--color-background', defaultTheme.backgroundColor);
-                root.style.setProperty('--color-text', defaultTheme.textColor);
-                root.style.setProperty('--color-card', defaultTheme.cardColor);
-                root.style.setProperty('--color-button', defaultTheme.buttonColor);
-                root.style.setProperty('--color-nav', defaultTheme.navColor);
+            root.style.setProperty('--color-primary', defaultTheme.primaryColor);
+            root.style.setProperty('--color-accent', defaultTheme.accentColor);
+            root.style.setProperty('--color-background', defaultTheme.backgroundColor);
+            root.style.setProperty('--color-text', defaultTheme.textColor);
+            root.style.setProperty('--color-card', defaultTheme.cardColor);
+            root.style.setProperty('--color-button', defaultTheme.buttonColor);
+            root.style.setProperty('--color-nav', defaultTheme.navColor);
 
-                root.style.setProperty('--color-button-text', defaultTheme.buttonTextColor);
-                root.style.setProperty('--color-secondary-text', defaultTheme.secondaryTextColor);
-                root.style.setProperty('--color-border', defaultTheme.borderColor);
-            }
+            root.style.setProperty('--color-button-text', defaultTheme.buttonTextColor);
+            root.style.setProperty('--color-secondary-text', defaultTheme.secondaryTextColor);
+            root.style.setProperty('--color-border', defaultTheme.borderColor);
         }
     }, [themes]);
 

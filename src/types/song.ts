@@ -2,14 +2,21 @@ import type { TipTapContent } from './annoucement';
 
 export interface SongType {
     id: string;
+    choirId: string;
+
     name: string;
     order: number;
     parentId?: string;
     isParent: boolean;
+
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface Song {
     id: string;
+    choirId: string;
+
     title: string;
     composer?: string;
     content: TipTapContent;

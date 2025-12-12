@@ -32,7 +32,7 @@ export const AdminBlogPostsView = () => {
         <section className="container py-4">
             <div className="botones text-center mb-3">
                 <h2 className="mb-4">Publicaciones</h2>
-                <Link to="/admin" className="btn general_btn mb-4">Ir al Panel de Control</Link>
+                {/* <Link to="/admin" className="btn general_btn mb-4">Ir al Panel de Control</Link> */}
             </div>
             {
                 posts.length === 0 ? (

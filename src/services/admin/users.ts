@@ -1,19 +1,19 @@
 import api from '../../api/axios';
 import type { User } from '../../types/auth';
 
-// 🟣 LIST (Paginated)
+// LIST (Paginated)
 export const getAllUsers = async (page: number = 1): Promise<{ users: User[], totalPages: number }> => {
     const { data } = await api.get<{ users: User[], totalPages: number }>(`/users?page=${page}`);
     return data;
 };
 
-// 🟣 GET DIRECTORY
+// GET DIRECTORY
 export const getUserDirectory = async (): Promise<User[]> => {
     const { data } = await api.get<User[]>('/users/directory');
     return data;
 };
 
-// 🟣 UPDATE SELF PROFILE (Matches PUT /me)
+// UPDATE SELF PROFILE (Matches PUT /me)
 export const updateSelfProfile = async (formData: FormData): Promise<User> => {
     const { data } = await api.put<User>('/users/me', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -21,13 +21,13 @@ export const updateSelfProfile = async (formData: FormData): Promise<User> => {
     return data;
 };
 
-// 🟣 UPDATE SELF THEME (Matches PUT /me/theme)
+// UPDATE SELF THEME (Matches PUT /me/theme)
 export const updateSelfTheme = async (themeId: string): Promise<User> => {
     const { data } = await api.put<User>('/users/me/theme', { themeId });
     return data;
 };
 
-// 🟣 ADMIN: SAVE USER
+// ADMIN: SAVE USER
 export const saveUser = async (data: any, file?: File, id?: string): Promise<void> => {
     const formData = new FormData();
     Object.keys(data).forEach(key => formData.append(key, data[key]));
@@ -40,7 +40,7 @@ export const saveUser = async (data: any, file?: File, id?: string): Promise<voi
     }
 };
 
-// 🟣 ADMIN: DELETE USER
+// ADMIN: DELETE USER
 export const deleteUser = async (id: string): Promise<void> => {
     await api.delete(`/users/${id}`);
 };

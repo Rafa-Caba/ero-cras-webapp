@@ -1,15 +1,23 @@
-import { useEffect } from "react";
-import { Spinner } from "react-bootstrap";
-import { useMemberStore } from "../../store/public/useMemberStore";
+import { useEffect } from 'react';
+import { Spinner } from 'react-bootstrap';
+import { useMemberStore } from '../../store/public/useMemberStore';
 
 const MemberSection = () => {
     const { members, loading, fetchMembers } = useMemberStore();
 
     useEffect(() => {
         fetchMembers();
-    }, []);
+    }, [fetchMembers]);
 
-    if (loading) return <Spinner animation="border" role="status" className="d-block mx-auto my-5" />;
+    if (loading) {
+        return (
+            <Spinner
+                animation="border"
+                role="status"
+                className="d-block mx-auto my-5"
+            />
+        );
+    }
 
     return (
         <div className="miembros w-100">
@@ -24,15 +32,21 @@ const MemberSection = () => {
                                     src={member.imageUrl || '/images/default-user.png'}
                                     style={{
                                         width: 180,
-                                        height: '100%'
+                                        height: '100%',
                                     }}
                                     alt={member.name}
                                 />
                                 <figcaption className="trasera">
-                                    <h2 className="titulo fs-3 mb-1 text-center">{member.name}</h2>
+                                    <h2 className="titulo fs-3 mb-1 text-center">
+                                        {member.name}
+                                    </h2>
                                     <hr className="my-2" />
-                                    <p className="fs-4 lh-sm mb-1">{member.instrument}</p>
-                                    <p className="fs-4 lh-sm mb-0">
+                                    <p className="fs-5 lh-sm mb-1">
+                                        {(member as any).instrumentLabel ||
+                                            (member as any).instrument ||
+                                            ''}
+                                    </p>
+                                    <p className="fs-5 lh-sm mb-0">
                                         {member.voice && 'Voz'}
                                     </p>
                                 </figcaption>

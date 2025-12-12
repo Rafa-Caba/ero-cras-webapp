@@ -11,7 +11,7 @@ export const NavBar = () => {
                     <Link className="nav-link text-theme-color" to="/members">Miembros</Link>
                 </li>
                 <li className="nav-item">
-                    <Link className="nav-link text-theme-color" to="/songs">Misa Cantos</Link>
+                    <Link className="nav-link text-theme-color" to="/songs">Cantos</Link>
                 </li>
                 <li className="nav-item">
                     <Link className="nav-link text-theme-color" to="/about">Nosotros</Link>

@@ -1,5 +1,7 @@
 export interface GalleryImage {
     id: string;
+    choirId: string;
+
     title: string;
     description: string;
     imageUrl: string;

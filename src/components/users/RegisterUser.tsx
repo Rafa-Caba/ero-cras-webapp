@@ -3,6 +3,7 @@ import { Form, Button, Container, Image } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { registerUser } from '../../services/auth';
+import type { RegisterPayload } from '../../types/auth';
 
 export const AdminRegister = () => {
     const navigate = useNavigate();
@@ -24,6 +25,7 @@ export const AdminRegister = () => {
         if (name === 'file' && files && files[0]) {
             const selectedFile = files[0];
             setFile(selectedFile);
+            console.log({ file: selectedFile });
             console.log({ file });
 
             setPreviewUrl(URL.createObjectURL(selectedFile));
@@ -48,12 +50,14 @@ export const AdminRegister = () => {
         }
 
         try {
-            const payload = {
+            const payload: RegisterPayload = {
                 name: formData.name,
                 username: formData.username,
                 email: formData.email,
                 password: formData.password,
-                instrument: ''
+                instrument: '',
+                // TODO 🔑 Choir binding: for now, this admin register always creates users in Ero Cras choir
+                choirCode: 'eroc1',
             };
 
             await registerUser(payload);
@@ -153,7 +157,6 @@ export const AdminRegister = () => {
                     </Form.Group>
 
                     {/* Image Upload (Preview only, actual upload requires auth token usually) */}
-                    {/* If backend supports public registration with image, we need to adjust service */}
                     <Form.Group className="mb-3" controlId="formFile">
                         <Form.Label>Foto de perfil (Opcional, se puede agregar después)</Form.Label>
                         <Form.Control

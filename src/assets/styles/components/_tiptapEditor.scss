@@ -72,7 +72,8 @@
     span,
     div {
         color: var(--color-text) !important;
-        text-align: center !important;
+        // text-align: center !important;
+        text-align: left !important;
         margin: 0;
         padding: 0;
     }
@@ -202,6 +203,13 @@
     padding: 0;
 }
 
+.tiptap-viewer p {
+    color: var(--color-text) !important;
+    text-align: left !important;
+    margin: 0;
+    padding: 0;
+}
+
 .chat-user-titulo {
     font-weight: bold;
     font-size: 0.85rem;
@@ -290,4 +298,13 @@
 .chat-reaccion-btn.visible {
     opacity: 1;
     transform: scale(1.1);
+}
+
+.badge_bg {
+    background-color: var(--color-card) !important;
+    color: var(--color-text);
+    font-size: large;
+    font-family: 'Courier New', Courier, monospace;
+    font-style: italic;
+    font-weight: 800;
 }

@@ -2,6 +2,8 @@ import type { User } from './auth';
 
 export interface Log {
     id: string;
+    choirId: string;
+
     user: User | { id: string; name: string; username: string; role: string };
     collectionName: string;
     action: 'create' | 'update' | 'delete' | 'add_reaction' | 'remove_reaction';

@@ -53,11 +53,7 @@ export const AdminUsersList = () => {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Gestión de Usuarios</h2>
-                {/* <Link to="/admin/users/new" className="btn btn-primary">
-                    + Nuevo Usuario
-                </Link> */}
                 <div>
-                    {/* <Link to="/admin" className="btn general_btn px-3 m-2">Inicio</Link> */}
                     <Link to="/admin/users/new" className="btn general_btn me-2"> + Nuevo Usuario</Link>
                 </div>
             </div>
@@ -113,11 +109,20 @@ export const AdminUsersList = () => {
                                         <td className="fw-bold">{user.name}</td>
                                         <td>@{user.username}</td>
                                         <td>
-                                            <span className={`badge ${user.role === 'ADMIN' ? 'bg-danger' : user.role === 'EDITOR' ? 'bg-warning text-dark' : 'bg-secondary'}`}>
+                                            <span
+                                                className={`badge ${user.role === 'SUPER_ADMIN'
+                                                    ? 'bg-dark'
+                                                    : user.role === 'ADMIN'
+                                                        ? 'bg-danger'
+                                                        : user.role === 'EDITOR'
+                                                            ? 'bg-warning text-dark'
+                                                            : 'bg-secondary'
+                                                    }`}
+                                            >
                                                 {user.role}
                                             </span>
                                         </td>
-                                        <td>{user.instrument || '-'}</td>
+                                        <td>{user.instrumentLabel || user.instrument || '-'}</td>
                                         <td className="text-end">
                                             <Link
                                                 to={`/admin/users/edit/${user.id}`}

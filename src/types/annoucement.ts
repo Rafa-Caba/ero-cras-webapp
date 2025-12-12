@@ -5,6 +5,8 @@ export interface TipTapContent {
 
 export interface Announcement {
     id: string;
+    choirId: string;
+
     title: string;
     content: TipTapContent;
     imageUrl?: string;

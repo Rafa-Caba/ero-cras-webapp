@@ -21,7 +21,7 @@ export const MembersList = () => {
 
     useEffect(() => {
         fetchMembers(currentPage);
-    }, [currentPage]);
+    }, [currentPage, fetchMembers]);
 
     useEffect(() => {
         const delay = setTimeout(() => {
@@ -32,7 +32,7 @@ export const MembersList = () => {
             }
         }, 500);
         return () => clearTimeout(delay);
-    }, [searchText]);
+    }, [searchText, members.length, loading, fetchMembers, searchMembersByText]);
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -65,8 +65,9 @@ export const MembersList = () => {
             <div className="d-flex flex-column align-items-center my-1">
                 <h2 className="mb-4">Miembros</h2>
                 <div className="botones mb-3">
-                    {/* <Link to="/admin" className="btn general_btn px-3 m-2">Inicio</Link> */}
-                    <Link to="/admin/members/new" className="btn general_btn me-2">Nuevo Miembro</Link>
+                    <Link to="/admin/members/new" className="btn general_btn me-2">
+                        Nuevo Miembro
+                    </Link>
                 </div>
             </div>
 
@@ -81,82 +82,105 @@ export const MembersList = () => {
             </div>
 
             <div className="mb-2">
-                {loading
-                    ? <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '300px' }}>
+                {loading ? (
+                    <div
+                        className="d-flex justify-content-center align-items-center"
+                        style={{ minHeight: '300px' }}
+                    >
                         <Spinner animation="border" />
                     </div>
-                    : (
-                        <>
-                            <Table bordered hover responsive className="text-center align-middle mx-auto">
-                                <thead className="table-dark">
+                ) : (
+                    <>
+                        <Table
+                            bordered
+                            hover
+                            responsive
+                            className="text-center align-middle mx-auto"
+                        >
+                            <thead className="table-dark">
+                                <tr>
+                                    <th>Foto</th>
+                                    <th>Nombre</th>
+                                    <th>Instrumento</th>
+                                    <th>¿Tiene voz?</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {members.length === 0 ? (
                                     <tr>
-                                        <th>Foto</th>
-                                        <th>Nombre</th>
-                                        <th>Instrumento</th>
-                                        <th>¿Tiene voz?</th>
-                                        <th>Acciones</th>
+                                        <td colSpan={5}>
+                                            No se encontraron miembros con ese criterio.
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {members.length === 0 ? (
-                                        <tr><td colSpan={5}>No se encontraron miembros con ese criterio.</td></tr>
-                                    ) : (
-                                        members.map((member: Member) => (
-                                            <tr key={member.id}>
-                                                <td>
-                                                    <Image
-                                                        src={member.imageUrl || '/images/default-user.png'}
-                                                        roundedCircle
-                                                        height={50}
-                                                        width={50}
-                                                        style={{ objectFit: 'cover' }}
-                                                        alt={member.name}
-                                                    />
-                                                </td>
-                                                <td>{member.name}</td>
-                                                <td>{member.instrument}</td>
-                                                <td>{member.voice ? 'Sí' : 'No'}</td>
-                                                <td>
-                                                    <Link to={`/admin/members/edit/${member.id}`} className="btn general_btn mb-2 mb-md-0 me-2">Editar</Link>
-                                                    <Button
-                                                        variant="danger"
-                                                        onClick={() => handleDelete(member.id)}
-                                                    >
-                                                        Eliminar
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </Table>
+                                ) : (
+                                    members.map((member: Member) => (
+                                        <tr key={member.id}>
+                                            <td>
+                                                <Image
+                                                    src={
+                                                        member.imageUrl ||
+                                                        '/images/default-user.png'
+                                                    }
+                                                    roundedCircle
+                                                    height={50}
+                                                    width={50}
+                                                    style={{ objectFit: 'cover' }}
+                                                    alt={member.name}
+                                                />
+                                            </td>
+                                            <td>{member.name}</td>
+                                            <td>
+                                                {(member as any).instrumentLabel ||
+                                                    (member as any).instrument ||
+                                                    '-'}
+                                            </td>
+                                            <td>{member.voice ? 'Sí' : 'No'}</td>
+                                            <td>
+                                                <Link
+                                                    to={`/admin/members/edit/${member.id}`}
+                                                    className="btn general_btn mb-2 mb-md-0 me-2"
+                                                >
+                                                    Editar
+                                                </Link>
+                                                <Button
+                                                    variant="danger"
+                                                    onClick={() => handleDelete(member.id)}
+                                                >
+                                                    Eliminar
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </Table>
 
-                            {totalPages > 1 && (
-                                <div className="d-flex justify-content-center gap-2 mt-3">
-                                    <Button
-                                        variant="secondary"
-                                        onClick={() => handlePageChange(currentPage - 1)}
-                                        disabled={currentPage === 1}
-                                    >
-                                        Anterior
-                                    </Button>
+                        {totalPages > 1 && (
+                            <div className="d-flex justify-content-center gap-2 mt-3">
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                >
+                                    Anterior
+                                </Button>
 
-                                    <span className="align-self-center">
-                                        Página {currentPage} de {totalPages}
-                                    </span>
+                                <span className="align-self-center">
+                                    Página {currentPage} de {totalPages}
+                                </span>
 
-                                    <Button
-                                        variant="secondary"
-                                        onClick={() => handlePageChange(currentPage + 1)}
-                                        disabled={currentPage === totalPages}
-                                    >
-                                        Siguiente
-                                    </Button>
-                                </div>
-                            )}
-                        </>
-                    )
-                }
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Siguiente
+                                </Button>
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
         </div>
     );

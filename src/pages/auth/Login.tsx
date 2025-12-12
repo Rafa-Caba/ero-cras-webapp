@@ -32,19 +32,18 @@ export const Login = () => {
     };
 
     return (
-        <div>
+        <div className="primary-color-container">
             <header className="layout-header">
                 <div className="titulo-nav px-0 col-12 d-flex flex-column">
                     <div className="titulo mx-5 text-black d-flex flex-column flex-md-row justify-content-md-between align-items-md-center">
                         <div className="titulo text-center text-md-start d-flex flex-column flex-md-row justify-content-between mt-3 w-100">
                             <h2 className="">Ero Cras Oficial - Admin</h2>
-                            <Link className="btn general_btn mt-3 mt-md-0 mb-md-2 fw-bold fs-6 fs-md-5" to="/">Ir al Inicio</Link>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <main className="layout-main primary-color-container" style={{ minHeight: '80vh' }}>
+            <main className="layout-main primary-color-container" style={{ minHeight: '83vh' }}>
                 <div className="mt-5 my-mb-5 mx-auto col-12 col-md-8 d-flex flex-column align-items-center justify-content-center">
                     <Image
                         src={'/images/erocrasLogo.png'}

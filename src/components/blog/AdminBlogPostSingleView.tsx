@@ -123,7 +123,7 @@ export const AdminBlogPostSingleView = () => {
                 {comments.length > 0 ? (
                     [...comments].reverse().map((c, i) => (
                         <div key={i}>
-                            <div className="border p-0 rounded mb-2">
+                            <div className="border p-3 rounded mb-2">
                                 <p className="mb-1"><strong>{c.author}</strong> — <small>{new Date(c.date).toLocaleString()}</small></p>
 
                                 <TiptapViewer content={parseText(c.text) as any} />

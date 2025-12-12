@@ -15,6 +15,8 @@ export interface HomeLegends {
 
 export interface AppSettings {
     id: string;
+    choirId: string;
+
     webTitle: string;
     contactPhone: string;
 

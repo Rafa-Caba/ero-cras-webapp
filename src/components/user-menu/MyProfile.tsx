@@ -18,7 +18,6 @@ export const MyProfile = () => {
         <div className="my-profile mt-1">
             <div className="d-flex flex-row justify-content-between">
                 <h2>📄 Mi Perfil</h2>
-                {/* <Link to="/admin" className="btn general_btn mb-4">Ir al Inicio</Link> */}
             </div>
 
             <div className="d-flex align-items-center gap-3 my-3">
@@ -40,6 +39,14 @@ export const MyProfile = () => {
             <ul>
                 <li><strong>Email:</strong> {user?.email}</li>
                 <li><strong>Rol:</strong> {user?.role ? capitalizeWord(user.role) : 'No disponible'}</li>
+                <li>
+                    <strong>Instrumento:</strong>{' '}
+                    {user?.instrumentLabel || user?.instrument || 'No especificado'}
+                </li>
+                <li>
+                    <strong>Voz:</strong>{' '}
+                    {user?.voice ? 'Sí' : 'No'}
+                </li>
                 <li>
                     <strong>🕓 Último acceso:</strong>{' '}
                     {user?.updatedAt

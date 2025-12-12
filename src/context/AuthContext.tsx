@@ -17,6 +17,8 @@ interface AuthContextType {
     updateUser: (userData: User) => void;
 }
 
+const DEFAULT_CHOIR_CODE = 'eroc1';
+
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -38,11 +40,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         };
 
-        initAuth();
+        void initAuth();
 
         return () => {
             disconnect();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -64,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             connect(storedToken, userData);
         } catch (error) {
-            console.error("Auth Check Failed", error);
+            console.error('Auth Check Failed', error);
             logout();
         } finally {
             setLoading(false);
@@ -73,7 +76,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const login = async (data: LoginPayload) => {
         try {
-            const response = await loginUser(data);
+            const payload: LoginPayload = {
+                ...data,
+                choirCode: data.choirCode ?? DEFAULT_CHOIR_CODE,
+            };
+
+            const response = await loginUser(payload);
+
             localStorage.setItem('token', response.accessToken);
             localStorage.setItem('refreshToken', response.refreshToken);
             localStorage.setItem('role', response.role);
@@ -90,7 +99,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const register = async (data: RegisterPayload) => {
         try {
-            const response = await registerUser(data);
+            const payload: RegisterPayload = {
+                ...data,
+                choirCode: data.choirCode ?? DEFAULT_CHOIR_CODE,
+            };
+
+            const response = await registerUser(payload);
+
             localStorage.setItem('token', response.accessToken);
             localStorage.setItem('refreshToken', response.refreshToken);
             localStorage.setItem('role', response.role);
@@ -118,17 +133,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <AuthContext.Provider value={{
-            user,
-            token,
-            role,
-            loading,
-            login,
-            register,
-            logout,
-            checkAuth,
-            updateUser
-        }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                token,
+                role,
+                loading,
+                login,
+                register,
+                logout,
+                checkAuth,
+                updateUser,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
@@ -140,9 +157,11 @@ export const useAuth = () => {
 
     const { user } = context;
 
-    // 🛡️ Role Helpers
-    const isAdmin = user?.role === 'ADMIN';
-    const canEdit = user?.role === 'ADMIN' || user?.role === 'EDITOR';
+    const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+    const isAdmin = isSuperAdmin || user?.role === 'ADMIN';
+    const canEdit = isSuperAdmin || user?.role === 'ADMIN' || user?.role === 'EDITOR';
 
-    return { ...context, isAdmin, canEdit };
+    const choirId = user?.choirId ?? null;
+
+    return { ...context, isAdmin, canEdit, isSuperAdmin, choirId };
 };

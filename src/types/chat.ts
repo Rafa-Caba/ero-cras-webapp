@@ -1,14 +1,19 @@
-import type { User } from './auth';
-import type { TipTapContent } from './annoucement';
+export interface ChatUserSummary {
+    id: string;
+    name: string;
+    username: string;
+    imageUrl: string;
+}
 
 export type MessageType = 'TEXT' | 'IMAGE' | 'FILE' | 'MEDIA' | 'REACTION' | 'AUDIO' | 'VIDEO';
 
 export interface MessageReaction {
     emoji: string;
-    user: User | string;
+    user: ChatUserSummary | string;
+    username?: string;
 }
 
-export interface ChatReplyPreview {
+export interface ReplyPreview {
     id: string;
     username: string;
     textPreview: string;
@@ -16,22 +21,23 @@ export interface ChatReplyPreview {
 
 export interface ChatMessage {
     id: string;
+    choirId?: string | null;
 
-    author: User;
-    content: TipTapContent;
+    author: ChatUserSummary;
+    content: any;
     type: MessageType;
 
-    // Media fields
     fileUrl?: string;
     filename?: string;
     imageUrl?: string;
     audioUrl?: string;
+    imagePublicId?: string;
 
     reactions: MessageReaction[];
-    replyTo?: ChatReplyPreview | null;
+    replyTo?: ReplyPreview | null;
 
     createdAt: string;
-    updatedAt: string;
+    updatedAt?: string;
 }
 
 export interface NewMessagePayload {
@@ -40,5 +46,7 @@ export interface NewMessagePayload {
     type: MessageType;
     fileUrl?: string;
     filename?: string;
+    imageUrl?: string;
+    audioUrl?: string;
     replyToId?: string;
 }

@@ -2,11 +2,12 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Form, Button, Container, Image } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { registerUser } from '../../services/auth';
 import { AdminFooter } from '../../components/components-admin/AdminFooter';
+import { useAuth } from '../../context/AuthContext';
 
 export const Register = () => {
     const navigate = useNavigate();
+    const { register } = useAuth();
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -15,18 +16,20 @@ export const Register = () => {
         email: '',
         password: '',
         confirmPassword: '',
+        choirCode: '',
     });
     const [errors, setErrors] = useState<string[]>([]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value, files } = e.target;
 
+        if (errors.length > 0) setErrors([]);
+
         if (name === 'file' && files && files[0]) {
             const selectedFile = files[0];
-            // setFile(selectedFile);
             setPreviewUrl(URL.createObjectURL(selectedFile));
         } else {
-            setFormData({ ...formData, [name]: value });
+            setFormData(prev => ({ ...prev, [name]: value }));
         }
     };
 
@@ -38,7 +41,9 @@ export const Register = () => {
         if (!formData.username.trim()) newErrors.push('El usuario es requerido.');
         if (!formData.email.trim()) newErrors.push('El correo es requerido.');
         if (!formData.password) newErrors.push('La contraseña es requerida.');
-        if (formData.password !== formData.confirmPassword) newErrors.push('Las contraseñas no coinciden.');
+        if (formData.password !== formData.confirmPassword) {
+            newErrors.push('Las contraseñas no coinciden.');
+        }
 
         if (newErrors.length > 0) {
             setErrors(newErrors);
@@ -46,18 +51,23 @@ export const Register = () => {
         }
 
         try {
-            await registerUser({
+            await register({
                 name: formData.name,
                 username: formData.username,
                 email: formData.email,
                 password: formData.password,
-                instrument: ''
+                instrument: '',
+                choirCode: formData.choirCode || undefined,
             });
 
-            Swal.fire('¡Registrado!', 'Usuario creado con éxito. Por favor inicia sesión.', 'success');
+            Swal.fire(
+                '¡Registrado!',
+                'Usuario creado con éxito. Por favor inicia sesión.',
+                'success'
+            );
             navigate('/auth/login');
         } catch (error: any) {
-            const msg = error.response?.data?.message || 'Error al conectar con el servidor';
+            const msg = error?.response?.data?.message || 'Error al conectar con el servidor';
             Swal.fire('Error', msg, 'error');
         }
     };
@@ -69,33 +79,38 @@ export const Register = () => {
     }, [previewUrl]);
 
     return (
-        <div>
-            <header className="layout-header">
+        <div className='primary-color-container'>
+            <header className="layout-header primary-color-container">
                 <div className="titulo-nav px-0 col-12 d-flex flex-column">
                     <div className="titulo mx-5 text-black d-flex flex-column flex-md-row justify-content-md-between align-items-md-center">
                         <div className="titulo text-center text-md-start d-flex flex-column flex-md-row justify-content-between mt-3 w-100">
-                            <h2 className="">Ero Cras Oficial - Admin</h2>
-                            <Link className="btn general_btn mt-3 mt-md-0 mb-md-2 fw-bold fs-6 fs-md-5" to="/">Ir al Inicio</Link>
+                            <h2 className="mb-0">Ero Cras Oficial - Admin</h2>
+                            {/* <Link
+                                className="btn general_btn mt-3 mt-md-0 mb-md-2 fw-bold fs-6 fs-md-5"
+                                to="/"
+                            >
+                                Ir al Inicio
+                            </Link> */}
                         </div>
                     </div>
                 </div>
             </header>
 
-            <main className='layout-main primary-color-container mx-3'>
-                <Container className="mt-4 d-flex flex-column justify-content-center col-12 col-md-6">
+            <main className="layout-main primary-color-container mx-3">
+                <Container className="mt-2 d-flex flex-column justify-content-center col-12 col-md-6">
                     <Image
                         src={'/images/erocrasLogo.png'}
                         roundedCircle
-                        height={150}
-                        width={150}
+                        height={100}
+                        width={100}
                         alt={`Ero Cras Official`}
                         style={{ objectFit: 'cover', border: '3px solid purple', margin: '.3rem' }}
-                        className="text-center mx-auto mb-5"
+                        className="text-center mx-auto mb-3"
                     />
                     <h3>Registrar Usuario</h3>
 
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3" controlId="formName">
+                    <Form className='p-4' onSubmit={handleSubmit}>
+                        <Form.Group className="mb-2" controlId="formName">
                             <Form.Label>Nombre</Form.Label>
                             <Form.Control
                                 type="text"
@@ -131,6 +146,22 @@ export const Register = () => {
                             />
                         </Form.Group>
 
+                        {/* 🆕 Código de coro opcional */}
+                        <Form.Group className="mb-3" controlId="formChoirCode">
+                            <Form.Label>Código de Coro (Opcional)</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="choirCode"
+                                placeholder="Ej. eroc1"
+                                value={formData.choirCode}
+                                onChange={handleChange}
+                            />
+                            <Form.Text className="text-muted">
+                                Déjalo vacío para registrarte en el coro principal de Ero Cras.
+                                Usa el código sólo si te lo compartieron para otro coro.
+                            </Form.Text>
+                        </Form.Group>
+
                         <Form.Group className="mb-3" controlId="formPassword">
                             <Form.Label>Contraseña</Form.Label>
                             <Form.Control
@@ -155,7 +186,6 @@ export const Register = () => {
                             />
                         </Form.Group>
 
-                        {/* Image Preview Placeholder (Logic needs Update Profile integration) */}
                         <Form.Group className="mb-3" controlId="formFile">
                             <Form.Label>Foto de perfil (Opcional)</Form.Label>
                             <Form.Control
@@ -168,25 +198,37 @@ export const Register = () => {
 
                         {previewUrl && (
                             <div className="text-center mb-3">
-                                <Image src={previewUrl} roundedCircle width={100} height={100} style={{ objectFit: 'cover' }} />
+                                <Image
+                                    src={previewUrl}
+                                    roundedCircle
+                                    width={100}
+                                    height={100}
+                                    style={{ objectFit: 'cover' }}
+                                />
                             </div>
                         )}
 
                         {errors.length > 0 && (
                             <div className="alert alert-danger">
                                 <ul className="mb-0">
-                                    {errors.map((error, i) => <li key={i}>{error}</li>)}
+                                    {errors.map((error, i) => (
+                                        <li key={i}>{error}</li>
+                                    ))}
                                 </ul>
                             </div>
                         )}
 
-                        <div className='text-center mb-3'>
-                            <Button type="submit" className="general_btn">Registrar</Button>
+                        <div className="text-center mb-2">
+                            <Button type="submit" className="general_btn">
+                                Registrar
+                            </Button>
                         </div>
 
-                        <p className="d-flex flex-column text-center">
+                        <p className="d-flex flex-column text-center mb-0">
                             ¿Ya tienes cuenta?
-                            <Link className="derecha" to="/auth/login">Iniciar Sesión</Link>
+                            <Link className="derecha" to="/auth/login">
+                                Iniciar Sesión
+                            </Link>
                         </p>
                     </Form>
                 </Container>

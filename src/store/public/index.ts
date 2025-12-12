@@ -5,3 +5,4 @@ export * from './useMemberStore';
 export * from './useSettingsStore';
 export * from './useThemeStore';
 export * from './useSongTypeStore';
+export * from './usePublicInstrumentsStore';

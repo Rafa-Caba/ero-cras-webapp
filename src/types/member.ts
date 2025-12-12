@@ -1,7 +1,13 @@
 export interface Member {
     id: string;
+    choirId: string;
+
     name: string;
+
     instrument: string;
+    instrumentId?: string | null;
+    instrumentLabel?: string;
+
     voice: boolean;
     imageUrl?: string;
     imagePublicId?: string;
@@ -21,7 +27,9 @@ export interface PaginatedMemberResponse {
 
 export interface CreateMemberPayload {
     name: string;
-    instrument: string;
+    instrumentId?: string;
+    instrumentLabel: string;
+    instrument?: string;
     voice: boolean;
     file?: File;
 }

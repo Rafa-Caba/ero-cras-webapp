@@ -24,6 +24,10 @@ import { Register } from './pages/auth/Register';
 // --- Admin Pages (English Filenames) ---
 import { Dashboard } from './pages/admin/Dashboard';
 
+// --- Choirs ---
+import { ChoirList } from './pages/admin/choir/ChoirList';
+import { ChoirForm } from './pages/admin/choir/ChoirForm';
+
 // Users
 import { UsersList } from './pages/admin/user/UsersList';
 import { UserForm } from './pages/admin/user/UserForm';
@@ -75,6 +79,10 @@ import { ChatGroup } from './pages/admin/chat/ChatGroup';
 import { EditProfile } from './pages/admin/user/EditProfile';
 import { PublicTestDashboard } from './pages/admin/log/PublicTestDashboard';
 
+// Instruments
+import { InstrumentsList } from './pages/admin/instruments/InstrumentsList';
+import { InstrumentForm } from './pages/admin/instruments/InstrumentForm';
+
 function App() {
     return (
         <div>
@@ -101,6 +109,11 @@ function App() {
                     </AuthProvider>
                 }>
                     <Route index element={<Dashboard />} />
+
+                    {/* Choirs */}
+                    <Route path="choirs" element={<ChoirList />} />
+                    <Route path="choirs/new" element={<ChoirForm />} />
+                    <Route path="choirs/edit/:id" element={<ChoirForm />} />
 
                     {/* Users */}
                     <Route path="users" element={<UsersList />} />
@@ -145,6 +158,11 @@ function App() {
                     <Route path="announcements" element={<AnnouncementList />} />
                     <Route path="announcements/new" element={<NewAnnouncement />} />
                     <Route path="announcements/edit/:id" element={<EditAnnouncement />} />
+
+                    {/* Instruments */}
+                    <Route path="/admin/instruments" element={<InstrumentsList />} />
+                    <Route path="/admin/instruments/new" element={<InstrumentForm />} />
+                    <Route path="/admin/instruments/edit/:id" element={<InstrumentForm />} />
 
                     {/* Settings & Tools */}
                     <Route path="settings" element={<WebsiteSettings />} />

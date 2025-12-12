@@ -8,6 +8,8 @@ export interface BlogComment {
 
 export interface BlogPost {
     id: string;
+    choirId: string;
+
     title: string;
     content: TipTapContent;
     imageUrl?: string;

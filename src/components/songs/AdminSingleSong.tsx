@@ -66,39 +66,41 @@ export const AdminSingleSong = () => {
     };
 
     return (
-        <div className="canto p-3 w-100 text-center my-3">
-            <div>
-                <h2 className="titulo">{song.title}</h2>
-                <p className="fst-italic">{song.songTypeName}</p>
+        <div className="canto p-3 text-center my-3">
+            <div className="d-flex flex-column justify-content-between">
+                <div className="d-flex flex-column">
+                    <h2 className="titulo">{song.title}</h2>
+                    <p className="fst-italic">{song.songTypeName}</p>
 
-                {song.audioUrl && (
-                    <div className="d-flex justify-content-center mt-3 mb-4">
-                        <button
-                            type="button"
-                            className="audio-bar-btn"
-                            onClick={handlePlayPause}
-                        >
-                            <span className="audio-bar-icon">▶</span>
-                            <div className="text-start">
-                                <div className="fw-bold">Escuchar audio</div>
-                                <div className="small text-muted">
-                                    Toca para reproducir / pausar
+                    {song.audioUrl && (
+                        <div className="d-flex justify-content-center mt-3 mb-4">
+                            <button
+                                type="button"
+                                className="audio-bar-btn"
+                                onClick={handlePlayPause}
+                            >
+                                <span className="audio-bar-icon">▶</span>
+                                <div className="text-start">
+                                    <div className="fw-bold">Escuchar audio</div>
+                                    <div className="small text-muted">
+                                        Toca para reproducir / pausar
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
-                        <audio ref={audioRef} src={song.audioUrl} />
-                    </div>
-                )}
+                            </button>
+                            <audio ref={audioRef} src={song.audioUrl} />
+                        </div>
+                    )}
 
-                <div className="texto-scrollable my-2">
-                    <div className="d-md-block text-center mb-3 fs-4">
-                        <TiptapViewer content={parseText(song.content)} />
+                    <div className="texto-scrollable my-2">
+                        <div className="d-md-block text-center mb-3 fs-4">
+                            <TiptapViewer content={parseText(song.content)} />
+                        </div>
                     </div>
+
+                    <p className="fst-italic mb-4 fw-bold">{song.composer}</p>
                 </div>
 
-                <p className="fst-italic mb-4 fw-bold">{song.composer}</p>
-
-                <div className="m-0">
+                <div className="m-0 mt-2">
                     {canEdit && (
                         <>
                             <Button
