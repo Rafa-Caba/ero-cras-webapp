@@ -1,4 +1,3 @@
-
 export interface InstrumentAuthor {
     id: string;
     name: string;
@@ -18,6 +17,8 @@ export interface Instrument {
     isActive: boolean;
     order: number;
 
+    choirId?: string | null;
+
     createdAt?: string;
     updatedAt?: string;
 
@@ -32,4 +33,7 @@ export interface CreateInstrumentPayload {
     iconKey: string;
     isActive?: boolean;
     order?: number;
+
+    choirId?: string;
+    choirKey?: string;
 }

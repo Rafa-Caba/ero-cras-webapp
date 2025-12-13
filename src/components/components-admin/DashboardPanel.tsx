@@ -1,4 +1,3 @@
-// src/components/components-admin/AdminDashboardPanel.tsx
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Image, Card, Row, Col } from 'react-bootstrap';
@@ -8,7 +7,7 @@ import LogoutButton from './LogoutButton';
 import { useAuth } from '../../context/AuthContext';
 import { useGalleryStore } from '../../store/admin/useGalleryStore';
 import { useUsersStore } from '../../store/admin/useUsersStore';
-import { useThemeStore } from '../../store/public';
+import { useThemeStore } from '../../store/admin/useThemeStore';
 import type { Choir } from '../../types/choir';
 import { useChoirsStore } from '../../store/admin/useChoirsStore';
 
@@ -24,12 +23,12 @@ const StatCard = ({ title, value, subtitle, children }: StatCardProps) => (
         <Card.Body className="d-flex flex-column justify-content-between">
             <div>
                 <Card.Title className="mb-1">{title}</Card.Title>
-                <div className="fs-2 fw-bold">{value}</div>
+                <div className="fs-3 fs-md-2 fw-bold">{value}</div>
                 {subtitle && (
                     <small className="text-muted d-block mt-1">{subtitle}</small>
                 )}
             </div>
-            {children && <div className="mt-2 small">{children}</div>}
+            {children && <div className="mt-2 sub_title">{children}</div>}
         </Card.Body>
     </Card>
 );
@@ -52,26 +51,25 @@ export const AdminDashboardPanel = () => {
 
     useEffect(() => {
         fetchGallery();
-    }, []);
+    }, [fetchGallery]);
 
     useEffect(() => {
         fetchUsers(1).catch(() => undefined);
-    }, []);
+    }, [fetchUsers]);
 
     useEffect(() => {
         fetchThemes().catch(() => undefined);
-    }, []);
+    }, [fetchThemes]);
 
     useEffect(() => {
         if (isSuperAdmin) {
             fetchChoirs().catch(() => undefined);
         }
-    }, [isSuperAdmin]);
+    }, [isSuperAdmin, fetchChoirs]);
 
     const startImage = images.find((img) => img.imageStart);
 
-    // const choirName = user?.choirId || 'Coro actual';
-    const choirName = user?.choirName ?? user?.choirId
+    const choirName = user?.choirName ?? user?.choirId;
 
     const choirsList: Choir[] = Array.isArray(choirs) ? choirs : [];
     const choirsPreview: Choir[] = choirsList.slice(0, 4);
@@ -85,8 +83,8 @@ export const AdminDashboardPanel = () => {
             <p className="m-3 mt-1 text-center fs-2 fw-bold">Panel de Control</p>
 
             {/* STATS ROW */}
-            <Row className="mb-3 g-3">
-                <Col xs={12} md={3}>
+            <Row className="mb-1 mb-md-3 g-3">
+                <Col xs={6} md={3}>
                     <StatCard
                         title="Usuarios del coro"
                         value={users.length}
@@ -94,7 +92,7 @@ export const AdminDashboardPanel = () => {
                     />
                 </Col>
 
-                <Col xs={12} md={3}>
+                <Col xs={6} md={3}>
                     <StatCard
                         title="Temas de color"
                         value={themes.length}
@@ -102,7 +100,7 @@ export const AdminDashboardPanel = () => {
                     />
                 </Col>
 
-                <Col xs={12} md={3}>
+                <Col xs={6} md={3}>
                     <StatCard
                         title="Imágenes en galería"
                         value={images.length}
@@ -111,11 +109,10 @@ export const AdminDashboardPanel = () => {
                 </Col>
 
                 {isSuperAdmin && (
-                    <Col xs={12} md={3}>
+                    <Col xs={6} md={3}>
                         <StatCard
                             title="Coros configurados"
                             value={choirsList.length}
-                        // subtitle="Solo visible para Super Admin"
                         >
                             {choirsList.length === 0 && (
                                 <span className="text-muted">
@@ -143,7 +140,8 @@ export const AdminDashboardPanel = () => {
             {/* MAIN CONTENT (image + footer row) */}
             <div className="panel-titulo d-flex flex-column my-0 flex-grow-1">
                 <div
-                    className={`${!startImage && 'imagen-inicio-container'} text-center mx-auto mt-3 fade-in`}
+                    className={`${!startImage && 'imagen-inicio-container'
+                        } text-center mx-auto mt-3 fade-in`}
                 >
                     {startImage ? (
                         <Image

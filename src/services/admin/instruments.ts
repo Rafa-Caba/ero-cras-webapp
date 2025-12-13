@@ -1,6 +1,17 @@
 import api from '../../api/axios';
 import type { Instrument, CreateInstrumentPayload } from '../../types/instrument';
 
+// Shared helper (same pattern as gallery)
+const createFormData = (payload: any, file?: File) => {
+    const formData = new FormData();
+    formData.append('data', JSON.stringify(payload));
+
+    if (file) {
+        formData.append('file', file);
+    }
+    return formData;
+};
+
 // ADMIN: Get all instruments (no pagination for now)
 export const getInstruments = async (): Promise<Instrument[]> => {
     const { data } = await api.get<Instrument[]>('/instruments');
@@ -19,27 +30,32 @@ export const saveInstrument = async (
     file?: File,
     id?: string
 ): Promise<Instrument> => {
-    const formData = new FormData();
+    const {
+        name,
+        slug,
+        iconKey,
+        category,
+        isActive,
+        order,
+        choirId,
+        choirKey
+    } = payload;
 
-    formData.append('name', payload.name);
-    formData.append('slug', payload.slug);
-    formData.append('iconKey', payload.iconKey);
+    const dataPayload: any = {
+        name,
+        slug,
+        iconKey
+    };
 
-    if (payload.category) {
-        formData.append('category', payload.category);
-    }
+    if (category) dataPayload.category = category;
+    if (typeof isActive === 'boolean') dataPayload.isActive = isActive;
+    if (typeof order === 'number') dataPayload.order = order;
 
-    if (typeof payload.isActive === 'boolean') {
-        formData.append('isActive', String(payload.isActive));
-    }
+    // Optional multi-choir targeting (for SUPER_ADMIN, if backend supports it)
+    if (choirId) dataPayload.choirId = choirId;
+    if (choirKey) dataPayload.choirKey = choirKey;
 
-    if (typeof payload.order === 'number') {
-        formData.append('order', String(payload.order));
-    }
-
-    if (file) {
-        formData.append('file', file);
-    }
+    const formData = createFormData(dataPayload, file);
 
     if (id) {
         // UPDATE

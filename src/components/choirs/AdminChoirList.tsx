@@ -103,10 +103,10 @@ export const AdminChoirList = () => {
                                                 {choir.isActive ? 'Activo' : 'Inactivo'}
                                             </Badge>
                                         </td>
-                                        <td className="text-end">
+                                        <td className="text-center text-md-end">
                                             <Link
                                                 to={`/admin/choirs/edit/${choir.id}`}
-                                                className="btn btn-sm btn-outline-primary me-2"
+                                                className="btn btn-sm btn-outline-primary me-1 me-md-2"
                                             >
                                                 <FaEdit />
                                             </Link>

@@ -1,6 +1,7 @@
 export interface Theme {
     id: string;
-    choirId: string;
+
+    choirId?: string | null;
 
     name: string;
     isDark: boolean;

@@ -51,7 +51,9 @@ export const useInstrumentsStore = create<InstrumentsState>((set, get) => ({
 
             set({
                 instruments: alreadyInList
-                    ? current.map(inst => (inst.id === instrument.id ? instrument : inst))
+                    ? current.map(inst =>
+                        inst.id === instrument.id ? instrument : inst
+                    )
                     : [...current, instrument]
             });
 
@@ -78,7 +80,9 @@ export const useInstrumentsStore = create<InstrumentsState>((set, get) => ({
     deleteInstrumentById: async (id: string) => {
         try {
             await deleteInstrument(id);
-            await get().fetchInstruments();
+            set(state => ({
+                instruments: state.instruments.filter(inst => inst.id !== id)
+            }));
         } catch (error) {
             console.error('Error deleting instrument:', error);
             throw error;

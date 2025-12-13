@@ -94,8 +94,8 @@ export const InstrumentPickerModal = ({
                                     >
                                         <div
                                             style={{
-                                                width: 50,
-                                                height: 50,
+                                                width: 150,
+                                                height: 200,
                                                 borderRadius: 12,
                                                 border: '1px solid #eee',
                                                 display: 'flex',

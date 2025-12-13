@@ -215,7 +215,7 @@ export const UserSettings = () => {
                     <Button type="submit" className="general_btn">
                         Guardar cambios
                     </Button>
-                    <Link to="/admin" className="btn btn-secondary px-3 ms-2">
+                    <Link to="/admin" style={{ borderRadius: 10 }} className="btn btn-secondary px-3 py-1 ms-2 mt-2 mt-md-0">
                         Ir al Inicio
                     </Link>
                 </div>

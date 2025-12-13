@@ -87,12 +87,29 @@ function App() {
     return (
         <div>
             <Routes>
-                {/* --- Public Section --- */}
-                <Route path="/" element={
-                    <PublicGlobalProvider>
-                        <PublicLayout />
-                    </PublicGlobalProvider>
-                }>
+                <Route
+                    path="/"
+                    element={
+                        <PublicGlobalProvider>
+                            <PublicLayout />
+                        </PublicGlobalProvider>
+                    }
+                >
+                    <Route index element={<HomePage />} />
+                    <Route path="contact" element={<Contact />} />
+                    <Route path="members" element={<MembersPublic />} />
+                    <Route path="songs" element={<Songs />} />
+                    <Route path="about" element={<AboutUs />} />
+                </Route>
+
+                <Route
+                    path="/:choirKey"
+                    element={
+                        <PublicGlobalProvider>
+                            <PublicLayout />
+                        </PublicGlobalProvider>
+                    }
+                >
                     <Route index element={<HomePage />} />
                     <Route path="contact" element={<Contact />} />
                     <Route path="members" element={<MembersPublic />} />
@@ -101,13 +118,16 @@ function App() {
                 </Route>
 
                 {/* --- Admin Section --- */}
-                <Route path="/admin" element={
-                    <AuthProvider>
-                        <PrivateRoute>
-                            <AdminLayout />
-                        </PrivateRoute>
-                    </AuthProvider>
-                }>
+                <Route
+                    path="/admin"
+                    element={
+                        <AuthProvider>
+                            <PrivateRoute>
+                                <AdminLayout />
+                            </PrivateRoute>
+                        </AuthProvider>
+                    }
+                >
                     <Route index element={<Dashboard />} />
 
                     {/* Choirs */}
@@ -159,10 +179,10 @@ function App() {
                     <Route path="announcements/new" element={<NewAnnouncement />} />
                     <Route path="announcements/edit/:id" element={<EditAnnouncement />} />
 
-                    {/* Instruments */}
-                    <Route path="/admin/instruments" element={<InstrumentsList />} />
-                    <Route path="/admin/instruments/new" element={<InstrumentForm />} />
-                    <Route path="/admin/instruments/edit/:id" element={<InstrumentForm />} />
+                    {/* Instruments (fixed paths) */}
+                    <Route path="instruments" element={<InstrumentsList />} />
+                    <Route path="instruments/new" element={<InstrumentForm />} />
+                    <Route path="instruments/edit/:id" element={<InstrumentForm />} />
 
                     {/* Settings & Tools */}
                     <Route path="settings" element={<WebsiteSettings />} />
@@ -174,17 +194,22 @@ function App() {
                 </Route>
 
                 {/* --- Auth Section (Wrapped in Provider) --- */}
-                <Route path="/auth/login" element={
-                    <AuthProvider>
-                        <Login />
-                    </AuthProvider>
-                } />
-                <Route path="/auth/register" element={
-                    <AuthProvider>
-                        <Register />
-                    </AuthProvider>
-                } />
-
+                <Route
+                    path="/auth/login"
+                    element={
+                        <AuthProvider>
+                            <Login />
+                        </AuthProvider>
+                    }
+                />
+                <Route
+                    path="/auth/register"
+                    element={
+                        <AuthProvider>
+                            <Register />
+                        </AuthProvider>
+                    }
+                />
             </Routes>
         </div>
     );

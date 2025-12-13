@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 export const AdminNav = () => {
     const location = useLocation();
     const { user, isAdmin, canEdit, isSuperAdmin } = useAuth();
+    const choirCode = user?.choirCode || 'eroc1';
 
     if (!user) return null;
 
@@ -194,7 +195,7 @@ export const AdminNav = () => {
                         <Nav.Item>
                             <Nav.Link
                                 as={Link}
-                                to="/?fromAdmin=true"
+                                to={`/${choirCode}?fromAdmin=true`}
                                 className="admin-nav-link"
                             >
                                 Página Pública

@@ -180,4 +180,16 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--color-secondary-text);
+
+    @media (max-width: 768px) {
+        font-size: 0.7rem;
+    }
+}
+
+.dashboard-stat-card .sub_title {
+    font-size: 0.8rem;
+
+    @media (max-width: 768px) {
+        font-size: 0.7rem;
+    }
 }

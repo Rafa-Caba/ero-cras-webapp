@@ -1,8 +1,18 @@
 import api from '../../api/axios';
 import type { Theme, CreateThemePayload } from '../../types/theme';
 
-export const getAllThemes = async (): Promise<Theme[]> => {
-    const { data } = await api.get<{ themes: Theme[] }>('/themes?all=true');
+type ThemeFilterParams = {
+    choirId?: string;
+    choirKey?: string;
+};
+
+export const getAllThemes = async (params?: ThemeFilterParams): Promise<Theme[]> => {
+    const { data } = await api.get<{ themes: Theme[] }>('/themes', {
+        params: {
+            ...(params || {}),
+            all: 'true'
+        }
+    });
     return data.themes || [];
 };
 
@@ -16,7 +26,10 @@ export const createTheme = async (payload: CreateThemePayload): Promise<Theme> =
     return data.theme;
 };
 
-export const updateTheme = async (id: string, payload: Partial<CreateThemePayload>): Promise<Theme> => {
+export const updateTheme = async (
+    id: string,
+    payload: Partial<CreateThemePayload>
+): Promise<Theme> => {
     const { data } = await api.put<{ theme: Theme }>(`/themes/${id}`, payload);
     return data.theme;
 };
