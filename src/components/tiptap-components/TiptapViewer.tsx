@@ -1,6 +1,9 @@
-import { useEditor, EditorContent } from '@tiptap/react';
+// src/components/tiptap-components/TiptapViewer.tsx
+
+import { useEffect } from 'react';
+import { EditorContent, useEditor, type JSONContent } from '@tiptap/react';
+
 import { customExtensions } from '../../utils/tiptap/extensions';
-import type { JSONContent } from '@tiptap/react';
 import { parseText } from '../../utils/handleTextTipTap';
 
 interface Props {
@@ -16,7 +19,17 @@ export const TiptapViewer = ({ content }: Props) => {
         editable: false,
     });
 
-    if (!editor) return null;
+    useEffect(() => {
+        if (!editor) {
+            return;
+        }
+
+        editor.commands.setContent(parsedContent);
+    }, [editor, parsedContent]);
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <div className="tiptap-viewer">
