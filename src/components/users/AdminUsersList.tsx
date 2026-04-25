@@ -1,4 +1,4 @@
-// src/components/members/MembersList.tsx
+// src/components/users/AdminUsersList.tsx
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
@@ -27,11 +27,10 @@ import {
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
-import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
+import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
-import { useMemberStore } from '../../store/admin/useMemberStore';
-import type { Member } from '../../types/member';
+import { useUsersStore } from '../../store/admin/useUsersStore';
 
 interface SectionHeaderProps {
     title: string;
@@ -40,18 +39,38 @@ interface SectionHeaderProps {
     action?: ReactNode;
 }
 
-interface MemberInstrumentFields {
-    instrumentId?: string;
-    instrumentLabel?: string;
-    instrument?: string;
-}
+type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR' | 'VIEWER';
 
-type MemberWithInstrument = Member & MemberInstrumentFields;
+const getRoleChipColor = (role: string) => {
+    if (role === 'SUPER_ADMIN') {
+        return {
+            label: 'Super Admin',
+            backgroundColor: '#111827',
+            color: '#ffffff',
+        };
+    }
 
-const getMemberInstrumentLabel = (member: Member): string => {
-    const memberWithInstrument = member as MemberWithInstrument;
+    if (role === 'ADMIN') {
+        return {
+            label: 'Admin',
+            backgroundColor: '#dc2626',
+            color: '#ffffff',
+        };
+    }
 
-    return memberWithInstrument.instrumentLabel || memberWithInstrument.instrument || '-';
+    if (role === 'EDITOR') {
+        return {
+            label: 'Editor',
+            backgroundColor: '#f59e0b',
+            color: '#111827',
+        };
+    }
+
+    return {
+        label: 'Viewer',
+        backgroundColor: 'color-mix(in srgb, var(--color-card) 74%, var(--color-border) 26%)',
+        color: 'var(--color-text)',
+    };
 };
 
 const SectionHeader = ({ title, subtitle, icon, action }: SectionHeaderProps) => {
@@ -157,54 +176,33 @@ const SectionHeader = ({ title, subtitle, icon, action }: SectionHeaderProps) =>
     );
 };
 
-export const MembersList = () => {
-    const [searchText, setSearchText] = useState('');
+export const AdminUsersList = () => {
+    const [searchTerm, setSearchTerm] = useState('');
 
     const {
-        members,
+        users,
         currentPage,
         totalPages,
         loading,
-        fetchMembers,
-        removeMember,
+        fetchUsers,
+        deleteUserById,
         setCurrentPage,
-        searchMembersByText,
-    } = useMemberStore();
+    } = useUsersStore();
 
     useEffect(() => {
-        void fetchMembers(currentPage);
-    }, [currentPage, fetchMembers]);
-
-    useEffect(() => {
-        const delay = window.setTimeout(() => {
-            if (searchText.trim() === '') {
-                if (members.length === 0 && !loading) {
-                    void fetchMembers(1);
-                }
-
-                return;
-            }
-
-            void searchMembersByText(searchText);
-        }, 500);
-
-        return () => window.clearTimeout(delay);
-    }, [searchText, members.length, loading, fetchMembers, searchMembersByText]);
-
-    const handlePageChange = (newPage: number) => {
-        if (newPage >= 1 && newPage <= totalPages) {
-            setCurrentPage(newPage);
-        }
-    };
+        void fetchUsers(currentPage);
+    }, [currentPage, fetchUsers]);
 
     const handleDelete = async (id: string) => {
         const result = await Swal.fire({
             title: '¿Estás seguro?',
-            text: 'Esta acción eliminará al miembro y su imagen',
+            text: 'Esta acción eliminará al usuario permanentemente.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
         });
 
         if (!result.isConfirmed) {
@@ -212,13 +210,22 @@ export const MembersList = () => {
         }
 
         try {
-            await removeMember(id);
-            Swal.fire('Eliminado', 'El miembro ha sido eliminado.', 'success');
-        } catch (error) {
-            console.error(error);
-            Swal.fire('Error', 'No se pudo eliminar el miembro', 'error');
+            await deleteUserById(id);
+            Swal.fire('Eliminado', 'El usuario ha sido eliminado.', 'success');
+        } catch {
+            Swal.fire('Error', 'No se pudo eliminar el usuario.', 'error');
         }
     };
+
+    const filteredUsers = users.filter((userItem) => {
+        const searchValue = searchTerm.toLowerCase();
+
+        return (
+            userItem.name.toLowerCase().includes(searchValue) ||
+            userItem.username.toLowerCase().includes(searchValue) ||
+            userItem.email.toLowerCase().includes(searchValue)
+        );
+    });
 
     return (
         <Box
@@ -235,13 +242,13 @@ export const MembersList = () => {
             }}
         >
             <SectionHeader
-                title="Miembros"
-                subtitle="Administra integrantes, instrumentos, voz y foto de perfil."
-                icon={<GroupsRoundedIcon />}
+                title="Gestión de Usuarios"
+                subtitle="Administra perfiles, roles, instrumentos y accesos del coro."
+                icon={<PeopleRoundedIcon />}
                 action={
                     <Button
                         component={RouterLink}
-                        to="/admin/members/new"
+                        to="/admin/users/new"
                         variant="contained"
                         startIcon={<AddRoundedIcon />}
                         sx={{
@@ -251,7 +258,7 @@ export const MembersList = () => {
                             fontWeight: 950,
                         }}
                     >
-                        Nuevo Miembro
+                        Nuevo Usuario
                     </Button>
                 }
             />
@@ -281,9 +288,9 @@ export const MembersList = () => {
                 <TextField
                     type="text"
                     label="Buscar"
-                    placeholder="Buscar por nombre o instrumento..."
-                    value={searchText}
-                    onChange={(event) => setSearchText(event.target.value)}
+                    placeholder="Buscar por nombre, usuario o correo..."
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
                     slotProps={{
                         input: {
                             startAdornment: (
@@ -307,7 +314,7 @@ export const MembersList = () => {
                         <Box sx={{ textAlign: 'center' }}>
                             <CircularProgress />
                             <Typography sx={{ mt: 2, fontWeight: 800 }}>
-                                Cargando miembros...
+                                Cargando usuarios...
                             </Typography>
                         </Box>
                     </Box>
@@ -328,7 +335,7 @@ export const MembersList = () => {
                         <Table stickyHeader>
                             <TableHead>
                                 <TableRow>
-                                    {['Foto', 'Nombre', 'Instrumento', '¿Tiene voz?', 'Acciones'].map((label) => (
+                                    {['Avatar', 'Nombre', 'Usuario', 'Rol', 'Instrumento', 'Acciones'].map((label) => (
                                         <TableCell
                                             key={label}
                                             align={label === 'Acciones' ? 'right' : 'left'}
@@ -349,10 +356,10 @@ export const MembersList = () => {
                             </TableHead>
 
                             <TableBody>
-                                {members.length === 0 ? (
+                                {filteredUsers.length === 0 ? (
                                     <TableRow>
                                         <TableCell
-                                            colSpan={5}
+                                            colSpan={6}
                                             sx={{
                                                 py: 5,
                                                 textAlign: 'center',
@@ -361,142 +368,155 @@ export const MembersList = () => {
                                                 borderBottom: 'none',
                                             }}
                                         >
-                                            No se encontraron miembros con ese criterio.
+                                            No se encontraron usuarios.
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    members.map((member: Member) => (
-                                        <TableRow
-                                            key={member.id}
-                                            hover
-                                            sx={{
-                                                '&:hover': {
-                                                    backgroundColor:
-                                                        'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-                                                },
-                                            }}
-                                        >
-                                            <TableCell
+                                    filteredUsers.map((userItem) => {
+                                        const roleChip = getRoleChipColor(userItem.role as UserRole);
+
+                                        return (
+                                            <TableRow
+                                                key={userItem.id}
+                                                hover
                                                 sx={{
-                                                    width: 86,
-                                                    borderBottom:
-                                                        '1px solid color-mix(in srgb, var(--color-border) 32%, transparent)',
+                                                    '&:hover': {
+                                                        backgroundColor:
+                                                            'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+                                                    },
                                                 }}
                                             >
-                                                <Avatar
-                                                    src={member.imageUrl || '/images/default-user.png'}
-                                                    alt={member.name}
+                                                <TableCell
                                                     sx={{
-                                                        width: 50,
-                                                        height: 50,
-                                                        bgcolor: 'var(--color-primary)',
-                                                        color: 'var(--color-button-text)',
-                                                        fontWeight: 950,
-                                                        boxShadow: '0 8px 20px rgba(15, 23, 42, 0.12)',
+                                                        width: 86,
+                                                        borderBottom:
+                                                            '1px solid color-mix(in srgb, var(--color-border) 32%, transparent)',
                                                     }}
                                                 >
-                                                    {member.name.slice(0, 1).toUpperCase()}
-                                                </Avatar>
-                                            </TableCell>
+                                                    <Avatar
+                                                        src={userItem.imageUrl || '/default-avatar.png'}
+                                                        alt={userItem.username}
+                                                        sx={{
+                                                            width: 50,
+                                                            height: 50,
+                                                            bgcolor: 'var(--color-primary)',
+                                                            color: 'var(--color-button-text)',
+                                                            fontWeight: 900,
+                                                            boxShadow: '0 8px 20px rgba(15, 23, 42, 0.12)',
+                                                        }}
+                                                    >
+                                                        {userItem.name?.slice(0, 1).toUpperCase() || 'U'}
+                                                    </Avatar>
+                                                </TableCell>
 
-                                            <TableCell
-                                                sx={{
-                                                    color: 'var(--color-text)',
-                                                    fontWeight: 950,
-                                                    borderBottom:
-                                                        '1px solid color-mix(in srgb, var(--color-border) 32%, transparent)',
-                                                    minWidth: 190,
-                                                    overflowWrap: 'anywhere',
-                                                }}
-                                            >
-                                                {member.name}
-                                            </TableCell>
-
-                                            <TableCell
-                                                sx={{
-                                                    color: 'var(--color-text)',
-                                                    fontWeight: 850,
-                                                    borderBottom:
-                                                        '1px solid color-mix(in srgb, var(--color-border) 32%, transparent)',
-                                                    minWidth: 170,
-                                                    overflowWrap: 'anywhere',
-                                                }}
-                                            >
-                                                {getMemberInstrumentLabel(member)}
-                                            </TableCell>
-
-                                            <TableCell
-                                                sx={{
-                                                    borderBottom:
-                                                        '1px solid color-mix(in srgb, var(--color-border) 32%, transparent)',
-                                                    minWidth: 120,
-                                                }}
-                                            >
-                                                <Chip
-                                                    size="small"
-                                                    label={member.voice ? 'Sí' : 'No'}
-                                                    color={member.voice ? 'success' : 'default'}
+                                                <TableCell
                                                     sx={{
+                                                        color: 'var(--color-text)',
                                                         fontWeight: 950,
-                                                    }}
-                                                />
-                                            </TableCell>
-
-                                            <TableCell
-                                                align="right"
-                                                sx={{
-                                                    borderBottom:
-                                                        '1px solid color-mix(in srgb, var(--color-border) 32%, transparent)',
-                                                    minWidth: 140,
-                                                }}
-                                            >
-                                                <Box
-                                                    sx={{
-                                                        display: 'flex',
-                                                        justifyContent: 'flex-end',
-                                                        gap: 0.75,
+                                                        borderBottom:
+                                                            '1px solid color-mix(in srgb, var(--color-border) 32%, transparent)',
+                                                        minWidth: 190,
                                                     }}
                                                 >
-                                                    <Tooltip title="Editar miembro">
-                                                        <IconButton
-                                                            component={RouterLink}
-                                                            to={`/admin/members/edit/${member.id}`}
-                                                            aria-label={`Editar ${member.name}`}
-                                                            sx={{
-                                                                color: 'var(--color-primary)',
-                                                                backgroundColor:
-                                                                    'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                                                                '&:hover': {
-                                                                    backgroundColor:
-                                                                        'color-mix(in srgb, var(--color-primary) 18%, transparent)',
-                                                                },
-                                                            }}
-                                                        >
-                                                            <EditRoundedIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
+                                                    {userItem.name}
+                                                </TableCell>
 
-                                                    <Tooltip title="Eliminar miembro">
-                                                        <IconButton
-                                                            aria-label={`Eliminar ${member.name}`}
-                                                            onClick={() => handleDelete(member.id)}
-                                                            sx={{
-                                                                color: '#dc2626',
-                                                                backgroundColor:
-                                                                    'color-mix(in srgb, #dc2626 10%, transparent)',
-                                                                '&:hover': {
+                                                <TableCell
+                                                    sx={{
+                                                        color: 'var(--color-secondary-text)',
+                                                        fontWeight: 850,
+                                                        borderBottom:
+                                                            '1px solid color-mix(in srgb, var(--color-border) 32%, transparent)',
+                                                        minWidth: 160,
+                                                    }}
+                                                >
+                                                    @{userItem.username}
+                                                </TableCell>
+
+                                                <TableCell
+                                                    sx={{
+                                                        borderBottom:
+                                                            '1px solid color-mix(in srgb, var(--color-border) 32%, transparent)',
+                                                    }}
+                                                >
+                                                    <Chip
+                                                        size="small"
+                                                        label={roleChip.label}
+                                                        sx={{
+                                                            fontWeight: 950,
+                                                            backgroundColor: roleChip.backgroundColor,
+                                                            color: roleChip.color,
+                                                        }}
+                                                    />
+                                                </TableCell>
+
+                                                <TableCell
+                                                    sx={{
+                                                        color: 'var(--color-text)',
+                                                        fontWeight: 800,
+                                                        borderBottom:
+                                                            '1px solid color-mix(in srgb, var(--color-border) 32%, transparent)',
+                                                        minWidth: 150,
+                                                    }}
+                                                >
+                                                    {userItem.instrumentLabel || userItem.instrument || '-'}
+                                                </TableCell>
+
+                                                <TableCell
+                                                    align="right"
+                                                    sx={{
+                                                        borderBottom:
+                                                            '1px solid color-mix(in srgb, var(--color-border) 32%, transparent)',
+                                                    }}
+                                                >
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            justifyContent: 'flex-end',
+                                                            gap: 0.75,
+                                                        }}
+                                                    >
+                                                        <Tooltip title="Editar usuario">
+                                                            <IconButton
+                                                                component={RouterLink}
+                                                                to={`/admin/users/edit/${userItem.id}`}
+                                                                aria-label={`Editar ${userItem.name}`}
+                                                                sx={{
+                                                                    color: 'var(--color-primary)',
                                                                     backgroundColor:
-                                                                        'color-mix(in srgb, #dc2626 18%, transparent)',
-                                                                },
-                                                            }}
-                                                        >
-                                                            <DeleteRoundedIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                </Box>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
+                                                                        'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                                                                    '&:hover': {
+                                                                        backgroundColor:
+                                                                            'color-mix(in srgb, var(--color-primary) 18%, transparent)',
+                                                                    },
+                                                                }}
+                                                            >
+                                                                <EditRoundedIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+
+                                                        <Tooltip title="Eliminar usuario">
+                                                            <IconButton
+                                                                aria-label={`Eliminar ${userItem.name}`}
+                                                                onClick={() => handleDelete(userItem.id)}
+                                                                sx={{
+                                                                    color: '#dc2626',
+                                                                    backgroundColor:
+                                                                        'color-mix(in srgb, #dc2626 10%, transparent)',
+                                                                    '&:hover': {
+                                                                        backgroundColor:
+                                                                            'color-mix(in srgb, #dc2626 18%, transparent)',
+                                                                    },
+                                                                }}
+                                                            >
+                                                                <DeleteRoundedIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </Box>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
                                 )}
                             </TableBody>
                         </Table>
@@ -508,10 +528,7 @@ export const MembersList = () => {
                         sx={{
                             flexShrink: 0,
                             display: 'flex',
-                            flexDirection: {
-                                xs: 'column',
-                                sm: 'row',
-                            },
+                            flexDirection: 'row',
                             justifyContent: 'center',
                             alignItems: 'center',
                             gap: 1,
@@ -519,8 +536,8 @@ export const MembersList = () => {
                     >
                         <Button
                             variant="outlined"
-                            onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(currentPage - 1)}
                             sx={{
                                 borderRadius: 1.5,
                                 fontWeight: 950,
@@ -535,8 +552,8 @@ export const MembersList = () => {
 
                         <Button
                             variant="outlined"
-                            onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(currentPage + 1)}
                             sx={{
                                 borderRadius: 1.5,
                                 fontWeight: 950,

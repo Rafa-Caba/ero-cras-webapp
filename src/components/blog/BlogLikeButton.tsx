@@ -1,6 +1,16 @@
+// src/components/blog/BlogLikeButton.tsx
+
 import { useState } from 'react';
-import { Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
+
+import {
+    Button,
+    CircularProgress,
+} from '@mui/material';
+
+import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
+import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
+
 import { useBlogStore } from '../../store/admin/useBlogStore';
 
 interface Props {
@@ -10,7 +20,12 @@ interface Props {
     currentUserId: string | undefined;
 }
 
-export const BlogLikeButton = ({ postId, initialLikes, initialLikesUsers, currentUserId }: Props) => {
+export const BlogLikeButton = ({
+    postId,
+    initialLikes,
+    initialLikesUsers,
+    currentUserId,
+}: Props) => {
     const { toggleLike } = useBlogStore();
 
     const safeInitialLikes = Math.max(0, initialLikes);
@@ -26,7 +41,9 @@ export const BlogLikeButton = ({ postId, initialLikes, initialLikesUsers, curren
             return;
         }
 
-        if (loading) return;
+        if (loading) {
+            return;
+        }
 
         const previousLiked = liked;
         const previousLikes = likes;
@@ -42,8 +59,7 @@ export const BlogLikeButton = ({ postId, initialLikes, initialLikesUsers, curren
 
         try {
             await toggleLike(postId);
-        } catch (error) {
-            console.error("Like failed", error);
+        } catch {
             setLiked(previousLiked);
             setLikes(previousLikes);
         } finally {
@@ -53,17 +69,38 @@ export const BlogLikeButton = ({ postId, initialLikes, initialLikesUsers, curren
 
     return (
         <Button
-            className="me-2 transition-all duration-200"
-            style={{
-                backgroundColor: liked ? '#7d2181' : 'transparent',
-                borderColor: '#7d2181',
-                color: liked ? '#fff' : '#7d2181',
-                minWidth: '140px',
-                opacity: loading ? 0.7 : 1
-            }}
+            type="button"
+            variant={liked ? 'contained' : 'outlined'}
             onClick={handleLike}
+            disabled={loading}
+            startIcon={
+                loading ? (
+                    <CircularProgress size={18} />
+                ) : liked ? (
+                    <FavoriteRoundedIcon />
+                ) : (
+                    <FavoriteBorderRoundedIcon />
+                )
+            }
+            sx={{
+                minWidth: 160,
+                borderRadius: 1.5,
+                px: 2.5,
+                py: 0.9,
+                fontWeight: 950,
+                color: liked ? 'var(--color-button-text)' : 'var(--color-primary)',
+                backgroundColor: liked ? 'var(--color-button)' : 'transparent',
+                borderColor: 'var(--color-primary)',
+                opacity: loading ? 0.72 : 1,
+                '&:hover': {
+                    backgroundColor: liked
+                        ? 'var(--color-accent)'
+                        : 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                    borderColor: 'var(--color-accent)',
+                },
+            }}
         >
-            {liked ? `❤️ Te gusta (${likes})` : `🤍 Me gusta (${likes})`}
+            {liked ? `Te gusta (${likes})` : `Me gusta (${likes})`}
         </Button>
     );
 };

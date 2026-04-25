@@ -1,7 +1,7 @@
 // src/layouts/admin/AdminLayout.tsx
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Navigate, Outlet, Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
@@ -47,7 +47,7 @@ import PublicRoundedIcon from '@mui/icons-material/PublicRounded';
 import QueueMusicRoundedIcon from '@mui/icons-material/QueueMusicRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 
-import { AvisosSidebar } from '../../components/announcements/AnnouncementSidebar';
+import { AnnouncementSidebar } from '../../components/announcements/AnnouncementSidebar';
 import { UserMenu } from '../../components/user-menu/UserMenu';
 import { useAuth } from '../../context/AuthContext';
 import { useAdminSettingsStore } from '../../store/admin/useSettingsStore';
@@ -327,6 +327,11 @@ const AdminLayout = () => {
                     overflowX: 'hidden',
                     px: collapsed ? 0.75 : 1.25,
                     py: 1.5,
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    '&::-webkit-scrollbar': {
+                        display: 'none',
+                    },
                 }}
             >
                 <List disablePadding>
@@ -543,19 +548,20 @@ const AdminLayout = () => {
                                     }}
                                 />
                             </Box>
-
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    mt: 0.5,
-                                    display: { xs: 'none', sm: 'block' },
-                                    color: 'color-mix(in srgb, var(--color-button-text) 88%, transparent)',
-                                    fontWeight: 700,
-                                }}
-                            >
-                                ¡Hola {formatName(user.name)}!
-                            </Typography>
                         </Box>
+
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                mt: 0.5,
+                                display: { xs: 'none', sm: 'block' },
+                                color: 'color-mix(in srgb, var(--color-button-text) 88%, transparent)',
+                                fontWeight: 700,
+                                fontSize: 22,
+                            }}
+                        >
+                            ¡Hola {formatName(user.name)}!
+                        </Typography>
 
                         <Tooltip title="Abrir chat grupal">
                             <IconButton
@@ -654,7 +660,7 @@ const AdminLayout = () => {
                                 overflowX: 'hidden',
                             }}
                         >
-                            <AvisosSidebar />
+                            <AnnouncementSidebar />
                         </Paper>
                     </Box>
                 )}
@@ -681,6 +687,10 @@ const AdminLayout = () => {
                             xl: showRightRail
                                 ? `calc(100% - ${activeDrawerWidth + rightRailWidth}px)`
                                 : `calc(100% - ${activeDrawerWidth}px)`,
+                        },
+                        height: {
+                            xs: `calc(100vh - ${headerHeight}px)`,
+                            xl: `calc(100vh - ${headerHeight + footerHeight}px)`,
                         },
                         display: 'flex',
                         flexDirection: 'column',
@@ -713,6 +723,7 @@ const AdminLayout = () => {
                             mx: 'auto',
                             flex: 1,
                             minHeight: 0,
+                            height: '100%',
                             display: 'flex',
                             flexDirection: 'column',
                         }}
@@ -722,6 +733,7 @@ const AdminLayout = () => {
                             sx={{
                                 flex: 1,
                                 minHeight: 0,
+                                height: '100%',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 p: {
@@ -738,27 +750,25 @@ const AdminLayout = () => {
                                 color: 'var(--color-text)',
                                 boxShadow: '0 18px 60px rgba(15, 23, 42, 0.08)',
                                 overflow: 'hidden',
-                                '& > *': {
-                                    flex: 1,
-                                    minHeight: 0,
-                                },
-                                '& section': {
-                                    minHeight: '100%',
-                                },
-                                '& section > .MuiPaper-root': {
-                                    minHeight: '100%',
-                                },
                             }}
                         >
                             <Box
+                                className="admin-outlet-scroll"
                                 sx={{
                                     flex: 1,
                                     minHeight: 0,
+                                    height: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
                                     overflowY: 'auto',
                                     overflowX: 'hidden',
                                     pr: {
                                         xs: 0,
                                         md: 0.5,
+                                    },
+                                    '& > *': {
+                                        flex: 1,
+                                        minHeight: 0,
                                     },
                                 }}
                             >
@@ -871,15 +881,6 @@ const AdminLayout = () => {
                             aria-label="YouTube"
                         >
                             <FontAwesomeIcon icon={['fab', 'youtube']} />
-                        </Box>
-
-                        <Box
-                            component={RouterLink}
-                            to="/contact"
-                            sx={{ color: 'var(--color-button-text)', fontSize: 22 }}
-                            aria-label="Contacto"
-                        >
-                            <FontAwesomeIcon icon={['fas', 'envelope']} />
                         </Box>
                     </Box>
                 </Box>

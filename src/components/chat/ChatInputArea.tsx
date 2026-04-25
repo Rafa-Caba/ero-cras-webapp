@@ -1,16 +1,26 @@
+// src/components/chat/ChatInputArea.tsx
+
 import { type RefObject } from 'react';
-import { Button, Form } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperclip } from '@fortawesome/free-solid-svg-icons';
+import type { JSONContent } from '@tiptap/react';
+
+import {
+    Box,
+    Button,
+    IconButton,
+    Paper,
+} from '@mui/material';
+
+import AttachFileRoundedIcon from '@mui/icons-material/AttachFileRounded';
+import SendRoundedIcon from '@mui/icons-material/SendRounded';
+
 import { TiptapChatEditor } from '../tiptap-components/TiptapChatEditor';
 
 interface Props {
-    messageContent: any;
-    setMessageContent: (msg: any) => void;
-    onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    messageContent: JSONContent;
+    setMessageContent: (message: JSONContent) => void;
+    onFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
     onSend: () => void;
     onAttachClick: () => void;
-
     fileInputRef: RefObject<HTMLInputElement | null>;
     editorRef: RefObject<{ clear: () => void } | null>;
     loading?: boolean;
@@ -24,42 +34,92 @@ export const ChatInputArea = ({
     fileInputRef,
     onAttachClick,
     editorRef,
-    loading = false
+    loading = false,
 }: Props) => {
     return (
-        <>
-            <div className="max-h-[150px] overflow-y-auto px-2 py-1 rounded bg-white border border-gray-300 chat-container-color-textarea">
-                <TiptapChatEditor ref={editorRef} content={messageContent} onChange={setMessageContent} />
-            </div>
+        <Paper
+            elevation={0}
+            sx={{
+                flexShrink: 0,
+                p: {
+                    xs: 1,
+                    md: 1.25,
+                },
+                borderRadius: 1.5,
+                backgroundColor:
+                    'color-mix(in srgb, var(--color-card) 84%, var(--color-primary) 16%)',
+                border: '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+                overflow: 'visible',
+            }}
+        >
+            <Box
+                sx={{
+                    width: '100%',
+                    minWidth: 0,
+                    overflow: 'visible',
+                    '& .ProseMirror': {
+                        outline: 'none',
+                        color: 'var(--color-text)',
+                    },
+                }}
+            >
+                <TiptapChatEditor
+                    ref={editorRef}
+                    content={messageContent}
+                    onChange={setMessageContent}
+                />
+            </Box>
 
-            <div className="d-flex align-items-center justify-content-end gap-2 mt-2 flex-wrap">
-                <Form.Group className="mb-0">
-                    <Button
-                        variant="secondary"
-                        onClick={onAttachClick}
-                        aria-label="Adjuntar archivo"
-                        disabled={loading}
-                    >
-                        <FontAwesomeIcon icon={faPaperclip} className="text-white" size="lg" />
-                    </Button>
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    gap: 1,
+                    flexWrap: 'wrap',
+                }}
+            >
+                <IconButton
+                    aria-label="Adjuntar archivo"
+                    onClick={onAttachClick}
+                    disabled={loading}
+                    sx={{
+                        color: 'var(--color-button-text)',
+                        backgroundColor: 'var(--color-secondary)',
+                        '&:hover': {
+                            backgroundColor:
+                                'color-mix(in srgb, var(--color-secondary) 85%, #000 15%)',
+                        },
+                    }}
+                >
+                    <AttachFileRoundedIcon />
+                </IconButton>
 
-                    <Form.Control
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.zip,.rar,.mp3,.wav,.mp4,.mov,.webm"
-                        ref={fileInputRef}
-                        onChange={onFileSelect}
-                        style={{ display: 'none' }}
-                    />
-                </Form.Group>
+                <input
+                    hidden
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.zip,.rar,.mp3,.wav,.mp4,.mov,.webm"
+                    ref={fileInputRef}
+                    onChange={onFileSelect}
+                />
 
                 <Button
-                    className='general_btn px-4'
+                    variant="contained"
+                    endIcon={<SendRoundedIcon />}
                     onClick={onSend}
                     disabled={loading}
+                    sx={{
+                        borderRadius: 1.5,
+                        px: 2.5,
+                        fontWeight: 950,
+                    }}
                 >
                     {loading ? 'Enviando...' : 'Enviar'}
                 </Button>
-            </div>
-        </>
+            </Box>
+        </Paper>
     );
 };

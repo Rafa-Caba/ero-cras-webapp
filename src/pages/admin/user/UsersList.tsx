@@ -1,4 +1,4 @@
-import { AdminUsersList } from "../../../components/users/UsersList";
+import { AdminUsersList } from "../../../components/users/AdminUsersList";
 
 export const UsersList = () => {
     return (

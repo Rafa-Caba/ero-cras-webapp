@@ -1,4 +1,11 @@
-import { Spinner } from 'react-bootstrap';
+// src/components/chat/ChatBubbleContainer.tsx
+
+import {
+    Box,
+    CircularProgress,
+    Typography,
+} from '@mui/material';
+
 import { AdminChatBubbles } from './AdminChatBubbles';
 import type { ChatMessage } from '../../types/chat';
 import { getDateTag } from '../../utils/chat/getDateTag';
@@ -13,7 +20,7 @@ interface Props {
     onPreviewClick: (
         type: 'image' | 'file' | 'audio' | 'video',
         url: string,
-        name?: string
+        name?: string,
     ) => void;
     onReply: (message: ChatMessage) => void;
 }
@@ -26,48 +33,96 @@ export const ChatBubbleContainer = ({
     isOwnMessage,
     onImageClick,
     onPreviewClick,
-    onReply
+    onReply,
 }: Props) => {
-    const groupedMessages = messages.reduce((acc, message) => {
+    const groupedMessages = messages.reduce<Record<string, ChatMessage[]>>((accumulator, message) => {
         let label = 'Sin fecha';
 
         if (message.createdAt) {
             try {
                 label = getDateTag(message.createdAt);
-            } catch (err) {
-                console.warn('Invalid createdAt in message', message.id, message.createdAt, err);
+            } catch (error) {
+                console.warn('Invalid createdAt in message', message.id, message.createdAt, error);
             }
         } else {
             console.warn('Message without createdAt:', message);
         }
 
-        if (!acc[label]) acc[label] = [];
-        acc[label].push(message);
-        return acc;
-    }, {} as Record<string, ChatMessage[]>);
+        if (!accumulator[label]) {
+            accumulator[label] = [];
+        }
+
+        accumulator[label].push(message);
+
+        return accumulator;
+    }, {});
 
     return (
-        <div
-            ref={messagesContainerRef as React.RefObject<HTMLDivElement>}
-            className="chat-mensajes-container chat-scroll-container no_scrollbar chat-container-color rounded p-2 p-md-3 mb-1 mb-lg-2 border overflow-y-auto"
-            style={{ minHeight: '400px', maxHeight: '62vh', overflowY: 'auto' }}
+        <Box
+            ref={messagesContainerRef}
+            sx={{
+                flex: 1,
+                minHeight: {
+                    xs: 280,
+                    md: 400,
+                },
+                maxHeight: {
+                    xs: '100%',
+                    md: '62vh',
+                },
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                p: {
+                    xs: 1,
+                    md: 1.5,
+                },
+                borderRadius: 1.5,
+                backgroundColor:
+                    'color-mix(in srgb, var(--color-card) 84%, var(--color-primary) 16%)',
+                border: '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                '&::-webkit-scrollbar': {
+                    display: 'none',
+                },
+            }}
         >
             {!hasMoreMessages && messages.length > 0 && (
-                <div className="text-center my-3">
-                    <span
-                        className="badge bg-secondary opacity-50 fw-light"
-                        style={{ fontSize: '0.7rem' }}
+                <Box sx={{ textAlign: 'center', my: 1.5 }}>
+                    <Typography
+                        component="span"
+                        sx={{
+                            px: 1.25,
+                            py: 0.45,
+                            borderRadius: 999,
+                            backgroundColor:
+                                'color-mix(in srgb, var(--color-secondary-text) 18%, transparent)',
+                            color: 'var(--color-secondary-text)',
+                            fontWeight: 800,
+                            fontSize: '0.72rem',
+                        }}
                     >
                         Inicio de la conversación
-                    </span>
-                </div>
+                    </Typography>
+                </Box>
             )}
 
             {isLoadingMore && (
-                <div className="text-center text-theme-color small mb-2">
-                    <Spinner animation="border" size="sm" className="me-2" />
-                    Cargando mensajes anteriores...
-                </div>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: 1,
+                        mb: 1,
+                        color: 'var(--color-primary)',
+                    }}
+                >
+                    <CircularProgress size={16} />
+                    <Typography sx={{ fontWeight: 800, fontSize: '0.82rem' }}>
+                        Cargando mensajes anteriores...
+                    </Typography>
+                </Box>
             )}
 
             <AdminChatBubbles
@@ -77,6 +132,6 @@ export const ChatBubbleContainer = ({
                 onPreviewClick={onPreviewClick}
                 onReply={onReply}
             />
-        </div>
+        </Box>
     );
 };

@@ -1,3 +1,12 @@
+// src/components/chat/AdminChatBubbles.tsx
+
+import {
+    Box,
+    Divider,
+    Paper,
+    Typography,
+} from '@mui/material';
+
 import type { ChatMessage } from '../../types/chat';
 import { ChatBubble } from './ChatBubble';
 
@@ -8,7 +17,7 @@ interface Props {
     onPreviewClick: (
         type: 'image' | 'file' | 'audio' | 'video',
         url: string,
-        name?: string
+        name?: string,
     ) => void;
     onReply: (message: ChatMessage) => void;
 }
@@ -18,43 +27,83 @@ export const AdminChatBubbles = ({
     isOwnMessage,
     setExpandedImage,
     onPreviewClick,
-    onReply
+    onReply,
 }: Props) => {
     const dates = Object.entries(groupedMessages);
 
     if (dates.length === 0) {
         return (
-            <div className="d-flex justify-content-center">
-                <p>No hay mensajes</p>
-            </div>
+            <Box
+                sx={{
+                    height: '100%',
+                    minHeight: 220,
+                    display: 'grid',
+                    placeItems: 'center',
+                    color: 'var(--color-secondary-text)',
+                    fontWeight: 800,
+                }}
+            >
+                <Typography sx={{ fontWeight: 850 }}>
+                    No hay mensajes
+                </Typography>
+            </Box>
         );
     }
 
     return (
         <>
-            {dates.map(([date, msgsOfDay]) => (
-                <div key={date}>
-                    <div className="relative my-3 text-center">
-                        <hr className="border-t border-gray-300" />
-                        <span className="absolute left-1/2 -translate-x-1/2 -top-3 dark:bg-gray-900 px-3 text-theme-color fw-bold text-sm">
-                            {date}
-                        </span>
-                    </div>
+            {dates.map(([date, messagesOfDay]) => (
+                <Box key={date}>
+                    <Box
+                        sx={{
+                            position: 'relative',
+                            my: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <Divider
+                            sx={{
+                                width: '100%',
+                                borderColor:
+                                    'color-mix(in srgb, var(--color-border) 44%, transparent)',
+                            }}
+                        />
 
-                    {msgsOfDay.map((msg, i) => {
-                        if (!msg || !(msg as any).author) {
-                            console.warn('Skipping invalid chat message in AdminChatBubbles:', msg);
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                position: 'absolute',
+                                px: 1.5,
+                                py: 0.25,
+                                borderRadius: 999,
+                                backgroundColor: 'var(--color-card)',
+                                border:
+                                    '1px solid color-mix(in srgb, var(--color-border) 36%, transparent)',
+                                color: 'var(--color-primary)',
+                                fontWeight: 950,
+                                fontSize: '0.78rem',
+                            }}
+                        >
+                            {date}
+                        </Paper>
+                    </Box>
+
+                    {messagesOfDay.map((message, index) => {
+                        if (!message || !message.author) {
+                            console.warn('Skipping invalid chat message in AdminChatBubbles:', message);
                             return null;
                         }
 
-                        const previous = i > 0 ? msgsOfDay[i - 1] : undefined;
+                        const previous = index > 0 ? messagesOfDay[index - 1] : undefined;
 
                         return (
                             <ChatBubble
-                                key={msg.id || i}
-                                msg={msg}
+                                key={message.id || `${date}-${index}`}
+                                msg={message}
                                 previous={previous}
-                                isOwn={isOwnMessage(msg.author.id)}
+                                isOwn={isOwnMessage(message.author.id)}
                                 onImageClick={setExpandedImage}
                                 onAvatarClick={setExpandedImage}
                                 onPreviewClick={onPreviewClick}
@@ -62,7 +111,7 @@ export const AdminChatBubbles = ({
                             />
                         );
                     })}
-                </div>
+                </Box>
             ))}
         </>
     );

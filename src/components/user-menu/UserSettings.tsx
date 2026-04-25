@@ -1,14 +1,43 @@
+// src/components/user-menu/UserSettings.tsx
+
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Form, Button, Container, Image } from 'react-bootstrap';
+import { Link as RouterLink } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { Link } from 'react-router-dom';
+
+import {
+    Avatar,
+    Box,
+    Button,
+    CircularProgress,
+    Paper,
+    TextField,
+    Typography,
+} from '@mui/material';
+
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
+import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded';
+import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 
 import { useUsersStore } from '../../store/admin/useUsersStore';
 import { useAuth } from '../../context/AuthContext';
-
 import { useInstrumentsStore } from '../../store/admin/useInstrumentsStore';
 import { InstrumentPickerModal } from '../components-admin/instruments/InstrumentPickerModal';
 import type { Instrument } from '../../types/instrument';
+
+interface UserSettingsFormState {
+    name: string;
+    username: string;
+    email: string;
+    imageUrl: string;
+    instrumentId: string;
+    instrumentLabel: string;
+}
+
+interface UserInstrumentFields {
+    instrumentId?: string;
+    instrumentLabel?: string;
+}
 
 export const UserSettings = () => {
     const { user, updateUser } = useAuth();
@@ -20,7 +49,7 @@ export const UserSettings = () => {
         fetchInstruments,
     } = useInstrumentsStore();
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<UserSettingsFormState>({
         name: '',
         username: '',
         email: '',
@@ -31,45 +60,66 @@ export const UserSettings = () => {
 
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
+    const [loading, setLoading] = useState(false);
     const [showInstrumentPicker, setShowInstrumentPicker] = useState(false);
 
     useEffect(() => {
-        if (user) {
-            setFormData({
-                name: user.name || '',
-                username: user.username || '',
-                email: user.email || '',
-                imageUrl: user.imageUrl || '',
-                instrumentId: (user as any).instrumentId || '',
-                instrumentLabel: (user as any).instrumentLabel || '',
-            });
-            setPreviewUrl(user.imageUrl || null);
+        if (!user) {
+            return;
         }
+
+        const userWithInstrument = user as typeof user & UserInstrumentFields;
+
+        setFormData({
+            name: user.name || '',
+            username: user.username || '',
+            email: user.email || '',
+            imageUrl: user.imageUrl || '',
+            instrumentId: userWithInstrument.instrumentId || '',
+            instrumentLabel: userWithInstrument.instrumentLabel || '',
+        });
+
+        setPreviewUrl(user.imageUrl || null);
     }, [user]);
 
-    // Load instruments for picker
     useEffect(() => {
         if (!instruments || instruments.length === 0) {
-            fetchInstruments().catch((err) =>
-                console.error('Error fetching instruments for UserSettings:', err)
-            );
+            fetchInstruments().catch((error: Error) => {
+                console.error('Error fetching instruments for UserSettings:', error);
+            });
         }
     }, [fetchInstruments, instruments]);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const target = e.target;
-
-        if (target.type === 'file') {
-            const selectedFile = target.files?.[0];
-            if (selectedFile) {
-                setFile(selectedFile);
-                setPreviewUrl(URL.createObjectURL(selectedFile));
+    useEffect(() => {
+        return () => {
+            if (previewUrl?.startsWith('blob:')) {
+                URL.revokeObjectURL(previewUrl);
             }
-        } else {
-            const { name, value } = target;
-            setFormData(prev => ({ ...prev, [name]: value }));
+        };
+    }, [previewUrl]);
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = event.target;
+
+        setFormData((previousValue) => ({
+            ...previousValue,
+            [name]: value,
+        }));
+    };
+
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = event.target.files?.[0];
+
+        if (!selectedFile) {
+            return;
         }
+
+        if (previewUrl?.startsWith('blob:')) {
+            URL.revokeObjectURL(previewUrl);
+        }
+
+        setFile(selectedFile);
+        setPreviewUrl(URL.createObjectURL(selectedFile));
     };
 
     const handleOpenInstrumentPicker = () => {
@@ -78,34 +128,39 @@ export const UserSettings = () => {
 
     const handleInstrumentSelected = (instrument: Instrument | null) => {
         if (!instrument) {
-            setFormData(prev => ({
-                ...prev,
+            setFormData((previousValue) => ({
+                ...previousValue,
                 instrumentId: '',
                 instrumentLabel: '',
             }));
             return;
         }
 
-        setFormData(prev => ({
-            ...prev,
+        setFormData((previousValue) => ({
+            ...previousValue,
             instrumentId: instrument.id,
             instrumentLabel: instrument.name,
         }));
     };
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
 
-        if (!user?.id) return;
+        if (!user?.id) {
+            return;
+        }
+
+        setLoading(true);
 
         const payload = new FormData();
-        payload.append('name', formData.name);
-        payload.append('username', formData.username);
-        payload.append('email', formData.email);
+        payload.append('name', formData.name.trim());
+        payload.append('username', formData.username.trim());
+        payload.append('email', formData.email.trim());
 
         if (formData.instrumentId) {
             payload.append('instrumentId', formData.instrumentId);
         }
+
         if (formData.instrumentLabel) {
             payload.append('instrumentLabel', formData.instrumentLabel);
         }
@@ -123,103 +178,380 @@ export const UserSettings = () => {
         } catch (error) {
             console.error(error);
             Swal.fire('Error', '❌ No se pudo actualizar el usuario', 'error');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <Container className="m-3 col-md-8 mt-4 mx-auto">
-            <h3>Ajustes del Usuario</h3>
-            <Form onSubmit={handleSubmit} encType="multipart/form-data">
-                <Form.Group className="mb-3">
-                    <Form.Label>Nombre</Form.Label>
-                    <Form.Control
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                    <Form.Label>Username</Form.Label>
-                    <Form.Control
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                    <Form.Label>Correo</Form.Label>
-                    <Form.Control
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                    <Form.Label>Instrumento</Form.Label>
-                    <div className="d-flex gap-2">
-                        <Form.Control
-                            type="text"
-                            name="instrumentLabel"
-                            placeholder="Selecciona un instrumento..."
-                            value={formData.instrumentLabel}
-                            readOnly
-                        />
-                        <Button
-                            className="btn-outline-primary-theme-color"
-                            type="button"
-                            onClick={handleOpenInstrumentPicker}
-                            disabled={instrumentsLoading}
+        <Box
+            component="section"
+            sx={{
+                width: '100%',
+                minHeight: 0,
+                height: '100%',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                overflow: 'hidden',
+            }}
+        >
+            <Paper
+                elevation={0}
+                sx={{
+                    flexShrink: 0,
+                    p: {
+                        xs: 1.5,
+                        md: 2,
+                    },
+                    borderRadius: 2,
+                    background:
+                        'linear-gradient(145deg, color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%) 0%, color-mix(in srgb, var(--color-card) 78%, transparent) 100%)',
+                    border: '1px solid color-mix(in srgb, var(--color-border) 38%, transparent)',
+                    boxShadow:
+                        'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 14%, transparent), 0 12px 38px rgba(15, 23, 42, 0.06)',
+                    color: 'var(--color-text)',
+                    overflow: 'hidden',
+                }}
+            >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: {
+                            xs: 'column',
+                            sm: 'row',
+                        },
+                        alignItems: {
+                            xs: 'stretch',
+                            sm: 'center',
+                        },
+                        justifyContent: 'space-between',
+                        gap: 1.5,
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: {
+                                xs: 'center',
+                                sm: 'flex-start',
+                            },
+                            gap: 1.25,
+                            textAlign: {
+                                xs: 'center',
+                                sm: 'left',
+                            },
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                width: 44,
+                                height: 44,
+                                display: 'grid',
+                                placeItems: 'center',
+                                borderRadius: 1.5,
+                                color: 'var(--color-button-text)',
+                                background:
+                                    'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)',
+                                boxShadow:
+                                    '0 10px 24px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.24)',
+                                flexShrink: 0,
+                            }}
                         >
-                            {instrumentsLoading ? 'Cargando...' : 'Elegir'}
-                        </Button>
-                    </div>
-                    {formData.instrumentId && (
-                        <Form.Text muted>
-                            Instrumento seleccionado: {formData.instrumentLabel}
-                        </Form.Text>
-                    )}
-                </Form.Group>
+                            <ManageAccountsRoundedIcon />
+                        </Box>
 
-                {previewUrl && (
-                    <div className="mb-3 mt-4 text-center">
-                        <Image
-                            src={previewUrl}
-                            roundedCircle
-                            width={200}
-                            height={200}
-                            alt="Vista previa"
-                        />
-                    </div>
-                )}
+                        <Box sx={{ minWidth: 0 }}>
+                            <Typography
+                                component="h1"
+                                sx={{
+                                    m: 0,
+                                    fontSize: {
+                                        xs: '1.55rem',
+                                        md: '2rem',
+                                    },
+                                    fontWeight: 950,
+                                    lineHeight: 1.1,
+                                }}
+                            >
+                                Ajustes del Usuario
+                            </Typography>
 
-                <Form.Group className="mb-3">
-                    <Form.Label>Foto de perfil (opcional)</Form.Label>
-                    <Form.Control
-                        type="file"
-                        name="file"
-                        accept="image/*"
-                        onChange={handleChange}
-                    />
-                </Form.Group>
+                            <Typography
+                                sx={{
+                                    mt: 0.4,
+                                    color: 'var(--color-secondary-text)',
+                                    fontWeight: 800,
+                                    fontSize: '0.9rem',
+                                }}
+                            >
+                                Actualiza tu información personal, instrumento y foto de perfil.
+                            </Typography>
+                        </Box>
+                    </Box>
 
-                <div className="text-center">
-                    <Button type="submit" className="general_btn">
-                        Guardar cambios
-                    </Button>
-                    <Link to="/admin" style={{ borderRadius: 10 }} className="btn btn-secondary px-3 py-1 ms-2 mt-2 mt-md-0">
+                    <Button
+                        component={RouterLink}
+                        to="/admin"
+                        variant="outlined"
+                        startIcon={<ArrowBackRoundedIcon />}
+                        disabled={loading}
+                        sx={{
+                            borderRadius: 1.5,
+                            px: 2,
+                            py: 0.9,
+                            fontWeight: 950,
+                        }}
+                    >
                         Ir al Inicio
-                    </Link>
-                </div>
-            </Form>
+                    </Button>
+                </Box>
+            </Paper>
+
+            <Paper
+                elevation={0}
+                sx={{
+                    flex: 1,
+                    minHeight: 0,
+                    p: {
+                        xs: 1,
+                        sm: 1.25,
+                        md: 2,
+                    },
+                    mt: 3,
+                    borderRadius: 2,
+                    background:
+                        'linear-gradient(145deg, color-mix(in srgb, var(--color-card) 86%, var(--color-primary) 14%) 0%, color-mix(in srgb, var(--color-card) 76%, transparent) 100%)',
+                    border: '1px solid color-mix(in srgb, var(--color-border) 38%, transparent)',
+                    boxShadow:
+                        'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 14%, transparent), 0 12px 42px rgba(15, 23, 42, 0.06)',
+                    color: 'var(--color-text)',
+                    overflow: 'hidden',
+                }}
+            >
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    encType="multipart/form-data"
+                    sx={{
+                        maxWidth: 860,
+                        mx: 'auto',
+                        height: '100%',
+                        minHeight: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: {
+                            xs: 1.5,
+                            md: 2,
+                        },
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
+                        '&::-webkit-scrollbar': {
+                            display: 'none',
+                        },
+                        p: '0 !important',
+                        m: '0 auto !important',
+                        backgroundColor: 'transparent !important',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: {
+                                xs: '1fr',
+                                md: '300px minmax(0, 1fr)',
+                            },
+                            gap: 2,
+                            alignItems: 'start',
+                        }}
+                    >
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 1.5,
+                                borderRadius: 2,
+                                backgroundColor:
+                                    'color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%)',
+                                border: '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                                textAlign: 'center',
+                            }}
+                        >
+                            <Avatar
+                                src={previewUrl || undefined}
+                                alt="Vista previa"
+                                sx={{
+                                    width: 250,
+                                    height: 250,
+                                    mx: 'auto',
+                                    mb: 1.5,
+                                    bgcolor: 'var(--color-primary)',
+                                    color: 'var(--color-button-text)',
+                                    fontSize: '2.5rem',
+                                    fontWeight: 950,
+                                    border: '3px solid color-mix(in srgb, var(--color-border) 60%, transparent)',
+                                }}
+                            >
+                                {formData.name.slice(0, 1).toUpperCase() || 'U'}
+                            </Avatar>
+
+                            <Button
+                                variant="outlined"
+                                component="label"
+                                startIcon={<CloudUploadRoundedIcon />}
+                                disabled={loading}
+                                sx={{
+                                    width: '100%',
+                                    borderRadius: 1.5,
+                                    py: 0.9,
+                                    fontWeight: 950,
+                                }}
+                            >
+                                Cambiar foto
+                                <input hidden type="file" name="file" accept="image/*" onChange={handleFileChange} />
+                            </Button>
+                        </Paper>
+
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 1.5,
+                                mt: 1,
+                            }}
+                        >
+                            <TextField
+                                type="text"
+                                name="name"
+                                label="Nombre"
+                                value={formData.name}
+                                onChange={handleChange}
+                                disabled={loading}
+                                required
+                            />
+
+                            <TextField
+                                type="text"
+                                name="username"
+                                label="Username"
+                                value={formData.username}
+                                onChange={handleChange}
+                                disabled={loading}
+                                required
+                            />
+
+                            <TextField
+                                type="email"
+                                name="email"
+                                label="Correo"
+                                value={formData.email}
+                                onChange={handleChange}
+                                disabled={loading}
+                                required
+                            />
+
+                            <Box
+                                sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'minmax(0, 1fr) auto',
+                                    gap: 1,
+                                }}
+                            >
+                                <TextField
+                                    type="text"
+                                    name="instrumentLabel"
+                                    label="Instrumento"
+                                    placeholder="Selecciona un instrumento..."
+                                    value={formData.instrumentLabel}
+                                    disabled
+                                />
+
+                                <Button
+                                    type="button"
+                                    variant="outlined"
+                                    onClick={handleOpenInstrumentPicker}
+                                    disabled={instrumentsLoading || loading}
+                                    sx={{
+                                        borderRadius: 1.5,
+                                        px: 2,
+                                        fontWeight: 950,
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {instrumentsLoading ? 'Cargando...' : 'Elegir'}
+                                </Button>
+                            </Box>
+
+                            {formData.instrumentId && (
+                                <Typography
+                                    sx={{
+                                        color: 'var(--color-secondary-text)',
+                                        fontWeight: 800,
+                                        fontSize: '0.86rem',
+                                    }}
+                                >
+                                    Instrumento seleccionado: {formData.instrumentLabel}
+                                </Typography>
+                            )}
+                        </Box>
+                    </Box>
+
+                    <Box
+                        sx={{
+                            mt: 'auto',
+                            flexShrink: 0,
+                            display: 'flex',
+                            flexDirection: {
+                                xs: 'column-reverse',
+                                sm: 'row',
+                            },
+                            justifyContent: 'center',
+                            gap: 1,
+                            pt: 1,
+                        }}
+                    >
+                        <Button
+                            component={RouterLink}
+                            to="/admin"
+                            variant="outlined"
+                            startIcon={<ArrowBackRoundedIcon />}
+                            disabled={loading}
+                            sx={{
+                                borderRadius: 1.5,
+                                px: 2.5,
+                                py: 0.9,
+                                fontWeight: 950,
+                            }}
+                        >
+                            Ir al Inicio
+                        </Button>
+
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={loading}
+                            endIcon={
+                                loading ? (
+                                    <CircularProgress size={18} sx={{ color: 'var(--color-button-text)' }} />
+                                ) : (
+                                    <SaveRoundedIcon />
+                                )
+                            }
+                            sx={{
+                                borderRadius: 1.5,
+                                px: 2.5,
+                                py: 0.9,
+                                fontWeight: 950,
+                            }}
+                        >
+                            {loading ? 'Guardando...' : 'Guardar cambios'}
+                        </Button>
+                    </Box>
+                </Box>
+            </Paper>
 
             <InstrumentPickerModal
                 show={showInstrumentPicker}
@@ -228,6 +560,6 @@ export const UserSettings = () => {
                 selectedInstrumentId={formData.instrumentId || null}
                 onSelectInstrument={handleInstrumentSelected}
             />
-        </Container>
+        </Box>
     );
 };

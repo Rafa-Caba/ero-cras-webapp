@@ -1,43 +1,177 @@
-import { useEffect } from 'react';
+// src/components/components-admin/AdminDashboardPanel.tsx
+
+import { useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Image, Card, Row, Col } from 'react-bootstrap';
-import { FaImage } from 'react-icons/fa';
 
-import LogoutButton from './LogoutButton';
+import {
+    Box,
+    Button,
+    Chip,
+    CircularProgress,
+    Divider,
+    Paper,
+    Typography,
+} from '@mui/material';
+
+import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded';
+import CollectionsRoundedIcon from '@mui/icons-material/CollectionsRounded';
+import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import PaletteRoundedIcon from '@mui/icons-material/PaletteRounded';
+import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+
 import { useAuth } from '../../context/AuthContext';
-import { useGalleryStore } from '../../store/admin/useGalleryStore';
-import { useUsersStore } from '../../store/admin/useUsersStore';
-import { useThemeStore } from '../../store/admin/useThemeStore';
-import type { Choir } from '../../types/choir';
 import { useChoirsStore } from '../../store/admin/useChoirsStore';
+import { useGalleryStore } from '../../store/admin/useGalleryStore';
+import { useThemeStore } from '../../store/admin/useThemeStore';
+import { useUsersStore } from '../../store/admin/useUsersStore';
+import type { Choir } from '../../types/choir';
 
-type StatCardProps = {
+interface StatCardProps {
     title: string;
     value: number | string;
     subtitle?: string;
-    children?: React.ReactNode;
-};
+    icon: ReactNode;
+    children?: ReactNode;
+}
 
-const StatCard = ({ title, value, subtitle, children }: StatCardProps) => (
-    <Card className="shadow-sm dashboard-stat-card h-100">
-        <Card.Body className="d-flex flex-column justify-content-between">
-            <div>
-                <Card.Title className="mb-1">{title}</Card.Title>
-                <div className="fs-3 fs-md-2 fw-bold">{value}</div>
-                {subtitle && (
-                    <small className="text-muted d-block mt-1">{subtitle}</small>
-                )}
-            </div>
-            {children && <div className="mt-2 sub_title">{children}</div>}
-        </Card.Body>
-    </Card>
-);
+const StatCard = ({ title, value, subtitle, icon, children }: StatCardProps) => {
+    return (
+        <Paper
+            elevation={0}
+            sx={{
+                height: '100%',
+                p: {
+                    xs: 1.5,
+                    md: 2,
+                },
+                borderRadius: 2,
+                background:
+                    'linear-gradient(145deg, color-mix(in srgb, var(--color-card) 90%, var(--color-primary) 10%) 0%, color-mix(in srgb, var(--color-card) 82%, var(--color-primary) 18%) 100%)',
+                border: '1px solid color-mix(in srgb, var(--color-border) 42%, transparent)',
+                color: 'var(--color-text)',
+                boxShadow:
+                    'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 18%, transparent), 0 12px 34px rgba(15, 23, 42, 0.07)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: 1.25,
+                overflow: 'hidden',
+                transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+                '&:hover': {
+                    transform: 'translateY(-3px)',
+                    borderColor: 'color-mix(in srgb, var(--color-primary) 34%, transparent)',
+                    boxShadow:
+                        'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 22%, transparent), 0 18px 46px rgba(15, 23, 42, 0.12)',
+                },
+            }}
+        >
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    gap: 1.5,
+                }}
+            >
+                <Box sx={{ minWidth: 0 }}>
+                    <Typography
+                        component="h2"
+                        sx={{
+                            mb: 0.5,
+                            fontSize: {
+                                xs: '0.9rem',
+                                md: '0.98rem',
+                            },
+                            color: 'var(--color-secondary-text)',
+                            fontWeight: 900,
+                            lineHeight: 1.2,
+                            letterSpacing: '0.02em',
+                        }}
+                    >
+                        {title}
+                    </Typography>
+
+                    <Typography
+                        component="p"
+                        sx={{
+                            m: 0,
+                            fontSize: {
+                                xs: '1.75rem',
+                                md: '2.15rem',
+                            },
+                            fontWeight: 950,
+                            lineHeight: 1,
+                            color: 'var(--color-text)',
+                        }}
+                    >
+                        {value}
+                    </Typography>
+
+                    {subtitle && (
+                        <Typography
+                            component="p"
+                            sx={{
+                                mt: 0.8,
+                                mb: 0,
+                                fontSize: '0.82rem',
+                                color: 'var(--color-secondary-text)',
+                                fontWeight: 700,
+                                lineHeight: 1.25,
+                            }}
+                        >
+                            {subtitle}
+                        </Typography>
+                    )}
+                </Box>
+
+                <Box
+                    sx={{
+                        width: 42,
+                        height: 42,
+                        flexShrink: 0,
+                        display: 'grid',
+                        placeItems: 'center',
+                        borderRadius: 1.5,
+                        color: 'var(--color-button-text)',
+                        background:
+                            'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)',
+                        boxShadow:
+                            '0 10px 24px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.24)',
+                    }}
+                >
+                    {icon}
+                </Box>
+            </Box>
+
+            {children && (
+                <>
+                    <Divider
+                        sx={{
+                            borderColor: 'color-mix(in srgb, var(--color-border) 44%, transparent)',
+                        }}
+                    />
+
+                    <Box
+                        sx={{
+                            color: 'var(--color-secondary-text)',
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                        }}
+                    >
+                        {children}
+                    </Box>
+                </>
+            )}
+        </Paper>
+    );
+};
 
 export const AdminDashboardPanel = () => {
     const navigate = useNavigate();
 
     const { images, fetchGallery } = useGalleryStore();
-    const { user, isSuperAdmin } = useAuth();
+    const { user, isSuperAdmin, logout } = useAuth();
 
     const { users, fetchUsers } = useUsersStore();
     const { themes, fetchThemes } = useThemeStore();
@@ -50,7 +184,7 @@ export const AdminDashboardPanel = () => {
     }, [user, navigate]);
 
     useEffect(() => {
-        fetchGallery();
+        void fetchGallery();
     }, [fetchGallery]);
 
     useEffect(() => {
@@ -67,9 +201,8 @@ export const AdminDashboardPanel = () => {
         }
     }, [isSuperAdmin, fetchChoirs]);
 
-    const startImage = images.find((img) => img.imageStart);
-
-    const choirName = user?.choirName ?? user?.choirId;
+    const startImage = images.find((image) => image.imageStart);
+    const choirName = user?.choirName || user?.choirId || 'Sin coro asignado';
 
     const choirsList: Choir[] = Array.isArray(choirs) ? choirs : [];
     const choirsPreview: Choir[] = choirsList.slice(0, 4);
@@ -78,99 +211,352 @@ export const AdminDashboardPanel = () => {
             ? choirsList.length - choirsPreview.length
             : 0;
 
+    const handleLogout = () => {
+        logout();
+        navigate('/auth/login');
+    };
+
+    if (!user) {
+        return (
+            <Box
+                sx={{
+                    minHeight: 320,
+                    display: 'grid',
+                    placeItems: 'center',
+                    color: 'var(--color-text)',
+                }}
+            >
+                <Box sx={{ textAlign: 'center' }}>
+                    <CircularProgress />
+                    <Typography sx={{ mt: 2, fontWeight: 800 }}>
+                        Redirigiendo al inicio de sesión...
+                    </Typography>
+                </Box>
+            </Box>
+        );
+    }
+
     return (
-        <div className="d-flex flex-column pt-2 pb-1 px-1 px-md-3 mt-0">
-            <p className="m-3 mt-1 text-center fs-2 fw-bold">Panel de Control</p>
+        <Box
+            component="section"
+            sx={{
+                width: '100%',
+                minHeight: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: {
+                    xs: 1.5,
+                    md: 2,
+                },
+            }}
+        >
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: {
+                        xs: 'column',
+                        md: 'row',
+                    },
+                    alignItems: {
+                        xs: 'stretch',
+                        md: 'center',
+                    },
+                    justifyContent: 'space-between',
+                    gap: 1.5,
+                }}
+            >
+                <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                    <Typography
+                        component="h1"
+                        sx={{
+                            m: 0,
+                            fontSize: {
+                                xs: '1.75rem',
+                                md: '2.15rem',
+                            },
+                            fontWeight: 950,
+                            lineHeight: 1.1,
+                            color: 'var(--color-text)',
+                        }}
+                    >
+                        Panel de Control
+                    </Typography>
 
-            {/* STATS ROW */}
-            <Row className="mb-1 mb-md-3 g-3">
-                <Col xs={6} md={3}>
-                    <StatCard
-                        title="Usuarios del coro"
-                        value={users.length}
-                        subtitle="En esta administración"
-                    />
-                </Col>
+                    <Typography
+                        sx={{
+                            mt: 0.75,
+                            color: 'var(--color-secondary-text)',
+                            fontWeight: 800,
+                        }}
+                    >
+                        Resumen general del panel administrativo.
+                    </Typography>
+                </Box>
 
-                <Col xs={6} md={3}>
-                    <StatCard
-                        title="Temas de color"
-                        value={themes.length}
-                        subtitle="Disponibles para este sitio"
-                    />
-                </Col>
+                <Chip
+                    label={`Coro actual: ${choirName}`}
+                    sx={{
+                        alignSelf: {
+                            xs: 'center',
+                            md: 'auto',
+                        },
+                        maxWidth: '100%',
+                        color: 'var(--color-button-text)',
+                        background:
+                            'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)',
+                        fontWeight: 900,
+                        boxShadow: '0 10px 24px rgba(15, 23, 42, 0.12)',
+                        '& .MuiChip-label': {
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                        },
+                    }}
+                />
+            </Box>
 
-                <Col xs={6} md={3}>
-                    <StatCard
-                        title="Imágenes en galería"
-                        value={images.length}
-                        subtitle="Inicio, menús y galería"
-                    />
-                </Col>
+            <Box
+                sx={{
+                    width: '100%',
+                    display: 'grid',
+                    gridTemplateColumns: {
+                        xs: 'repeat(2, minmax(0, 1fr))',
+                        md: isSuperAdmin
+                            ? 'repeat(4, minmax(0, 1fr))'
+                            : 'repeat(3, minmax(0, 1fr))',
+                    },
+                    gap: {
+                        xs: 1.25,
+                        md: 2,
+                    },
+                }}
+            >
+                <StatCard
+                    title="Usuarios del coro"
+                    value={users.length}
+                    subtitle="En esta administración"
+                    icon={<PeopleRoundedIcon />}
+                />
+
+                <StatCard
+                    title="Temas de color"
+                    value={themes.length}
+                    subtitle="Disponibles para este sitio"
+                    icon={<PaletteRoundedIcon />}
+                />
+
+                <StatCard
+                    title="Imágenes en galería"
+                    value={images.length}
+                    subtitle="Inicio, menús y galería"
+                    icon={<CollectionsRoundedIcon />}
+                />
 
                 {isSuperAdmin && (
-                    <Col xs={6} md={3}>
-                        <StatCard
-                            title="Coros configurados"
-                            value={choirsList.length}
-                        >
-                            {choirsList.length === 0 && (
-                                <span className="text-muted">
-                                    Aún no hay coros registrados.
-                                </span>
-                            )}
+                    <StatCard
+                        title="Coros configurados"
+                        value={choirsList.length}
+                        icon={<AccountTreeRoundedIcon />}
+                    >
+                        {choirsList.length === 0 && (
+                            <Typography
+                                component="span"
+                                sx={{
+                                    color: 'var(--color-secondary-text)',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 700,
+                                }}
+                            >
+                                Aún no hay coros registrados.
+                            </Typography>
+                        )}
 
-                            {choirsList.length > 0 && (
-                                <ul className="list-unstyled mb-0">
-                                    {choirsPreview.map((c: Choir) => (
-                                        <li key={c.id}>• {c.name}</li>
-                                    ))}
-                                    {extraChoirs > 0 && (
-                                        <li className="text-muted">
-                                            +{extraChoirs} más…
-                                        </li>
-                                    )}
-                                </ul>
-                            )}
-                        </StatCard>
-                    </Col>
+                        {choirsList.length > 0 && (
+                            <Box
+                                component="ul"
+                                sx={{
+                                    m: 0,
+                                    pl: 2,
+                                }}
+                            >
+                                {choirsPreview.map((choir) => (
+                                    <Box component="li" key={choir.id}>
+                                        {choir.name}
+                                    </Box>
+                                ))}
+
+                                {extraChoirs > 0 && (
+                                    <Box
+                                        component="li"
+                                        sx={{
+                                            color: 'var(--color-secondary-text)',
+                                        }}
+                                    >
+                                        +{extraChoirs} más…
+                                    </Box>
+                                )}
+                            </Box>
+                        )}
+                    </StatCard>
                 )}
-            </Row>
+            </Box>
 
-            {/* MAIN CONTENT (image + footer row) */}
-            <div className="panel-titulo d-flex flex-column my-0 flex-grow-1">
-                <div
-                    className={`${!startImage && 'imagen-inicio-container'
-                        } text-center mx-auto mt-3 fade-in`}
+            <Paper
+                elevation={0}
+                sx={{
+                    flex: 1,
+                    minHeight: {
+                        xs: 320,
+                        md: 0,
+                    },
+                    p: {
+                        xs: 1.5,
+                        md: 2,
+                    },
+                    borderRadius: 2,
+                    background:
+                        'linear-gradient(145deg, color-mix(in srgb, var(--color-card) 84%, var(--color-primary) 16%) 0%, color-mix(in srgb, var(--color-card) 74%, transparent) 100%)',
+                    border: '1px solid color-mix(in srgb, var(--color-border) 38%, transparent)',
+                    color: 'var(--color-text)',
+                    boxShadow:
+                        'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 16%, transparent), 0 12px 42px rgba(15, 23, 42, 0.06)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                    overflow: 'hidden',
+                }}
+            >
+                <Box
+                    sx={{
+                        flex: 1,
+                        minHeight: 0,
+                        display: 'grid',
+                        placeItems: 'center',
+                        borderRadius: 1.5,
+                        backgroundColor:
+                            'color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%)',
+                        border: '1px dashed color-mix(in srgb, var(--color-border) 38%, transparent)',
+                        boxShadow: 'inset 0 1px 18px rgba(15, 23, 42, 0.035)',
+                        overflow: 'hidden',
+                        p: {
+                            xs: 1.5,
+                            md: 2,
+                        },
+                    }}
                 >
                     {startImage ? (
-                        <Image
+                        <Box
+                            component="img"
                             src={startImage.imageUrl}
-                            alt={startImage.title || 'Start Image'}
-                            fluid
-                            style={{
+                            alt={startImage.title || 'Imagen de inicio'}
+                            sx={{
                                 width: '100%',
-                                maxHeight: '40vh',
-                                objectFit: 'contain'
+                                height: '100%',
+                                maxHeight: {
+                                    xs: 280,
+                                    md: '42vh',
+                                },
+                                objectFit: 'contain',
+                                display: 'block',
+                                borderRadius: 1.5,
+                                filter: 'drop-shadow(0 16px 32px rgba(15, 23, 42, 0.08))',
                             }}
-                            className="imagen-fija-inicio mt-3"
                         />
                     ) : (
-                        <div className="text-muted d-flex flex-column align-items-center">
-                            <FaImage size={100} color="#ccc" />
-                            <p className="mt-2">No hay imagen de inicio aún</p>
-                        </div>
-                    )}
-                </div>
+                        <Box
+                            sx={{
+                                minHeight: {
+                                    xs: 240,
+                                    md: 320,
+                                },
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                textAlign: 'center',
+                                color: 'var(--color-secondary-text)',
+                            }}
+                        >
+                            <ImageRoundedIcon sx={{ fontSize: 92 }} />
 
-                <div className="d-flex justify-content-between align-items-center mt-5">
-                    <div className="small text-muted">
+                            <Typography
+                                sx={{
+                                    mt: 1.5,
+                                    fontWeight: 900,
+                                }}
+                            >
+                                No hay imagen de inicio aún
+                            </Typography>
+
+                            <Typography
+                                sx={{
+                                    mt: 0.5,
+                                    fontSize: '0.9rem',
+                                    fontWeight: 700,
+                                }}
+                            >
+                                Puedes configurarla desde la galería administrativa.
+                            </Typography>
+                        </Box>
+                    )}
+                </Box>
+
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: {
+                            xs: 'column',
+                            sm: 'row',
+                        },
+                        alignItems: {
+                            xs: 'stretch',
+                            sm: 'center',
+                        },
+                        justifyContent: 'space-between',
+                        gap: 1.5,
+                    }}
+                >
+                    <Typography
+                        sx={{
+                            color: 'var(--color-secondary-text)',
+                            fontSize: '0.9rem',
+                            fontWeight: 800,
+                            textAlign: {
+                                xs: 'center',
+                                sm: 'left',
+                            },
+                        }}
+                    >
                         Coro actual:{' '}
-                        <span className="fw-semibold">{choirName}</span>
-                    </div>
-                    <LogoutButton />
-                </div>
-            </div>
-        </div>
+                        <Box
+                            component="span"
+                            sx={{
+                                color: 'var(--color-text)',
+                                fontWeight: 950,
+                            }}
+                        >
+                            {choirName}
+                        </Box>
+                    </Typography>
+
+                    <Button
+                        variant="contained"
+                        onClick={handleLogout}
+                        endIcon={<LogoutRoundedIcon />}
+                        sx={{
+                            alignSelf: {
+                                xs: 'stretch',
+                                sm: 'center',
+                            },
+                            borderRadius: 1.5,
+                            px: 2.5,
+                            py: 0.8,
+                            fontWeight: 950,
+                        }}
+                    >
+                        Cerrar Sesión
+                    </Button>
+                </Box>
+            </Paper>
+        </Box>
     );
 };

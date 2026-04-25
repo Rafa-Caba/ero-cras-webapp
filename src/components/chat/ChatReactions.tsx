@@ -1,3 +1,9 @@
+// src/components/chat/ChatReactions.tsx
+
+import {
+    Box,
+} from '@mui/material';
+
 import { useChatStore } from '../../store/admin/useChatStore';
 import { ItemReaction } from './ItemReaction';
 import type { MessageReaction } from '../../types/chat';
@@ -8,28 +14,55 @@ interface Props {
     reactions: MessageReaction[];
 }
 
+interface ReactionUserLike {
+    id?: string;
+    _id?: string;
+}
+
+const getReactionUserId = (reaction: MessageReaction): string => {
+    if (typeof reaction.user === 'string') {
+        return reaction.user;
+    }
+
+    const userObject = reaction.user as ReactionUserLike;
+
+    return userObject.id || userObject._id || '';
+};
+
 export const ChatReactions = ({ messageId, reactions }: Props) => {
     const { user } = useAuth();
     const reactToMessage = useChatStore((state) => state.reactToMessage);
 
     const handleReactionClick = async (emoji: string) => {
-        if (!user?.id) return;
+        if (!user?.id) {
+            return;
+        }
+
         await reactToMessage(messageId, emoji);
     };
 
-    const grouped = reactions.reduce<Record<string, string[]>>((acc, reaction) => {
+    const grouped = reactions.reduce<Record<string, string[]>>((accumulator, reaction) => {
         const emoji = reaction.emoji;
-        const userId = typeof reaction.user === 'string' ? reaction.user : reaction.user.id || (reaction.user as any)._id;
+        const userId = getReactionUserId(reaction);
 
-        acc[emoji] = acc[emoji] || [];
-        acc[emoji].push(userId);
-        return acc;
+        accumulator[emoji] = accumulator[emoji] || [];
+        accumulator[emoji].push(userId);
+
+        return accumulator;
     }, {});
 
     return (
-        <div className="d-flex gap-2 mt-1 flex-wrap">
+        <Box
+            sx={{
+                display: 'flex',
+                gap: 0.75,
+                mt: 0.5,
+                flexWrap: 'wrap',
+            }}
+        >
             {Object.entries(grouped).map(([emoji, userIds]) => {
                 const hasReacted = userIds.includes(user?.id || '');
+
                 return (
                     <ItemReaction
                         key={emoji}
@@ -41,6 +74,6 @@ export const ChatReactions = ({ messageId, reactions }: Props) => {
                     />
                 );
             })}
-        </div>
+        </Box>
     );
 };

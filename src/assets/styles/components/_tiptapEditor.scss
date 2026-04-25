@@ -1,310 +1,96 @@
-// Editor Container
-.editor {
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    padding: 1rem;
-    min-height: 150px;
+// src/assets/styles/components/_tiptapEditor.scss
+
+.tiptap-chat-editor-content {
+    display: block !important;
+    width: 100% !important;
+    min-height: 72px !important;
+    max-height: 150px !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+
+    padding: 0.75rem 1rem !important;
+    margin: 0 !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
     background-color: var(--color-background) !important;
-    text-align: left !important;
-
-    color: "#000000";
-    outline: none;
-
-    .ProseMirror {
-        color: #333333 !important;
-        background-color: var(--color-background) !important;
-        text-align: left !important;
-    }
-
-    p,
-    h1,
-    h2,
-    h3 {
-        margin: 0;
-        padding: 0;
-        text-align: left;
-        color: "#000000";
-    }
-}
-
-.editor-toolbar {
-    display: flex;
-    background-color: var(--color-background) !important;
-    color: "#000000";
-    text-align: left !important;
-
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 0.5rem;
-
-    button {
-        background: var(--color-background) !important;
-        color: "#000000";
-        padding: 6px 10px;
-        border: 1px solid var(--color-border);
-        border-radius: 4px;
-        cursor: pointer;
-
-        &.active {
-            background: var(--color-accent);
-            color: var(--color-button-text);
-            border-color: var(--color-accent);
-        }
-    }
-}
-
-.tool_buttons .ProseMirror * {
-    background: var(--color-background) !important;
-}
-
-.editor-estilo .ProseMirror * {
-    background: var(--color-background) !important;
     color: var(--color-text) !important;
-}
+    caret-color: var(--color-text) !important;
 
-
-.tiptap {
-    font-size: 18px;
-
-    p,
-    h1,
-    h2,
-    span,
-    div {
-        color: var(--color-text) !important;
-        // text-align: center !important;
-        text-align: left !important;
-        margin: 0;
-        padding: 0;
-    }
-
-    .ProseMirror {
-        color: var(--color-text) !important;
-        caret-color: #000000;
-        min-height: 100%;
-        text-align: left !important;
-
-        p,
-        h1,
-        h2,
-        span,
-        div {
-            color: #333333 !important;
-            text-align: left !important;
-        }
-
-        p.is-editor-empty:first-child::before {
-            color: #888888 !important;
-        }
-    }
-
-    @media (max-width: 768px) {
-        font-size: 15px;
-    }
-}
-
-// =======================
-// Chats
-// =======================
-.chat-editor {
-    background-color: var(--color-background) !important;
     text-align: left !important;
-    color: "#000000";
-    outline: none;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    padding: 1rem;
-    min-height: 90px;
-    max-height: 150px;
-    overflow-y: auto;
-
-    p,
-    h1,
-    h2,
-    span,
-    div {
-        color: var(--color-text) !important;
-        text-align: left !important;
-        margin: 0;
-        padding: 0;
-    }
-
-    .ProseMirror {
-        color: var(--color-text) !important;
-        caret-color: #000000;
-        min-height: 100%;
-        text-align: left !important;
-
-        p,
-        h1,
-        h2,
-        span,
-        div {
-            color: #333333 !important;
-            text-align: left !important;
-        }
-
-        p.is-editor-empty:first-child::before {
-            color: #888888 !important;
-        }
-    }
-}
-
-.chat-mensajes-container {
-    overflow-y: auto;
-    height: 47vh;
-    max-height: calc(100vh - 500px);
-    -webkit-overflow-scrolling: touch;
-    background-color: var(--color-accent);
-    scrollbar-width: none;
-
-    @media (max-width: 768px) {
-        height: 70vh;
-    }
-}
-
-// Chat Bubbles
-.mensaje-burbuja {
-    padding: 0.3rem;
-    border-radius: 8px;
-}
-
-// SENDER (Own messages)
-.chat-sender-container {
-    background-color: var(--color-accent);
-    color: var(--color-button-text) !important;
-    border-top-right-radius: 0;
-}
-
-// RECEIVER (Other messages)
-.chat-receiver-container {
-    background-color: var(--color-primary);
-    color: var(--color-button-text) !important;
-    border: 1px solid var(--color-border);
-    border-top-left-radius: 0;
-}
-
-// Text Colors inside bubbles
-.chat-sender-container .chat-text-color,
-.chat-sender-container p,
-.chat-sender-container .chat-viewer p {
-    color: var(--color-button-text) !important;
-    text-align: left !important;
-    margin: 0;
-    padding: 0;
-}
-
-.chat-receiver-container .chat-text-color,
-.chat-receiver-container p,
-.chat-receiver-container .chat-viewer p {
-    color: var(--color-button-text) !important;
-    text-align: left !important;
-    margin: 0;
-    padding: 0;
-}
-
-.tiptap-viewer p {
-    color: var(--color-text) !important;
-    text-align: left !important;
-    margin: 0;
-    padding: 0;
-}
-
-.chat-user-titulo {
-    font-weight: bold;
-    font-size: 0.85rem;
-    margin-bottom: 2px;
-}
-
-// Chat Input Area Container
-.chat-container-color {
-    background-color: var(--color-card) !important;
-    color: var(--color-text) !important;
-    border-bottom: 1px solid var(--color-border) !important;
-}
-
-// Chat Outer Card
-.chat-container {
-    background-color: var(--color-accent) !important;
+    outline: none !important;
     border: none !important;
-}
+    border-radius: 0 !important;
 
-// Placeholder Text
-.ProseMirror p.is-editor-empty:first-child::before {
-    color: var(--color-secondary-text);
-}
+    font-size: 0.94rem !important;
+    line-height: 1.45 !important;
 
-.chat-bubble-container {
-    position: relative;
-    margin-bottom: 20px;
-}
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 
-.chat-reactions-wrapper {
-    position: absolute;
-    bottom: -15px;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    padding: 0;
-    gap: 5px;
-    height: 30px;
-    width: max-content;
-    background-color: transparent;
-}
+    &::-webkit-scrollbar {
+        display: none;
+    }
 
-.reaction-sender {
-    right: 60%;
-    margin-right: 8px;
-    flex-direction: row;
-    justify-content: flex-end;
-    background-color: transparent;
-}
+    * {
+        box-sizing: border-box;
+    }
 
-.reaction-receiver {
-    left: 70%;
-    margin-left: 8px;
-    flex-direction: row-reverse;
-    justify-content: flex-start;
-}
+    p,
+    h1,
+    h2,
+    h3,
+    span,
+    div,
+    strong,
+    em,
+    u,
+    li {
+        color: var(--color-text) !important;
+        text-align: left !important;
+    }
 
-.chat-reactions-display {
-    background: transparent;
-    border: transparent;
-    border-radius: 50px;
-    padding: 4px 7px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0);
-    font-size: 0.75rem;
-    display: flex;
-    gap: 4px;
-}
+    p {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 
-.chat-reaccion-btn {
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    background-color: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-    border: 1px solid #eee;
-    opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s;
-}
+    h1 {
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 1.25rem !important;
+        font-weight: 950 !important;
+        line-height: 1.2 !important;
+    }
 
-.chat-bubble-container:hover .chat-reaccion-btn,
-.chat-reaccion-btn.visible {
-    opacity: 1;
-    transform: scale(1.1);
-}
+    h2 {
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 1.08rem !important;
+        font-weight: 950 !important;
+        line-height: 1.25 !important;
+    }
 
-.badge_bg {
-    background-color: var(--color-card) !important;
-    color: var(--color-text);
-    font-size: large;
-    font-family: 'Courier New', Courier, monospace;
-    font-style: italic;
-    font-weight: 800;
+    ul,
+    ol {
+        margin-top: 0.35rem !important;
+        margin-bottom: 0.35rem !important;
+        padding-left: 1.5rem !important;
+    }
+
+    li {
+        margin-top: 0.15rem !important;
+        margin-bottom: 0.15rem !important;
+        padding: 0 !important;
+    }
+
+    p.is-editor-empty:first-child::before {
+        content: attr(data-placeholder);
+        color: var(--color-secondary-text) !important;
+        float: left;
+        height: 0;
+        pointer-events: none;
+        opacity: 0.82;
+    }
 }

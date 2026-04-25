@@ -1,4 +1,14 @@
+// src/components/components-admin/LogoutButton.tsx
+
 import { useNavigate } from 'react-router-dom';
+
+import {
+    Box,
+    Button,
+} from '@mui/material';
+
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+
 import { useAuth } from '../../context/AuthContext';
 
 const LogoutButton = () => {
@@ -11,12 +21,29 @@ const LogoutButton = () => {
     };
 
     return (
-        <div className='d-flex justify-content-center mt-0'>
-            <button onClick={handleLogout} className="btn general_btn py-1 px-3">
+        <Box
+            sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                mt: 0,
+            }}
+        >
+            <Button
+                type="button"
+                variant="contained"
+                onClick={handleLogout}
+                endIcon={<LogoutRoundedIcon />}
+                sx={{
+                    borderRadius: 1.5,
+                    px: 2.5,
+                    py: 0.7,
+                    fontWeight: 900,
+                }}
+            >
                 Cerrar Sesión
-            </button>
-        </div>
+            </Button>
+        </Box>
     );
 };
 
-export default LogoutButton;
+export default LogoutButton

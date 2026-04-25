@@ -1,4 +1,18 @@
-import { Modal, Button } from 'react-bootstrap';
+// src/components/user-menu/ThemeSelectorModal.tsx
+
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Paper,
+    Typography,
+} from '@mui/material';
+
+import PaletteRoundedIcon from '@mui/icons-material/PaletteRounded';
+
 import type { Theme } from '../../types/theme';
 
 interface Props {
@@ -10,38 +24,163 @@ interface Props {
 
 export const ThemeSelectorModal = ({ show, onClose, themes, onSelect }: Props) => {
     return (
-        <Modal show={show} onHide={onClose} centered scrollable>
-            <Modal.Header closeButton>
-                <Modal.Title>🎨 Cambiar tema visual</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                {themes.length === 0 ? (
-                    <p className="text-center text-muted">No hay temas disponibles.</p>
-                ) : (
-                    themes.map((theme) => (
-                        <div
-                            key={theme.id}
-                            onClick={() => onSelect(theme)}
-                            className="mb-3 p-3 border rounded theme-option cursor-pointer d-flex align-items-center justify-content-between"
-                            style={{ cursor: 'pointer', transition: 'background 0.2s' }}
-                        >
-                            <div>
-                                <strong className="d-block">{theme.name}</strong>
-                                <small className="text-muted">{theme.isDark ? 'Modo Oscuro' : 'Modo Claro'}</small>
-                            </div>
+        <Dialog
+            open={show}
+            onClose={onClose}
+            fullWidth
+            maxWidth="sm"
+            scroll="paper"
+            slotProps={{
+                paper: {
+                    sx: {
+                        borderRadius: 2,
+                        backgroundColor: 'var(--color-card)',
+                        color: 'var(--color-text)',
+                        border: '1px solid color-mix(in srgb, var(--color-border) 46%, transparent)',
+                        boxShadow: '0 22px 70px rgba(15, 23, 42, 0.22)',
+                        overflow: 'hidden',
+                    },
+                },
+            }}
+        >
+            <DialogTitle
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    fontWeight: 950,
+                    borderBottom: '1px solid color-mix(in srgb, var(--color-border) 36%, transparent)',
+                }}
+            >
+                <PaletteRoundedIcon sx={{ color: 'var(--color-primary)' }} />
+                Cambiar tema visual
+            </DialogTitle>
 
-                            <div className="d-flex gap-1">
-                                <div style={{ width: 24, height: 24, backgroundColor: theme.backgroundColor, border: '1px solid #ccc', borderRadius: 4 }} title="Fondo" />
-                                <div style={{ width: 24, height: 24, backgroundColor: theme.primaryColor, border: '1px solid #ccc', borderRadius: 4 }} title="Primario" />
-                                <div style={{ width: 24, height: 24, backgroundColor: theme.accentColor, border: '1px solid #ccc', borderRadius: 4 }} title="Acento" />
-                            </div>
-                        </div>
-                    ))
+            <DialogContent
+                sx={{
+                    p: 2,
+                    backgroundColor: 'var(--color-card)',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    '&::-webkit-scrollbar': {
+                        display: 'none',
+                    },
+                }}
+            >
+                {themes.length === 0 ? (
+                    <Typography
+                        sx={{
+                            py: 4,
+                            textAlign: 'center',
+                            color: 'var(--color-secondary-text)',
+                            fontWeight: 800,
+                        }}
+                    >
+                        No hay temas disponibles.
+                    </Typography>
+                ) : (
+                    <Box
+                        sx={{
+                            paddingTop: 2,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1.25,
+                        }}
+                    >
+                        {themes.map((theme) => (
+                            <Paper
+                                key={theme.id}
+                                elevation={0}
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => onSelect(theme)}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        onSelect(theme);
+                                    }
+                                }}
+                                sx={{
+                                    p: 1.5,
+                                    borderRadius: 1.5,
+                                    cursor: 'pointer',
+                                    backgroundColor:
+                                        'color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%)',
+                                    border: '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                                    color: 'var(--color-text)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 1.5,
+                                    transition: 'all 0.18s ease',
+                                    '&:hover': {
+                                        transform: 'translateY(-1px)',
+                                        boxShadow: '0 12px 28px rgba(15, 23, 42, 0.12)',
+                                        borderColor:
+                                            'color-mix(in srgb, var(--color-primary) 50%, var(--color-border) 50%)',
+                                    },
+                                }}
+                            >
+                                <Box sx={{ minWidth: 0 }}>
+                                    <Typography sx={{ fontWeight: 950, overflowWrap: 'anywhere' }}>
+                                        {theme.name}
+                                    </Typography>
+
+                                    <Typography
+                                        sx={{
+                                            color: 'var(--color-secondary-text)',
+                                            fontWeight: 750,
+                                            fontSize: '0.84rem',
+                                        }}
+                                    >
+                                        {theme.isDark ? 'Modo Oscuro' : 'Modo Claro'}
+                                    </Typography>
+                                </Box>
+
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        gap: 0.5,
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    {[theme.backgroundColor, theme.primaryColor, theme.accentColor].map((colorValue) => (
+                                        <Box
+                                            key={colorValue}
+                                            title={colorValue}
+                                            sx={{
+                                                width: 26,
+                                                height: 26,
+                                                borderRadius: 0.8,
+                                                backgroundColor: colorValue,
+                                                border: '1px solid color-mix(in srgb, var(--color-border) 70%, transparent)',
+                                                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.18)',
+                                            }}
+                                        />
+                                    ))}
+                                </Box>
+                            </Paper>
+                        ))}
+                    </Box>
                 )}
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-            </Modal.Footer>
-        </Modal>
+            </DialogContent>
+
+            <DialogActions
+                sx={{
+                    p: 1.5,
+                    borderTop: '1px solid color-mix(in srgb, var(--color-border) 36%, transparent)',
+                }}
+            >
+                <Button
+                    variant="outlined"
+                    onClick={onClose}
+                    sx={{
+                        borderRadius: 1.5,
+                        fontWeight: 950,
+                    }}
+                >
+                    Cancelar
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 };

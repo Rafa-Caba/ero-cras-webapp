@@ -1,29 +1,114 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
+// src/pages/admin/user/UserForm.tsx
+
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { useUsersStore } from '../../../store/admin/useUsersStore';
 
+import {
+    Avatar,
+    Box,
+    Button,
+    CircularProgress,
+    FormControl,
+    FormControlLabel,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Switch,
+    TextField,
+    Typography,
+} from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material/Select';
+
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
+import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded';
+import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
+
+import { useUsersStore } from '../../../store/admin/useUsersStore';
 import { useInstrumentsStore } from '../../../store/admin/useInstrumentsStore';
 import { InstrumentPickerModal } from '../../../components/components-admin/instruments/InstrumentPickerModal';
 import type { Instrument } from '../../../types/instrument';
+import { useAuth } from '../../../context/AuthContext';
+
+type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR' | 'VIEWER';
+
+interface UserFormState {
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    role: UserRole;
+    instrumentId: string;
+    instrumentLabel: string;
+    bio: string;
+    voice: boolean;
+}
+
+interface SaveUserPayload {
+    name: string;
+    username: string;
+    email: string;
+    role: UserRole;
+    instrumentId: string;
+    instrumentLabel: string;
+    bio: string;
+    voice: boolean;
+    password?: string;
+}
+
+interface UserInstrumentFields {
+    instrumentId?: string;
+    instrumentLabel?: string;
+    instrument?: string;
+}
+
+const roleOptions: Array<{ value: UserRole; label: string; description: string }> = [
+    {
+        value: 'VIEWER',
+        label: 'Viewer',
+        description: 'Solo ver',
+    },
+    {
+        value: 'EDITOR',
+        label: 'Editor',
+        description: 'Gestionar contenido',
+    },
+    {
+        value: 'ADMIN',
+        label: 'Admin',
+        description: 'Control total del coro',
+    },
+    {
+        value: 'SUPER_ADMIN',
+        label: 'Super Admin',
+        description: 'Todos los coros',
+    },
+];
+
+const isUserRole = (value: string): value is UserRole => {
+    return value === 'SUPER_ADMIN' || value === 'ADMIN' || value === 'EDITOR' || value === 'VIEWER';
+};
 
 export const UserForm = () => {
-    const { id } = useParams();
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+
+    const { user: authUser } = useAuth();
     const { saveUserAction, getUserById, fetchUsers } = useUsersStore();
 
-    const isEdit = !!id;
+    const isEdit = Boolean(id);
+    const canManageSuperAdminRole = authUser?.role === 'SUPER_ADMIN';
 
-    // 🔹 Instruments store
     const {
         instruments,
         loading: instrumentsLoading,
         fetchInstruments,
     } = useInstrumentsStore();
 
-    // Form State
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<UserFormState>({
         name: '',
         username: '',
         email: '',
@@ -37,73 +122,123 @@ export const UserForm = () => {
     });
 
     const [file, setFile] = useState<File | undefined>(undefined);
-    const [previewUrl, setPreviewUrl] = useState<string>('');
+    const [previewUrl, setPreviewUrl] = useState('');
     const [loading, setLoading] = useState(false);
-
-    // 🔹 Modal state
     const [showInstrumentPicker, setShowInstrumentPicker] = useState(false);
 
-    // Load Instruments once
+    const currentRoleIsProtectedSuperAdmin = formData.role === 'SUPER_ADMIN' && !canManageSuperAdminRole;
+
+    const availableRoleOptions = useMemo(() => {
+        if (canManageSuperAdminRole) {
+            return roleOptions;
+        }
+
+        return roleOptions.filter((roleOption) => roleOption.value !== 'SUPER_ADMIN');
+    }, [canManageSuperAdminRole]);
+
     useEffect(() => {
         if (!instruments || instruments.length === 0) {
-            fetchInstruments().catch((err) =>
-                console.error('Error fetching instruments for UserForm:', err)
-            );
+            fetchInstruments().catch((error: Error) => {
+                console.error('Error fetching instruments for UserForm:', error);
+            });
         }
     }, [fetchInstruments, instruments]);
 
-    // Load Data for Edit
     useEffect(() => {
         const loadData = async () => {
-            if (isEdit) {
-                let userToEdit = getUserById(id!);
-
-                if (!userToEdit) {
-                    await fetchUsers();
-                    userToEdit = getUserById(id!);
-                }
-
-                if (userToEdit) {
-                    setFormData({
-                        name: userToEdit.name,
-                        username: userToEdit.username,
-                        email: userToEdit.email,
-                        password: '',
-                        confirmPassword: '',
-                        role: userToEdit.role,
-                        instrumentId: (userToEdit as any).instrumentId || '',
-                        instrumentLabel:
-                            (userToEdit as any).instrumentLabel ||
-                            (userToEdit as any).instrument ||
-                            '',
-                        bio: userToEdit.bio || '',
-                        voice: userToEdit.voice || false,
-                    });
-                    setPreviewUrl(userToEdit.imageUrl || '');
-                }
+            if (!isEdit || !id) {
+                return;
             }
+
+            let userToEdit = getUserById(id);
+
+            if (!userToEdit) {
+                await fetchUsers();
+                userToEdit = getUserById(id);
+            }
+
+            if (!userToEdit) {
+                return;
+            }
+
+            const userWithInstrument = userToEdit as typeof userToEdit & UserInstrumentFields;
+            const safeRole = isUserRole(userToEdit.role) ? userToEdit.role : 'VIEWER';
+
+            setFormData({
+                name: userToEdit.name,
+                username: userToEdit.username,
+                email: userToEdit.email,
+                password: '',
+                confirmPassword: '',
+                role: safeRole,
+                instrumentId: userWithInstrument.instrumentId || '',
+                instrumentLabel: userWithInstrument.instrumentLabel || userWithInstrument.instrument || '',
+                bio: userToEdit.bio || '',
+                voice: userToEdit.voice || false,
+            });
+
+            setPreviewUrl(userToEdit.imageUrl || '');
         };
+
         void loadData();
     }, [id, isEdit, getUserById, fetchUsers]);
 
-    const handleChange = (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-    ) => {
-        const { name, value, type } = e.target;
+    useEffect(() => {
+        return () => {
+            if (previewUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value, type } = event.target;
 
         if (type === 'checkbox') {
-            setFormData(prev => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }));
-        } else {
-            setFormData(prev => ({ ...prev, [name]: value }));
+            setFormData((previousValue) => ({
+                ...previousValue,
+                [name]: (event.target as HTMLInputElement).checked,
+            }));
+            return;
         }
+
+        setFormData((previousValue) => ({
+            ...previousValue,
+            [name]: value,
+        }));
     };
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const selectedFile = e.target.files[0];
-            setFile(selectedFile);
-            setPreviewUrl(URL.createObjectURL(selectedFile));
+    const handleRoleChange = (event: SelectChangeEvent<UserRole>) => {
+        const nextRole = event.target.value;
+
+        if (nextRole === 'SUPER_ADMIN' && !canManageSuperAdminRole) {
+            Swal.fire(
+                'Rol protegido',
+                'Solo un Super Admin puede asignar o modificar el rol Super Admin.',
+                'warning',
+            );
+            return;
         }
+
+        setFormData((previousValue) => ({
+            ...previousValue,
+            role: nextRole,
+        }));
+    };
+
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = event.target.files?.[0];
+
+        if (!selectedFile) {
+            return;
+        }
+
+        if (previewUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(previewUrl);
+        }
+
+        setFile(selectedFile);
+        setPreviewUrl(URL.createObjectURL(selectedFile));
     };
 
     const handleOpenInstrumentPicker = () => {
@@ -112,54 +247,71 @@ export const UserForm = () => {
 
     const handleInstrumentSelected = (instrument: Instrument | null) => {
         if (!instrument) {
-            setFormData(prev => ({
-                ...prev,
+            setFormData((previousValue) => ({
+                ...previousValue,
                 instrumentId: '',
                 instrumentLabel: '',
             }));
             return;
         }
 
-        setFormData(prev => ({
-            ...prev,
+        setFormData((previousValue) => ({
+            ...previousValue,
             instrumentId: instrument.id,
             instrumentLabel: instrument.name,
         }));
     };
 
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
 
-        // Validation
-        if (!formData.name || !formData.username || !formData.email) {
-            return Swal.fire('Error', 'Por favor completa los campos obligatorios (*)', 'error');
+        if (!formData.name.trim() || !formData.username.trim() || !formData.email.trim()) {
+            Swal.fire('Error', 'Por favor completa los campos obligatorios (*)', 'error');
+            return;
+        }
+
+        if (formData.role === 'SUPER_ADMIN' && !canManageSuperAdminRole) {
+            Swal.fire(
+                'Rol protegido',
+                'Solo un Super Admin puede guardar usuarios con rol Super Admin.',
+                'warning',
+            );
+            return;
         }
 
         if (!isEdit && !formData.password) {
-            return Swal.fire(
-                'Error',
-                'La contraseña es obligatoria para nuevos usuarios',
-                'error'
-            );
+            Swal.fire('Error', 'La contraseña es obligatoria para nuevos usuarios', 'error');
+            return;
         }
 
         if (formData.password && formData.password !== formData.confirmPassword) {
-            return Swal.fire('Error', 'Las contraseñas no coinciden', 'error');
+            Swal.fire('Error', 'Las contraseñas no coinciden', 'error');
+            return;
         }
 
         setLoading(true);
-        try {
-            // Prepare Payload
-            const { confirmPassword, ...payload } = formData;
-            if (!payload.password) delete (payload as any).password;
 
+        const payload: SaveUserPayload = {
+            name: formData.name.trim(),
+            username: formData.username.trim(),
+            email: formData.email.trim(),
+            role: formData.role,
+            instrumentId: formData.instrumentId,
+            instrumentLabel: formData.instrumentLabel,
+            bio: formData.bio,
+            voice: formData.voice,
+            ...(formData.password ? { password: formData.password } : {}),
+        };
+
+        try {
             await saveUserAction(payload, file, id);
 
             Swal.fire(
                 'Éxito',
                 `Usuario ${isEdit ? 'actualizado' : 'creado'} correctamente`,
-                'success'
+                'success',
             );
+
             navigate('/admin/users');
         } catch (error) {
             console.error(error);
@@ -170,235 +322,520 @@ export const UserForm = () => {
     };
 
     return (
-        <Container className="py-5">
-            <Card className="shadow-sm">
-                <Card.Header className="bg-white">
-                    <h3 className="mb-0">
-                        {isEdit ? 'Editar Usuario' : 'Nuevo Usuario'}
-                    </h3>
-                </Card.Header>
-                <Card.Body>
-                    <Form onSubmit={handleSubmit}>
-                        <Row>
-                            {/* Left Column: Inputs */}
-                            <Col md={8}>
-                                <Row className="mb-3">
-                                    <Col md={6}>
-                                        <Form.Group controlId="name">
-                                            <Form.Label>Nombre Completo *</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="name"
-                                                value={formData.name}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={6}>
-                                        <Form.Group controlId="username">
-                                            <Form.Label>Usuario *</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="username"
-                                                value={formData.username}
-                                                onChange={handleChange}
-                                                required
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
+        <Box
+            component="section"
+            sx={{
+                width: '100%',
+                minHeight: 0,
+                height: '100%',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                overflow: 'hidden',
+            }}
+        >
+            <Paper
+                elevation={0}
+                sx={{
+                    flexShrink: 0,
+                    p: {
+                        xs: 1.5,
+                        md: 2,
+                    },
+                    borderRadius: 2,
+                    background:
+                        'linear-gradient(145deg, color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%) 0%, color-mix(in srgb, var(--color-card) 78%, transparent) 100%)',
+                    border: '1px solid color-mix(in srgb, var(--color-border) 38%, transparent)',
+                    boxShadow:
+                        'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 14%, transparent), 0 12px 38px rgba(15, 23, 42, 0.06)',
+                    color: 'var(--color-text)',
+                    overflow: 'hidden',
+                }}
+            >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: {
+                            xs: 'column',
+                            sm: 'row',
+                        },
+                        alignItems: {
+                            xs: 'stretch',
+                            sm: 'center',
+                        },
+                        justifyContent: 'space-between',
+                        gap: 1.5,
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: {
+                                xs: 'center',
+                                sm: 'flex-start',
+                            },
+                            gap: 1.25,
+                            textAlign: {
+                                xs: 'center',
+                                sm: 'left',
+                            },
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                width: 44,
+                                height: 44,
+                                display: 'grid',
+                                placeItems: 'center',
+                                borderRadius: 1.5,
+                                color: 'var(--color-button-text)',
+                                background:
+                                    'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)',
+                                boxShadow:
+                                    '0 10px 24px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.24)',
+                                flexShrink: 0,
+                            }}
+                        >
+                            <ManageAccountsRoundedIcon />
+                        </Box>
 
-                                <Form.Group className="mb-3" controlId="email">
-                                    <Form.Label>Correo Electrónico *</Form.Label>
-                                    <Form.Control
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        required
+                        <Box sx={{ minWidth: 0 }}>
+                            <Typography
+                                component="h1"
+                                sx={{
+                                    m: 0,
+                                    fontSize: {
+                                        xs: '1.55rem',
+                                        md: '2rem',
+                                    },
+                                    fontWeight: 950,
+                                    lineHeight: 1.1,
+                                }}
+                            >
+                                {isEdit ? 'Editar Usuario' : 'Nuevo Usuario'}
+                            </Typography>
+
+                            <Typography
+                                sx={{
+                                    mt: 0.4,
+                                    color: 'var(--color-secondary-text)',
+                                    fontWeight: 800,
+                                    fontSize: '0.9rem',
+                                }}
+                            >
+                                Gestiona datos personales, rol, instrumento, voz y foto de perfil.
+                            </Typography>
+                        </Box>
+                    </Box>
+
+                    <Button
+                        variant="outlined"
+                        startIcon={<ArrowBackRoundedIcon />}
+                        onClick={() => navigate('/admin/users')}
+                        disabled={loading}
+                        sx={{
+                            borderRadius: 1.5,
+                            px: 2,
+                            py: 0.9,
+                            fontWeight: 950,
+                        }}
+                    >
+                        Volver
+                    </Button>
+                </Box>
+            </Paper>
+
+            <Paper
+                elevation={0}
+                sx={{
+                    flex: 1,
+                    minHeight: 0,
+                    p: {
+                        xs: 1,
+                        sm: 1.25,
+                        md: 2,
+                    },
+                    borderRadius: 2,
+                    background:
+                        'linear-gradient(145deg, color-mix(in srgb, var(--color-card) 86%, var(--color-primary) 14%) 0%, color-mix(in srgb, var(--color-card) 76%, transparent) 100%)',
+                    border: '1px solid color-mix(in srgb, var(--color-border) 38%, transparent)',
+                    boxShadow:
+                        'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 14%, transparent), 0 12px 42px rgba(15, 23, 42, 0.06)',
+                    color: 'var(--color-text)',
+                    overflow: 'hidden',
+                }}
+            >
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    sx={{
+                        height: '100%',
+                        minHeight: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: {
+                            xs: 1.5,
+                            md: 2,
+                        },
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
+                        '&::-webkit-scrollbar': {
+                            display: 'none',
+                        },
+                        p: '0 !important',
+                        m: '0 !important',
+                        backgroundColor: 'transparent !important',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: {
+                                xs: '1fr',
+                                lg: 'minmax(0, 1fr) 280px',
+                            },
+                            gap: {
+                                xs: 2,
+                                lg: 3,
+                            },
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 1.5,
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: {
+                                        xs: '1fr',
+                                        md: 'repeat(2, minmax(0, 1fr))',
+                                    },
+                                    gap: 1.5,
+                                }}
+                            >
+                                <TextField
+                                    type="text"
+                                    name="name"
+                                    label="Nombre completo *"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    disabled={loading}
+                                    required
+                                />
+
+                                <TextField
+                                    type="text"
+                                    name="username"
+                                    label="Usuario *"
+                                    value={formData.username}
+                                    onChange={handleChange}
+                                    disabled={loading}
+                                    required
+                                />
+                            </Box>
+
+                            <TextField
+                                type="email"
+                                name="email"
+                                label="Correo electrónico *"
+                                value={formData.email}
+                                onChange={handleChange}
+                                disabled={loading}
+                                required
+                            />
+
+                            <Box
+                                sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: {
+                                        xs: '1fr',
+                                        md: 'repeat(2, minmax(0, 1fr))',
+                                    },
+                                    gap: 1.5,
+                                }}
+                            >
+                                <FormControl fullWidth disabled={loading || currentRoleIsProtectedSuperAdmin}>
+                                    <InputLabel id="user-role-label">Rol *</InputLabel>
+                                    <Select
+                                        labelId="user-role-label"
+                                        value={formData.role}
+                                        label="Rol *"
+                                        onChange={handleRoleChange}
+                                    >
+                                        {currentRoleIsProtectedSuperAdmin && (
+                                            <MenuItem value="SUPER_ADMIN">
+                                                Super Admin (Protegido)
+                                            </MenuItem>
+                                        )}
+
+                                        {availableRoleOptions.map((roleOption) => (
+                                            <MenuItem key={roleOption.value} value={roleOption.value}>
+                                                {roleOption.label} ({roleOption.description})
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+
+                                <Box
+                                    sx={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'minmax(0, 1fr) auto',
+                                        gap: 1,
+                                    }}
+                                >
+                                    <TextField
+                                        type="text"
+                                        name="instrumentLabel"
+                                        label="Instrumento"
+                                        placeholder="Selecciona un instrumento..."
+                                        value={formData.instrumentLabel}
+                                        disabled
                                     />
-                                </Form.Group>
 
-                                <Row className="mb-3">
-                                    <Col md={6}>
-                                        <Form.Group controlId="role">
-                                            <Form.Label>Rol *</Form.Label>
-                                            <Form.Select
-                                                name="role"
-                                                value={formData.role}
-                                                onChange={handleChange}
-                                            >
-                                                <option value="VIEWER">
-                                                    Viewer (Solo ver)
-                                                </option>
-                                                <option value="EDITOR">
-                                                    Editor (Gestionar contenido)
-                                                </option>
-                                                <option value="ADMIN">
-                                                    Admin (Control total)
-                                                </option>
-                                                <option value="SUPER_ADMIN">
-                                                    Super Admin (Todos los coros)
-                                                </option>
-                                            </Form.Select>
-                                        </Form.Group>
-                                    </Col>
-
-                                    <Col md={6}>
-                                        <Form.Group controlId="instrument">
-                                            <Form.Label>Instrumento</Form.Label>
-                                            <div className="d-flex gap-2">
-                                                <Form.Control
-                                                    type="text"
-                                                    name="instrumentLabel"
-                                                    placeholder="Selecciona un instrumento..."
-                                                    value={formData.instrumentLabel}
-                                                    readOnly
-                                                />
-                                                <Button
-                                                    className="btn-outline-primary-theme-color"
-                                                    type="button"
-                                                    onClick={handleOpenInstrumentPicker}
-                                                    disabled={instrumentsLoading}
-                                                >
-                                                    {instrumentsLoading ? 'Cargando...' : 'Elegir'}
-                                                </Button>
-                                            </div>
-                                            {formData.instrumentId && (
-                                                <Form.Text muted>
-                                                    Instrumento seleccionado:{' '}
-                                                    {formData.instrumentLabel}
-                                                </Form.Text>
-                                            )}
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-
-                                <Form.Group className="mb-3">
-                                    <Form.Check
-                                        type="switch"
-                                        id="voice-switch"
-                                        label="¿Es Cantante? (Voz)"
-                                        name="voice"
-                                        checked={formData.voice}
-                                        onChange={handleChange}
-                                    />
-                                </Form.Group>
-
-                                <Form.Group className="mb-3" controlId="bio">
-                                    <Form.Label>Biografía</Form.Label>
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={3}
-                                        name="bio"
-                                        value={formData.bio}
-                                        onChange={handleChange}
-                                    />
-                                </Form.Group>
-
-                                <hr className="my-4" />
-
-                                <Row className="mb-3">
-                                    <Col md={6}>
-                                        <Form.Group controlId="password">
-                                            <Form.Label>
-                                                {isEdit
-                                                    ? 'Nueva Contraseña (Opcional)'
-                                                    : 'Contraseña *'}
-                                            </Form.Label>
-                                            <Form.Control
-                                                type="password"
-                                                name="password"
-                                                value={formData.password}
-                                                onChange={handleChange}
-                                                placeholder={isEdit ? '••••••' : ''}
-                                                required={!isEdit}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={6}>
-                                        <Form.Group controlId="confirmPassword">
-                                            <Form.Label>
-                                                Confirmar Contraseña
-                                            </Form.Label>
-                                            <Form.Control
-                                                type="password"
-                                                name="confirmPassword"
-                                                value={formData.confirmPassword}
-                                                onChange={handleChange}
-                                                required={
-                                                    !isEdit ||
-                                                    formData.password.length > 0
-                                                }
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                            </Col>
-
-                            {/* Right Column: Image */}
-                            <Col md={4} className="text-center">
-                                <Form.Label>Foto de Perfil</Form.Label>
-                                <div className="mb-3 d-flex justify-content-center">
-                                    <div
-                                        style={{
-                                            width: '150px',
-                                            height: '150px',
-                                            overflow: 'hidden',
-                                            borderRadius: '50%',
-                                            border: '3px solid #ddd',
+                                    <Button
+                                        type="button"
+                                        variant="outlined"
+                                        onClick={handleOpenInstrumentPicker}
+                                        disabled={instrumentsLoading || loading}
+                                        sx={{
+                                            borderRadius: 1.5,
+                                            px: 2,
+                                            fontWeight: 950,
+                                            whiteSpace: 'nowrap',
                                         }}
                                     >
-                                        <img
-                                            src={
-                                                previewUrl ||
-                                                '/dist/images/default-user.png'
-                                            }
-                                            alt="Preview"
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'cover',
-                                            }}
+                                        {instrumentsLoading ? 'Cargando...' : 'Elegir'}
+                                    </Button>
+                                </Box>
+                            </Box>
+
+                            {currentRoleIsProtectedSuperAdmin && (
+                                <Typography
+                                    sx={{
+                                        color: 'var(--color-secondary-text)',
+                                        fontWeight: 800,
+                                        fontSize: '0.86rem',
+                                    }}
+                                >
+                                    Este usuario tiene rol Super Admin. Solo otro Super Admin puede modificar ese rol.
+                                </Typography>
+                            )}
+
+                            {formData.instrumentId && (
+                                <Typography
+                                    sx={{
+                                        color: 'var(--color-secondary-text)',
+                                        fontWeight: 800,
+                                        fontSize: '0.86rem',
+                                    }}
+                                >
+                                    Instrumento seleccionado: {formData.instrumentLabel}
+                                </Typography>
+                            )}
+
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    p: 1.5,
+                                    borderRadius: 1.5,
+                                    backgroundColor:
+                                        'color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%)',
+                                    border: '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                                    boxShadow: 'inset 0 1px 16px rgba(15, 23, 42, 0.035)',
+                                }}
+                            >
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={formData.voice}
+                                            onChange={handleChange}
+                                            name="voice"
+                                            disabled={loading}
                                         />
-                                    </div>
-                                </div>
-                                <Form.Group controlId="file">
-                                    <Form.Control
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                        size="sm"
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
+                                    }
+                                    label={
+                                        <Box>
+                                            <Typography sx={{ fontWeight: 950 }}>
+                                                ¿Es cantante? (Voz)
+                                            </Typography>
 
-                        <div className="d-flex justify-content-end mt-4">
-                            <Button
-                                variant="secondary"
-                                className="me-2 px-3"
-                                style={{ borderRadius: 10 }}
-                                onClick={() => navigate('/admin/users')}
-                                type="button"
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                variant="primary"
-                                type="submit"
-                                className="general_btn"
+                                            <Typography
+                                                sx={{
+                                                    color: 'var(--color-secondary-text)',
+                                                    fontWeight: 700,
+                                                    fontSize: '0.85rem',
+                                                }}
+                                            >
+                                                Activa esta opción si el usuario también participa con voz.
+                                            </Typography>
+                                        </Box>
+                                    }
+                                    sx={{
+                                        m: 0,
+                                        alignItems: 'center',
+                                        gap: 1,
+                                    }}
+                                />
+                            </Paper>
+
+                            <TextField
+                                name="bio"
+                                label="Biografía"
+                                value={formData.bio}
+                                onChange={handleChange}
                                 disabled={loading}
-                            >
-                                {loading ? 'Guardando...' : 'Guardar Usuario'}
-                            </Button>
-                        </div>
-                    </Form>
-                </Card.Body>
-            </Card>
+                                multiline
+                                minRows={3}
+                            />
 
-            {/* 🔹 Instrument Picker Modal */}
+                            <Box
+                                sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: {
+                                        xs: '1fr',
+                                        md: 'repeat(2, minmax(0, 1fr))',
+                                    },
+                                    gap: 1.5,
+                                }}
+                            >
+                                <TextField
+                                    type="password"
+                                    name="password"
+                                    label={isEdit ? 'Nueva contraseña (opcional)' : 'Contraseña *'}
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    placeholder={isEdit ? '••••••' : ''}
+                                    disabled={loading}
+                                    required={!isEdit}
+                                />
+
+                                <TextField
+                                    type="password"
+                                    name="confirmPassword"
+                                    label="Confirmar contraseña"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    disabled={loading}
+                                    required={!isEdit || formData.password.length > 0}
+                                />
+                            </Box>
+                        </Box>
+
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 1.5,
+                                borderRadius: 2,
+                                backgroundColor:
+                                    'color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%)',
+                                border: '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                                boxShadow:
+                                    'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 12%, transparent), 0 10px 28px rgba(15, 23, 42, 0.05)',
+                                alignSelf: 'start',
+                                textAlign: 'center',
+                            }}
+                        >
+                            <Typography sx={{ mb: 1, fontWeight: 950 }}>
+                                Foto de perfil
+                            </Typography>
+
+                            <Avatar
+                                src={previewUrl || '/dist/images/default-user.png'}
+                                alt="Vista previa"
+                                sx={{
+                                    width: 150,
+                                    height: 150,
+                                    mx: 'auto',
+                                    mb: 1.5,
+                                    border: '3px solid color-mix(in srgb, var(--color-border) 60%, transparent)',
+                                    bgcolor: 'var(--color-primary)',
+                                    color: 'var(--color-button-text)',
+                                    fontSize: '2.5rem',
+                                    fontWeight: 950,
+                                }}
+                            >
+                                {formData.name.slice(0, 1).toUpperCase() || 'U'}
+                            </Avatar>
+
+                            <Button
+                                variant="outlined"
+                                component="label"
+                                startIcon={<CloudUploadRoundedIcon />}
+                                disabled={loading}
+                                sx={{
+                                    width: '100%',
+                                    borderRadius: 1.5,
+                                    py: 0.9,
+                                    fontWeight: 950,
+                                }}
+                            >
+                                Elegir foto
+                                <input hidden type="file" accept="image/*" onChange={handleFileChange} />
+                            </Button>
+                        </Paper>
+                    </Box>
+
+                    <Box
+                        sx={{
+                            mt: 'auto',
+                            flexShrink: 0,
+                            display: 'flex',
+                            flexDirection: {
+                                xs: 'column-reverse',
+                                sm: 'row',
+                            },
+                            justifyContent: 'flex-end',
+                            gap: 1,
+                            pt: 1,
+                        }}
+                    >
+                        <Button
+                            variant="outlined"
+                            startIcon={<ArrowBackRoundedIcon />}
+                            onClick={() => navigate('/admin/users')}
+                            disabled={loading}
+                            sx={{
+                                borderRadius: 1.5,
+                                px: 2.5,
+                                py: 0.9,
+                                fontWeight: 950,
+                            }}
+                        >
+                            Cancelar
+                        </Button>
+
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={loading}
+                            endIcon={
+                                loading ? (
+                                    <CircularProgress size={18} sx={{ color: 'var(--color-button-text)' }} />
+                                ) : (
+                                    <SaveRoundedIcon />
+                                )
+                            }
+                            sx={{
+                                borderRadius: 1.5,
+                                px: 2.5,
+                                py: 0.9,
+                                fontWeight: 950,
+                            }}
+                        >
+                            {loading ? 'Guardando...' : 'Guardar Usuario'}
+                        </Button>
+                    </Box>
+                </Box>
+            </Paper>
+
             <InstrumentPickerModal
                 show={showInstrumentPicker}
                 onClose={() => setShowInstrumentPicker(false)}
@@ -406,6 +843,6 @@ export const UserForm = () => {
                 selectedInstrumentId={formData.instrumentId || null}
                 onSelectInstrument={handleInstrumentSelected}
             />
-        </Container>
+        </Box>
     );
 };

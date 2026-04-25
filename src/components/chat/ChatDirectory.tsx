@@ -1,5 +1,22 @@
-import { OverlayTrigger, Popover, Image, Badge } from 'react-bootstrap';
-import { FaUsers } from 'react-icons/fa';
+// src/components/chat/ChatDirectory.tsx
+
+import { useMemo, useState } from 'react';
+
+import {
+    Avatar,
+    Badge,
+    Box,
+    Chip,
+    IconButton,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    Popover,
+    Typography,
+} from '@mui/material';
+
+import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 
 export interface ChatDirectoryUser {
     id?: string;
@@ -14,97 +31,227 @@ interface Props {
     onlineUsers: ChatDirectoryUser[];
 }
 
+const getDirectoryUserId = (user: ChatDirectoryUser, fallbackIndex: number): string => {
+    return user.id || user._id || `directory-user-${fallbackIndex}`;
+};
+
 export const ChatDirectory = ({ allUsers, onlineUsers }: Props) => {
+    const [anchorElement, setAnchorElement] = useState<HTMLButtonElement | null>(null);
 
-    const isOnline = (targetUser: ChatDirectoryUser) => {
-        const targetId = targetUser.id || targetUser._id;
-        if (!targetId) return false;
+    const onlineUserIds = useMemo(() => {
+        return onlineUsers
+            .map((user, index) => getDirectoryUserId(user, index))
+            .filter((id) => Boolean(id));
+    }, [onlineUsers]);
 
-        return onlineUsers.some(u => (u.id === targetId) || (u._id === targetId));
+    const isOpen = Boolean(anchorElement);
+
+    const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorElement(event.currentTarget);
     };
 
-    const popover = (
-        <Popover id="directory-popover" className="shadow border-0">
-            <Popover.Header as="h3" className="chat-container-color fw-bold text-center border-bottom">
-                Directorio ({allUsers.length})
-            </Popover.Header>
-            <Popover.Body className="p-0" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                {allUsers.length === 0 ? (
-                    <div className="p-3 text-center text-muted small">
-                        No hay usuarios disponibles.
-                    </div>
-                ) : (
-                    <ul className="list-group list-group-flush">
-                        {allUsers.map((user, index) => {
-                            const online = isOnline(user);
-                            const userId = user.id || user._id || index; // Fallback key
+    const handleClose = () => {
+        setAnchorElement(null);
+    };
 
-                            return (
-                                <li key={userId} className="list-group-item d-flex align-items-center justify-content-between px-3 py-2 border-bottom-0">
-                                    <div className="d-flex align-items-center">
-                                        <div className="position-relative">
-                                            <Image
-                                                src={user.imageUrl || '/images/default-user.png'}
-                                                roundedCircle
-                                                width={36}
-                                                height={36}
-                                                style={{ objectFit: 'cover' }}
-                                                alt={user.name}
-                                            />
-                                            <span
-                                                className="position-absolute bottom-0 end-0 border border-white rounded-circle"
-                                                style={{
-                                                    width: '10px',
-                                                    height: '10px',
-                                                    backgroundColor: online ? '#28a745' : '#ccc' // Green vs Gray
-                                                }}
-                                                title={online ? 'En Línea' : 'Desconectado'}
-                                            />
-                                        </div>
-                                        <div className="ms-2 d-flex flex-column" style={{ lineHeight: '1.2' }}>
-                                            <span className="fw-bold small text-dark">{user.name}</span>
-                                            <span className="text-muted" style={{ fontSize: '0.7rem' }}>@{user.username}</span>
-                                        </div>
-                                    </div>
-                                    <Badge
-                                        bg={online ? 'success' : 'secondary'}
-                                        className="ms-2 fw-normal"
-                                        style={{ fontSize: '0.65rem', minWidth: '70px' }}
-                                    >
-                                        {online ? 'En Línea' : 'Offline'}
-                                    </Badge>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                )}
-            </Popover.Body>
-        </Popover>
-    );
+    const isOnline = (targetUser: ChatDirectoryUser, fallbackIndex: number) => {
+        const targetId = getDirectoryUserId(targetUser, fallbackIndex);
+
+        return onlineUserIds.includes(targetId);
+    };
 
     return (
-        <OverlayTrigger
-            trigger={['hover', 'focus']}
-            placement="bottom"
-            overlay={popover}
-            delay={{ show: 100, hide: 300 }}
-        >
-            <div
-                className="d-flex align-items-center ms-3 position-relative"
-                style={{ cursor: 'pointer', color: '#555' }}
+        <>
+            <IconButton
+                aria-label="Abrir directorio del chat"
+                onClick={handleOpen}
+                sx={{
+                    color: 'var(--color-primary)',
+                    position: 'relative',
+                }}
             >
-                <FaUsers size={24} className="text-theme-color" />
+                <GroupsRoundedIcon />
 
-                {/* Online Count Badge */}
                 {onlineUsers.length > 0 && (
-                    <span
-                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success border border-white"
-                        style={{ fontSize: '0.6em', padding: '0.25em 0.4em' }}
-                    >
-                        {onlineUsers.length}
-                    </span>
+                    <Badge
+                        badgeContent={onlineUsers.length}
+                        color="success"
+                        sx={{
+                            position: 'absolute',
+                            top: 6,
+                            right: 6,
+                            '& .MuiBadge-badge': {
+                                fontSize: '0.62rem',
+                                fontWeight: 950,
+                            },
+                        }}
+                    />
                 )}
-            </div>
-        </OverlayTrigger>
+            </IconButton>
+
+            <Popover
+                open={isOpen}
+                anchorEl={anchorElement}
+                onClose={handleClose}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                }}
+                slotProps={{
+                    paper: {
+                        sx: {
+                            width: 330,
+                            maxWidth: 'calc(100vw - 24px)',
+                            borderRadius: 2,
+                            backgroundColor: 'var(--color-card)',
+                            color: 'var(--color-text)',
+                            border:
+                                '1px solid color-mix(in srgb, var(--color-border) 44%, transparent)',
+                            boxShadow: '0 18px 54px rgba(15, 23, 42, 0.22)',
+                            overflow: 'hidden',
+                        },
+                    },
+                }}
+            >
+                <Box
+                    sx={{
+                        px: 1.5,
+                        py: 1.25,
+                        borderBottom:
+                            '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                        backgroundColor:
+                            'color-mix(in srgb, var(--color-card) 82%, var(--color-primary) 18%)',
+                    }}
+                >
+                    <Typography
+                        sx={{
+                            fontWeight: 950,
+                            textAlign: 'center',
+                        }}
+                    >
+                        Directorio ({allUsers.length})
+                    </Typography>
+                </Box>
+
+                <Box
+                    sx={{
+                        maxHeight: 320,
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
+                        '&::-webkit-scrollbar': {
+                            display: 'none',
+                        },
+                    }}
+                >
+                    {allUsers.length === 0 ? (
+                        <Typography
+                            sx={{
+                                p: 2,
+                                textAlign: 'center',
+                                color: 'var(--color-secondary-text)',
+                                fontWeight: 800,
+                                fontSize: '0.86rem',
+                            }}
+                        >
+                            No hay usuarios disponibles.
+                        </Typography>
+                    ) : (
+                        <List disablePadding>
+                            {allUsers.map((directoryUser, index) => {
+                                const online = isOnline(directoryUser, index);
+                                const userId = getDirectoryUserId(directoryUser, index);
+
+                                return (
+                                    <ListItem
+                                        key={userId}
+                                        secondaryAction={
+                                            <Chip
+                                                size="small"
+                                                label={online ? 'En línea' : 'Offline'}
+                                                color={online ? 'success' : 'default'}
+                                                sx={{
+                                                    fontWeight: 900,
+                                                    minWidth: 76,
+                                                }}
+                                            />
+                                        }
+                                        sx={{
+                                            pr: 11,
+                                            borderBottom:
+                                                '1px solid color-mix(in srgb, var(--color-border) 24%, transparent)',
+                                        }}
+                                    >
+                                        <ListItemAvatar>
+                                            <Box sx={{ position: 'relative', width: 40 }}>
+                                                <Avatar
+                                                    src={directoryUser.imageUrl || '/images/default-user.png'}
+                                                    alt={directoryUser.name}
+                                                    sx={{
+                                                        width: 40,
+                                                        height: 40,
+                                                        bgcolor: 'var(--color-primary)',
+                                                        color: 'var(--color-button-text)',
+                                                        fontWeight: 950,
+                                                    }}
+                                                >
+                                                    {directoryUser.name.slice(0, 1).toUpperCase()}
+                                                </Avatar>
+
+                                                <Box
+                                                    title={online ? 'En línea' : 'Desconectado'}
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        right: 1,
+                                                        bottom: 1,
+                                                        width: 10,
+                                                        height: 10,
+                                                        borderRadius: '50%',
+                                                        backgroundColor: online ? '#22c55e' : '#9ca3af',
+                                                        border: '2px solid var(--color-card)',
+                                                    }}
+                                                />
+                                            </Box>
+                                        </ListItemAvatar>
+
+                                        <ListItemText
+                                            primary={directoryUser.name}
+                                            secondary={`@${directoryUser.username}`}
+                                            slotProps={{
+                                                primary: {
+                                                    sx: {
+                                                        color: 'var(--color-text)',
+                                                        fontWeight: 950,
+                                                        lineHeight: 1.1,
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                    },
+                                                },
+                                                secondary: {
+                                                    sx: {
+                                                        color: 'var(--color-secondary-text)',
+                                                        fontWeight: 750,
+                                                        fontSize: '0.76rem',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                    },
+                                                },
+                                            }}
+                                        />
+                                    </ListItem>
+                                );
+                            })}
+                        </List>
+                    )}
+                </Box>
+            </Popover>
+        </>
     );
 };

@@ -1,6 +1,7 @@
 // src/components/tiptap-components/TiptapViewer.tsx
 
 import { useEffect } from 'react';
+import { Box } from '@mui/material';
 import { EditorContent, useEditor, type JSONContent } from '@tiptap/react';
 
 import { customExtensions } from '../../utils/tiptap/extensions';
@@ -32,8 +33,20 @@ export const TiptapViewer = ({ content }: Props) => {
     }
 
     return (
-        <div className="tiptap-viewer">
+        <Box
+            className="tiptap-viewer"
+            sx={{
+                color: 'var(--color-text)',
+                '& .ProseMirror': {
+                    outline: 'none',
+                },
+                '& p': {
+                    marginTop: 0,
+                    marginBottom: '0.75rem',
+                },
+            }}
+        >
             <EditorContent editor={editor} />
-        </div>
+        </Box>
     );
 };

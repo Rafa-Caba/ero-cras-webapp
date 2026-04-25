@@ -1,8 +1,21 @@
+// src/components/chat/AdminChatGroup.tsx
+
 import { useEffect, useRef, useState } from 'react';
-import { Card, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import type { JSONContent } from '@tiptap/react';
+
+import {
+    Box,
+    Button,
+    IconButton,
+    Paper,
+    Typography,
+} from '@mui/material';
+
+import ChatRoundedIcon from '@mui/icons-material/ChatRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 
 import { useChatStore } from '../../store/admin/useChatStore';
 import { useAuth } from '../../context/AuthContext';
@@ -17,10 +30,53 @@ import { ChatDirectory } from './ChatDirectory';
 import { scrollChatToBottom } from '../../utils';
 import type { ChatMessage } from '../../types/chat';
 
+type ChatAttachmentType = 'image' | 'file' | 'audio' | 'video';
+
 const getEmptyContent = (): JSONContent => ({
     type: 'doc',
-    content: [{ type: 'paragraph' }]
+    content: [{ type: 'paragraph' }],
 });
+
+const hasTextInContent = (content: JSONContent): boolean => {
+    return Boolean(
+        content.content?.some((block) =>
+            block.content?.some((child) => Boolean(child.text?.trim())),
+        ),
+    );
+};
+
+const getFileTypeFromName = (fileName: string): ChatAttachmentType => {
+    const extension = fileName.split('.').pop()?.toLowerCase() || '';
+
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) {
+        return 'image';
+    }
+
+    if (['mp3', 'wav', 'ogg', 'm4a'].includes(extension)) {
+        return 'audio';
+    }
+
+    if (['mp4', 'mov', 'webm', 'avi'].includes(extension)) {
+        return 'video';
+    }
+
+    return 'file';
+};
+
+const getReplyPreviewText = (message: ChatMessage | null): string => {
+    if (!message) {
+        return '';
+    }
+
+    if (typeof message.content === 'string') {
+        return message.content;
+    }
+
+    const firstBlock = message.content.content?.[0];
+    const firstChild = firstBlock?.content?.[0];
+
+    return firstChild?.text || '';
+};
 
 export const AdminChatGroup = () => {
     const { user, token } = useAuth();
@@ -35,7 +91,7 @@ export const AdminChatGroup = () => {
         loadMoreMessages,
         fetchDirectory,
         allUsers,
-        onlineUsers
+        onlineUsers,
     } = useChatStore();
 
     const [messageContent, setMessageContent] = useState<JSONContent>(getEmptyContent());
@@ -43,20 +99,16 @@ export const AdminChatGroup = () => {
     const [expandedImage, setExpandedImage] = useState<string | null>(null);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    // File & Preview States
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [fileType, setFileType] = useState<'image' | 'file' | 'audio' | 'video' | null>(null);
+    const [fileType, setFileType] = useState<ChatAttachmentType | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [previewName, setPreviewName] = useState<string | undefined>();
-    const [previewType, setPreviewType] = useState<'image' | 'file' | 'audio' | 'video' | null>(null);
+    const [previewType, setPreviewType] = useState<ChatAttachmentType | null>(null);
 
-    // Modal Preview States
-    const [modalPreviewType, setModalPreviewType] =
-        useState<'image' | 'file' | 'audio' | 'video' | null>(null);
+    const [modalPreviewType, setModalPreviewType] = useState<ChatAttachmentType | null>(null);
     const [modalPreviewUrl, setModalPreviewUrl] = useState<string | null>(null);
     const [modalPreviewName, setModalPreviewName] = useState<string | undefined>();
 
-    // Reply-to state
     const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
 
     const editorRef = useRef<{ clear: () => void }>(null);
@@ -67,13 +119,16 @@ export const AdminChatGroup = () => {
     useEffect(() => {
         if (token && user) {
             connect(token, user);
-            loadHistory();
-            fetchDirectory();
+            void loadHistory();
+            void fetchDirectory();
         }
-    }, [token, user]);
+    }, [token, user, connect, loadHistory, fetchDirectory]);
 
     useEffect(() => {
-        if (messages.length === 0) return;
+        if (messages.length === 0) {
+            return;
+        }
+
         const currentLastId = messages[messages.length - 1].id;
 
         if (currentLastId !== lastMessageIdRef.current) {
@@ -84,85 +139,122 @@ export const AdminChatGroup = () => {
 
     useEffect(() => {
         const container = messagesContainerRef.current;
-        if (!container) return;
+
+        if (!container) {
+            return undefined;
+        }
 
         const handleScroll = async () => {
-            if (container.scrollTop === 0 && !isLoadingMore && messages.length > 0 && hasMoreMessages) {
+            if (
+                container.scrollTop === 0 &&
+                !isLoadingMore &&
+                messages.length > 0 &&
+                hasMoreMessages
+            ) {
                 setIsLoadingMore(true);
+
                 const scrollHeightBefore = container.scrollHeight;
 
                 await loadMoreMessages();
 
-                requestAnimationFrame(() => {
+                window.requestAnimationFrame(() => {
                     const scrollHeightAfter = container.scrollHeight;
                     const heightDifference = scrollHeightAfter - scrollHeightBefore;
+
                     if (heightDifference > 0) {
                         container.scrollTop = heightDifference;
                     }
+
                     setIsLoadingMore(false);
                 });
             }
         };
 
         container.addEventListener('scroll', handleScroll);
+
         return () => container.removeEventListener('scroll', handleScroll);
-    }, [isLoadingMore, messages.length, hasMoreMessages]);
+    }, [isLoadingMore, messages.length, hasMoreMessages, loadMoreMessages]);
+
+    useEffect(() => {
+        return () => {
+            if (previewUrl?.startsWith('blob:')) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
 
     const isOwnMessage = (authorId: string) => authorId === user?.id;
 
-    const handleSendMessage = async () => {
-        // Validation: deeply check for any text content
-        const hasText = messageContent?.content?.some((block: any) =>
-            block.content?.some((child: any) => child.text?.trim())
-        );
+    const resetSelectedFile = () => {
+        if (previewUrl?.startsWith('blob:')) {
+            URL.revokeObjectURL(previewUrl);
+        }
 
-        if (!hasText && !selectedFile) return;
-        if (!user) return;
+        setSelectedFile(null);
+        setFileType(null);
+        setPreviewUrl(null);
+        setPreviewName(undefined);
+        setPreviewType(null);
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handleSendMessage = async () => {
+        const hasText = hasTextInContent(messageContent);
+
+        if (!hasText && !selectedFile) {
+            return;
+        }
+
+        if (!user) {
+            return;
+        }
 
         try {
             await sendMessage(
                 messageContent,
                 selectedFile || undefined,
                 fileType || undefined,
-                replyTo?.id
+                replyTo?.id,
             );
 
             editorRef.current?.clear();
             setMessageContent(getEmptyContent());
-            setSelectedFile(null);
-            setFileType(null);
-            setPreviewUrl(null);
-            setPreviewName(undefined);
-            setPreviewType(null);
-            setReplyTo(null); // ✅ clear reply after sending
+            resetSelectedFile();
+            setReplyTo(null);
         } catch (error) {
             console.error('Error sending message:', error);
-            Swal.fire('Error', 'Failed to send message', 'error');
+            Swal.fire('Error', 'No se pudo enviar el mensaje.', 'error');
         }
     };
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
 
-        const extension = file.name.split('.').pop()?.toLowerCase() || '';
-        let type: any = null;
+        if (!file) {
+            return;
+        }
 
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) type = 'image';
-        else if (['mp3', 'wav', 'ogg', 'm4a'].includes(extension)) type = 'audio';
-        else if (['mp4', 'mov', 'webm', 'avi'].includes(extension)) type = 'video';
-        else type = 'file';
+        if (previewUrl?.startsWith('blob:')) {
+            URL.revokeObjectURL(previewUrl);
+        }
+
+        const detectedType = getFileTypeFromName(file.name);
 
         setSelectedFile(file);
-        setFileType(type);
+        setFileType(detectedType);
         setPreviewUrl(URL.createObjectURL(file));
         setPreviewName(file.name);
-        setPreviewType(type);
+        setPreviewType(detectedType);
     };
 
-    const handleAttachClick = () => fileInputRef.current?.click();
+    const handleAttachClick = () => {
+        fileInputRef.current?.click();
+    };
 
-    const handlePreviewClick = (type: any, url: string, name?: string) => {
+    const handlePreviewClick = (type: ChatAttachmentType, url: string, name?: string) => {
         setModalPreviewType(type);
         setModalPreviewUrl(url);
         setModalPreviewName(name);
@@ -176,32 +268,108 @@ export const AdminChatGroup = () => {
         setReplyTo(null);
     };
 
-    // Small helper for preview text in the reply bar
-    const getReplyPreviewText = (msg: ChatMessage | null): string => {
-        if (!msg) return '';
-        if (typeof msg.content === 'string') return msg.content;
-
-        const doc: any = msg.content;
-        const firstBlock = doc?.content?.[0];
-        const firstChild = firstBlock?.content?.[0];
-        return firstChild?.text || '';
-    };
-
     return (
-        <div className="container p-0 pt-md-2 my-0">
-            <Card className="shadow p-2 p-lg-3 chat-container no_srollbar">
-                <div className="botones chat-container-color px-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between align-items-center text-center mb-3">
-                    <div className="d-flex align-items-center justify-content-center my-2">
-                        <h3 className="mb-1">💬 Chat de Grupo</h3>
+        <Box
+            component="section"
+            sx={{
+                width: '100%',
+                minHeight: 0,
+                height: '100%',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+            }}
+        >
+            <Paper
+                elevation={0}
+                sx={{
+                    flex: 1,
+                    minHeight: 0,
+                    p: {
+                        xs: 1,
+                        md: 1.5,
+                    },
+                    borderRadius: 2,
+                    background:
+                        'linear-gradient(145deg, color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%) 0%, color-mix(in srgb, var(--color-card) 76%, transparent) 100%)',
+                    border: '1px solid color-mix(in srgb, var(--color-border) 38%, transparent)',
+                    boxShadow:
+                        'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 14%, transparent), 0 12px 42px rgba(15, 23, 42, 0.06)',
+                    color: 'var(--color-text)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    gap: 1.25,
+                }}
+            >
+                <Paper
+                    elevation={0}
+                    sx={{
+                        flexShrink: 0,
+                        px: {
+                            xs: 1,
+                            md: 1.5,
+                        },
+                        py: 1,
+                        borderRadius: 1.5,
+                        backgroundColor:
+                            'color-mix(in srgb, var(--color-card) 84%, var(--color-primary) 16%)',
+                        border: '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                        display: 'flex',
+                        flexDirection: {
+                            xs: 'column',
+                            md: 'row',
+                        },
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: 1,
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 1,
+                        }}
+                    >
+                        <ChatRoundedIcon sx={{ color: 'var(--color-primary)' }} />
+
+                        <Typography
+                            component="h1"
+                            sx={{
+                                m: 0,
+                                fontSize: {
+                                    xs: '1.25rem',
+                                    md: '1.55rem',
+                                },
+                                fontWeight: 950,
+                            }}
+                        >
+                            Chat de Grupo
+                        </Typography>
+
                         <ChatDirectory allUsers={allUsers} onlineUsers={onlineUsers} />
-                    </div>
-                    <Link
+                    </Box>
+
+                    <Button
+                        component={RouterLink}
                         to="/admin"
-                        className="d-none d-md-block btn general_btn fw-bolder px-3 m-2"
+                        variant="contained"
+                        startIcon={<HomeRoundedIcon />}
+                        sx={{
+                            display: {
+                                xs: 'none',
+                                md: 'inline-flex',
+                            },
+                            borderRadius: 1.5,
+                            fontWeight: 950,
+                        }}
                     >
                         Ir al Inicio
-                    </Link>
-                </div>
+                    </Button>
+                </Paper>
 
                 <ChatBubbleContainer
                     messages={messages}
@@ -215,36 +383,76 @@ export const AdminChatGroup = () => {
                 />
 
                 {replyTo && (
-                    <div className="d-flex align-items-center justify-content-between mx-3 mt-1 mb-2 px-3 py-2 rounded bg-light border small">
-                        <div className="me-2 text-truncate">
-                            <div className="fw-semibold">
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            flexShrink: 0,
+                            mx: {
+                                xs: 0,
+                                md: 1,
+                            },
+                            px: 1.25,
+                            py: 1,
+                            borderRadius: 1.5,
+                            backgroundColor:
+                                'color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%)',
+                            border: '1px solid color-mix(in srgb, var(--color-border) 36%, transparent)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 1,
+                        }}
+                    >
+                        <Box sx={{ minWidth: 0 }}>
+                            <Typography
+                                sx={{
+                                    fontWeight: 950,
+                                    fontSize: '0.86rem',
+                                }}
+                            >
                                 Respondiendo a{' '}
                                 {replyTo.author?.name || replyTo.author?.username || replyTo.author?.id}
-                            </div>
-                            <div className="text-muted text-truncate" style={{ maxWidth: '100%' }}>
+                            </Typography>
+
+                            <Typography
+                                sx={{
+                                    color: 'var(--color-secondary-text)',
+                                    fontWeight: 750,
+                                    fontSize: '0.8rem',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    maxWidth: {
+                                        xs: 220,
+                                        sm: 420,
+                                        md: 720,
+                                    },
+                                }}
+                            >
                                 {getReplyPreviewText(replyTo)}
-                            </div>
-                        </div>
-                        <Button
-                            variant="link"
-                            className="text-muted p-0 ms-2"
+                            </Typography>
+                        </Box>
+
+                        <IconButton
+                            aria-label="Cancelar respuesta"
                             onClick={handleCancelReply}
+                            sx={{
+                                color: 'var(--color-text)',
+                            }}
                         >
-                            ✕
-                        </Button>
-                    </div>
+                            <CloseRoundedIcon />
+                        </IconButton>
+                    </Paper>
                 )}
 
-                <div className="d-flex flex-row align-items-end gap-3 ms-3 mt-1 mb-1">
-                    <ChatPreviewContainer
-                        previewType={previewType}
-                        previewUrl={previewUrl}
-                        previewName={previewName}
-                        loading={isSending}
-                        onPreviewClick={handlePreviewClick}
-                        onImageClick={setExpandedImage}
-                    />
-                </div>
+                <ChatPreviewContainer
+                    previewType={previewType}
+                    previewUrl={previewUrl}
+                    previewName={previewName}
+                    loading={isSending}
+                    onPreviewClick={handlePreviewClick}
+                    onImageClick={setExpandedImage}
+                />
 
                 <ChatInputArea
                     messageContent={messageContent}
@@ -256,15 +464,16 @@ export const AdminChatGroup = () => {
                     editorRef={editorRef}
                     loading={isSending}
                 />
-            </Card>
+            </Paper>
 
             <ChatImageModal imageUrl={expandedImage} onClose={() => setExpandedImage(null)} />
+
             <ChatFilePreviewModal
                 type={modalPreviewType}
                 fileUrl={modalPreviewUrl}
                 fileName={modalPreviewName}
                 onClose={() => setModalPreviewUrl(null)}
             />
-        </div>
+        </Box>
     );
 };

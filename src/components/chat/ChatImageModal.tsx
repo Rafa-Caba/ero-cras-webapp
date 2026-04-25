@@ -1,4 +1,18 @@
-import { Modal, Button } from 'react-bootstrap';
+// src/components/chat/ChatImageModal.tsx
+
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+} from '@mui/material';
+
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
+import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
 
 interface Props {
     imageUrl: string | null;
@@ -7,38 +21,123 @@ interface Props {
 
 export const ChatImageModal = ({ imageUrl, onClose }: Props) => {
     return (
-        <Modal show={!!imageUrl} onHide={onClose} centered size="lg">
-            <Modal.Header closeButton>
-                <Modal.Title>Imagen del mensaje</Modal.Title>
-            </Modal.Header>
+        <Dialog
+            open={Boolean(imageUrl)}
+            onClose={onClose}
+            fullWidth
+            maxWidth="lg"
+            scroll="paper"
+            slotProps={{
+                paper: {
+                    sx: {
+                        borderRadius: 2,
+                        backgroundColor: 'var(--color-card)',
+                        color: 'var(--color-text)',
+                        border: '1px solid color-mix(in srgb, var(--color-border) 46%, transparent)',
+                        boxShadow: '0 22px 70px rgba(15, 23, 42, 0.22)',
+                        overflow: 'hidden',
+                    },
+                },
+            }}
+        >
+            <DialogTitle
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 1,
+                    fontWeight: 950,
+                    borderBottom: '1px solid color-mix(in srgb, var(--color-border) 36%, transparent)',
+                }}
+            >
+                <Box
+                    component="span"
+                    sx={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 1,
+                    }}
+                >
+                    <ImageRoundedIcon sx={{ color: 'var(--color-primary)' }} />
+                    Imagen del mensaje
+                </Box>
 
-            <Modal.Body className="text-center">
+                <IconButton
+                    aria-label="Cerrar imagen"
+                    onClick={onClose}
+                    sx={{ color: 'var(--color-text)' }}
+                >
+                    <CloseRoundedIcon />
+                </IconButton>
+            </DialogTitle>
+
+            <DialogContent
+                sx={{
+                    p: 2,
+                    backgroundColor: 'var(--color-card)',
+                    display: 'grid',
+                    placeItems: 'center',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    '&::-webkit-scrollbar': {
+                        display: 'none',
+                    },
+                }}
+            >
                 {imageUrl && (
-                    <img
+                    <Box
+                        component="img"
                         src={imageUrl}
                         alt="Imagen ampliada"
-                        className="img-fluid rounded"
-                        style={{ maxHeight: '80vh' }}
+                        sx={{
+                            maxWidth: '100%',
+                            maxHeight: '80vh',
+                            borderRadius: 2,
+                            objectFit: 'contain',
+                            display: 'block',
+                        }}
                     />
                 )}
-            </Modal.Body>
+            </DialogContent>
 
-            <Modal.Footer className="justify-content-between">
-                <Button variant="secondary" className='px-3' onClick={onClose}>
+            <DialogActions
+                sx={{
+                    p: 1.5,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 1,
+                    borderTop: '1px solid color-mix(in srgb, var(--color-border) 36%, transparent)',
+                }}
+            >
+                <Button
+                    variant="outlined"
+                    onClick={onClose}
+                    sx={{
+                        borderRadius: 1.5,
+                        fontWeight: 950,
+                    }}
+                >
                     Cerrar
                 </Button>
+
                 {imageUrl && (
-                    <a
+                    <Button
+                        component="a"
                         href={imageUrl}
                         download
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn general_btn"
+                        variant="contained"
+                        startIcon={<DownloadRoundedIcon />}
+                        sx={{
+                            borderRadius: 1.5,
+                            fontWeight: 950,
+                        }}
                     >
                         Descargar
-                    </a>
+                    </Button>
                 )}
-            </Modal.Footer>
-        </Modal>
+            </DialogActions>
+        </Dialog>
     );
 };

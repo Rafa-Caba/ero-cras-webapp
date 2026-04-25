@@ -1,16 +1,46 @@
-import { useState, useEffect, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { Form, Button, Spinner } from "react-bootstrap";
-import Swal from "sweetalert2";
-import type { JSONContent } from "@tiptap/react";
+// src/components/songs/AdminNewSong.tsx
 
-import { TiptapEditor } from "../tiptap-components/TiptapEditor";
-import { useSongStore } from "../../store/admin/useSongStore";
-import { useSongTypeStore } from "../../store/admin/useSongTypeStore";
-import { emptyEditorContent } from "../../utils/editorDefaults";
-import type { CreateSongPayload } from "../../types";
-import { parseText } from "../../utils/handleTextTipTap";
-import { capitalizeWord } from "../../utils";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { JSONContent } from '@tiptap/react';
+import Swal from 'sweetalert2';
+
+import {
+    Box,
+    Button,
+    CircularProgress,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    TextField,
+    Typography,
+} from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material/Select';
+
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import AudioFileRoundedIcon from '@mui/icons-material/AudioFileRounded';
+import MusicNoteRoundedIcon from '@mui/icons-material/MusicNoteRounded';
+import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
+
+import { TiptapEditor } from '../tiptap-components/TiptapEditor';
+import { useSongStore } from '../../store/admin/useSongStore';
+import { useSongTypeStore } from '../../store/admin/useSongTypeStore';
+import { emptyEditorContent } from '../../utils/editorDefaults';
+import type { CreateSongPayload } from '../../types';
+import { parseText } from '../../utils/handleTextTipTap';
+import { capitalizeWord } from '../../utils';
+
+const buildSongContentPayload = (editorContent: JSONContent | null): CreateSongPayload['content'] => {
+    const parsedContent = parseText(editorContent ?? emptyEditorContent);
+
+    return {
+        ...parsedContent,
+        type: parsedContent.type ?? 'doc',
+        content: parsedContent.content ?? [],
+    };
+};
 
 export const AdminNewSong = () => {
     const navigate = useNavigate();
@@ -18,179 +48,426 @@ export const AdminNewSong = () => {
     const { addSong } = useSongStore();
     const { types, fetchTypes } = useSongTypeStore();
 
-    const [title, setTitle] = useState("");
+    const [title, setTitle] = useState('');
     const [content, setContent] = useState<JSONContent | null>(emptyEditorContent);
-    const [songTypeId, setSongTypeId] = useState("");
-    const [composer, setComposer] = useState("");
+    const [songTypeId, setSongTypeId] = useState('');
+    const [composer, setComposer] = useState('');
     const [audioFile, setAudioFile] = useState<File | null>(null);
+    const [audioFileName, setAudioFileName] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        fetchTypes();
-    }, []);
+        void fetchTypes();
+    }, [fetchTypes]);
 
-    const handleAudioChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        const input = e.target as HTMLInputElement;
-        const file = input.files?.[0] ?? null;
+    const handleAudioChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0] ?? null;
         setAudioFile(file);
+        setAudioFileName(file?.name ?? '');
     };
 
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
+    const handleSongTypeChange = (event: SelectChangeEvent<string>) => {
+        setSongTypeId(event.target.value);
+    };
 
-        if (!title || !content || !songTypeId) {
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        if (!title.trim() || !content || !songTypeId) {
             Swal.fire(
-                "Campos requeridos",
-                "Título, Contenido y Tipo son obligatorios",
-                "warning"
+                'Campos requeridos',
+                'Título, Contenido y Tipo son obligatorios',
+                'warning',
             );
             return;
         }
 
-        if (isSaving) return;
+        if (isSaving) {
+            return;
+        }
+
         setIsSaving(true);
 
         const payload: CreateSongPayload = {
-            title,
-            content: content as any,
+            title: title.trim(),
+            content: buildSongContentPayload(content),
             songTypeId,
-            composer,
-            ...(audioFile ? { file: audioFile } : {})
+            composer: composer.trim(),
+            ...(audioFile ? { file: audioFile } : {}),
         };
 
         try {
             await addSong(payload);
-            Swal.fire("¡Éxito!", "Canto guardado correctamente", "success");
-            navigate("/admin/songs");
-        } catch (err) {
-            console.error(err);
-            Swal.fire("Error", "Ocurrió un error inesperado", "error");
+            Swal.fire('¡Éxito!', 'Canto guardado correctamente', 'success');
+            navigate('/admin/songs');
+        } catch {
+            Swal.fire('Error', 'Ocurrió un error inesperado', 'error');
         } finally {
             setIsSaving(false);
         }
     };
 
     const rootTypes = types
-        .filter((t) => !t.parentId)
-        .sort((a, b) => a.order - b.order);
+        .filter((typeItem) => !typeItem.parentId)
+        .sort((firstType, secondType) => firstType.order - secondType.order);
 
     const getChildren = (parentId: string) =>
         types
-            .filter((t) => t.parentId === parentId)
-            .sort((a, b) => a.order - b.order);
+            .filter((typeItem) => typeItem.parentId === parentId)
+            .sort((firstType, secondType) => firstType.order - secondType.order);
 
     return (
-        <article className="m-3 col-md-8 mx-auto">
-            <div className="form-canto">
-                <h2 className="titulo mb-4">Nuevo Canto</h2>
-                <Form onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3" controlId="title">
-                        <Form.Label>Título del Canto</Form.Label>
-                        <Form.Control
-                            type="text"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Título del canto"
-                        />
-                    </Form.Group>
+        <Box
+            component="section"
+            sx={{
+                width: '100%',
+                minHeight: 0,
+                height: '100%',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                overflow: 'hidden',
+            }}
+        >
+            <Paper
+                elevation={0}
+                sx={{
+                    p: {
+                        xs: 1.5,
+                        md: 2,
+                    },
+                    borderRadius: 2,
+                    background:
+                        'linear-gradient(145deg, color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%) 0%, color-mix(in srgb, var(--color-card) 78%, transparent) 100%)',
+                    border: '1px solid color-mix(in srgb, var(--color-border) 38%, transparent)',
+                    boxShadow:
+                        'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 14%, transparent), 0 12px 38px rgba(15, 23, 42, 0.06)',
+                    color: 'var(--color-text)',
+                }}
+            >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: {
+                            xs: 'column',
+                            sm: 'row',
+                        },
+                        alignItems: {
+                            xs: 'stretch',
+                            sm: 'center',
+                        },
+                        justifyContent: 'space-between',
+                        gap: 1.5,
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: {
+                                xs: 'center',
+                                sm: 'flex-start',
+                            },
+                            gap: 1.25,
+                            textAlign: {
+                                xs: 'center',
+                                sm: 'left',
+                            },
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                width: 44,
+                                height: 44,
+                                display: 'grid',
+                                placeItems: 'center',
+                                borderRadius: 1.5,
+                                color: 'var(--color-button-text)',
+                                background:
+                                    'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)',
+                                boxShadow:
+                                    '0 10px 24px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.24)',
+                            }}
+                        >
+                            <MusicNoteRoundedIcon />
+                        </Box>
 
-                    <Form.Group className="mb-3">
-                        <Form.Label>Texto del Canto</Form.Label>
+                        <Box>
+                            <Typography
+                                component="h1"
+                                sx={{
+                                    m: 0,
+                                    fontSize: {
+                                        xs: '1.55rem',
+                                        md: '2rem',
+                                    },
+                                    fontWeight: 950,
+                                    lineHeight: 1.1,
+                                }}
+                            >
+                                Nuevo Canto
+                            </Typography>
+
+                            <Typography
+                                sx={{
+                                    mt: 0.4,
+                                    color: 'var(--color-secondary-text)',
+                                    fontWeight: 800,
+                                    fontSize: '0.9rem',
+                                }}
+                            >
+                                Crea un canto con texto, tipo, compositor y audio opcional.
+                            </Typography>
+                        </Box>
+                    </Box>
+
+                    <Button
+                        variant="outlined"
+                        startIcon={<ArrowBackRoundedIcon />}
+                        onClick={() => navigate('/admin/songs')}
+                        disabled={isSaving}
+                        sx={{
+                            borderRadius: 1.5,
+                            px: 2,
+                            py: 0.9,
+                            fontWeight: 950,
+                        }}
+                    >
+                        Volver
+                    </Button>
+                </Box>
+            </Paper>
+
+            <Paper
+                elevation={0}
+                sx={{
+                    flex: 1,
+                    minHeight: 0,
+                    p: {
+                        xs: 1.5,
+                        md: 2,
+                    },
+                    borderRadius: 2,
+                    background:
+                        'linear-gradient(145deg, color-mix(in srgb, var(--color-card) 86%, var(--color-primary) 14%) 0%, color-mix(in srgb, var(--color-card) 76%, transparent) 100%)',
+                    border: '1px solid color-mix(in srgb, var(--color-border) 38%, transparent)',
+                    boxShadow:
+                        'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 14%, transparent), 0 12px 42px rgba(15, 23, 42, 0.06)',
+                    color: 'var(--color-text)',
+                    overflow: 'hidden',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    '&::-webkit-scrollbar': {
+                        display: 'none',
+                    },
+
+                }}
+            >
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    sx={{
+                        height: '100%',
+                        minHeight: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: {
+                            xs: 1.5,
+                            md: 2,
+                        },
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
+                        '&::-webkit-scrollbar': {
+                            display: 'none',
+                        },
+                        p: '0 !important',
+                        m: '0 !important',
+                        pr: {
+                            xs: 0,
+                            md: 0.5,
+                        },
+                        backgroundColor: 'transparent !important',
+                    }}
+                >
+                    <TextField
+                        type="text"
+                        label="Título del Canto"
+                        value={title}
+                        onChange={(event) => setTitle(event.target.value)}
+                        placeholder="Título del canto"
+                        disabled={isSaving}
+                        required
+                    />
+
+                    <Box>
+                        <Typography
+                            sx={{
+                                mb: 1,
+                                fontWeight: 950,
+                                color: 'var(--color-text)',
+                            }}
+                        >
+                            Texto del Canto
+                        </Typography>
+
                         <TiptapEditor
                             content={parseText(content)}
-                            onChange={(val: JSONContent) => setContent(val)}
+                            onChange={(value: JSONContent) => setContent(value)}
                         />
-                    </Form.Group>
+                    </Box>
 
-                    <Form.Group className="mb-3" controlId="songType">
-                        <Form.Label>Tipo de Canto</Form.Label>
-                        <Form.Select
-                            value={songTypeId}
-                            onChange={(e) => setSongTypeId(e.target.value)}
-                        >
-                            <option value="">-- Seleccionar Tipo --</option>
+                    <Box
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: {
+                                xs: '1fr',
+                                md: 'minmax(0, 1fr) minmax(0, 1fr)',
+                            },
+                            gap: {
+                                xs: 1.5,
+                                md: 2,
+                            },
+                        }}
+                    >
+                        <FormControl fullWidth>
+                            <InputLabel id="song-type-label">Tipo de Canto</InputLabel>
+                            <Select
+                                labelId="song-type-label"
+                                value={songTypeId}
+                                label="Tipo de Canto"
+                                onChange={handleSongTypeChange}
+                                disabled={isSaving}
+                            >
+                                <MenuItem value="">
+                                    <em>-- Seleccionar Tipo --</em>
+                                </MenuItem>
 
-                            {rootTypes.map((root) => {
-                                const children = getChildren(root.id);
+                                {rootTypes.map((rootType) => {
+                                    const children = getChildren(rootType.id);
 
-                                if (root.isParent && children.length > 0) {
+                                    if (rootType.isParent && children.length > 0) {
+                                        return children.map((childType) => (
+                                            <MenuItem key={childType.id} value={childType.id}>
+                                                {capitalizeWord(rootType.name)} / {capitalizeWord(childType.name)}
+                                            </MenuItem>
+                                        ));
+                                    }
+
                                     return (
-                                        <optgroup
-                                            key={root.id}
-                                            label={capitalizeWord(root.name)}
-                                        >
-                                            {children.map((child) => (
-                                                <option key={child.id} value={child.id}>
-                                                    {capitalizeWord(child.name)}
-                                                </option>
-                                            ))}
-                                        </optgroup>
+                                        <MenuItem key={rootType.id} value={rootType.id}>
+                                            {capitalizeWord(rootType.name)}
+                                        </MenuItem>
                                     );
-                                }
+                                })}
+                            </Select>
+                        </FormControl>
 
-                                return (
-                                    <option key={root.id} value={root.id}>
-                                        {capitalizeWord(root.name)}
-                                    </option>
-                                );
-                            })}
-                        </Form.Select>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="composer">
-                        <Form.Label>Compositor</Form.Label>
-                        <Form.Control
+                        <TextField
                             type="text"
+                            label="Compositor"
                             value={composer}
-                            onChange={(e) => setComposer(e.target.value)}
+                            onChange={(event) => setComposer(event.target.value)}
                             placeholder="Compositor"
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-4" controlId="audio">
-                        <Form.Label>Audio (opcional)</Form.Label>
-                        <Form.Control
-                            type="file"
-                            accept="audio/*"
-                            onChange={handleAudioChange}
                             disabled={isSaving}
                         />
-                        <Form.Text muted>
-                            Puedes subir un archivo de audio para este canto.
-                        </Form.Text>
-                    </Form.Group>
+                    </Box>
 
-                    <div className="text-center">
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            p: 1.5,
+                            borderRadius: 1.5,
+                            backgroundColor:
+                                'color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%)',
+                            border: '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                            boxShadow: 'inset 0 1px 16px rgba(15, 23, 42, 0.035)',
+                        }}
+                    >
                         <Button
-                            type="submit"
-                            className="general_btn me-2"
+                            variant="outlined"
+                            component="label"
+                            startIcon={<AudioFileRoundedIcon />}
                             disabled={isSaving}
+                            sx={{
+                                width: '100%',
+                                borderRadius: 1.5,
+                                py: 0.9,
+                                fontWeight: 950,
+                            }}
                         >
-                            {isSaving ? (
-                                <>
-                                    <Spinner
-                                        animation="border"
-                                        size="sm"
-                                        className="me-2"
-                                    />
-                                    Guardando...
-                                </>
-                            ) : (
-                                "Guardar Canto"
-                            )}
+                            {audioFileName || 'Seleccionar audio opcional'}
+                            <input hidden type="file" accept="audio/*" onChange={handleAudioChange} />
                         </Button>
+
+                        <Typography
+                            sx={{
+                                mt: 0.75,
+                                color: 'var(--color-secondary-text)',
+                                fontWeight: 700,
+                                fontSize: '0.82rem',
+                                textAlign: 'center',
+                            }}
+                        >
+                            Puedes subir un archivo de audio para este canto.
+                        </Typography>
+                    </Paper>
+
+                    <Box
+                        sx={{
+                            mt: 'auto',
+                            display: 'flex',
+                            flexDirection: {
+                                xs: 'column-reverse',
+                                sm: 'row',
+                            },
+                            justifyContent: 'center',
+                            gap: 1,
+                        }}
+                    >
                         <Button
-                            variant="secondary"
-                            onClick={() => navigate("/admin/songs")}
+                            variant="outlined"
+                            startIcon={<ArrowBackRoundedIcon />}
+                            onClick={() => navigate('/admin/songs')}
                             disabled={isSaving}
+                            sx={{
+                                borderRadius: 1.5,
+                                px: 2.5,
+                                py: 0.9,
+                                fontWeight: 950,
+                            }}
                         >
                             Cancelar
                         </Button>
-                    </div>
-                </Form>
-            </div>
-        </article>
+
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={isSaving}
+                            endIcon={
+                                isSaving ? (
+                                    <CircularProgress
+                                        size={18}
+                                        sx={{ color: 'var(--color-button-text)' }}
+                                    />
+                                ) : (
+                                    <SaveRoundedIcon />
+                                )
+                            }
+                            sx={{
+                                borderRadius: 1.5,
+                                px: 2.5,
+                                py: 0.9,
+                                fontWeight: 950,
+                            }}
+                        >
+                            {isSaving ? 'Guardando...' : 'Guardar Canto'}
+                        </Button>
+                    </Box>
+                </Box>
+            </Paper>
+        </Box>
     );
 };

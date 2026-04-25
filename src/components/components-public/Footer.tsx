@@ -43,11 +43,6 @@ export const Footer = () => {
                                 <FontAwesomeIcon icon={['fab', 'youtube']} />
                             </Link>
                         </li>
-                        <li className="nav-item">
-                            <Link className="nav-link redes" to="/contact">
-                                <FontAwesomeIcon icon={['fas', 'envelope']} />
-                            </Link>
-                        </li>
                     </ul>
                 </div>
             </div>

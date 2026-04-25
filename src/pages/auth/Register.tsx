@@ -1,16 +1,51 @@
+// src/pages/auth/Register.tsx
+
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Form, Button, Container, Image } from 'react-bootstrap';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Swal from 'sweetalert2';
+
+import {
+    Alert,
+    AppBar,
+    Avatar,
+    Box,
+    Button,
+    IconButton,
+    InputAdornment,
+    Paper,
+    TextField,
+    Toolbar,
+    Typography,
+} from '@mui/material';
+
+import AppRegistrationRoundedIcon from '@mui/icons-material/AppRegistrationRounded';
+import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
+
 import { AdminFooter } from '../../components/components-admin/AdminFooter';
 import { useAuth } from '../../context/AuthContext';
+import { MuiAppThemeProvider } from '../../theme/mui/MuiAppThemeProvider';
+
+interface RegisterFormData {
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    choirCode: string;
+}
+
+interface ApiErrorResponse {
+    message?: string;
+}
 
 export const Register = () => {
     const navigate = useNavigate();
     const { register } = useAuth();
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<RegisterFormData>({
         name: '',
         username: '',
         email: '',
@@ -19,28 +54,66 @@ export const Register = () => {
         choirCode: '',
     });
     const [errors, setErrors] = useState<string[]>([]);
+    const [profileFileName, setProfileFileName] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value, files } = e.target;
-
-        if (errors.length > 0) setErrors([]);
-
-        if (name === 'file' && files && files[0]) {
-            const selectedFile = files[0];
-            setPreviewUrl(URL.createObjectURL(selectedFile));
-        } else {
-            setFormData(prev => ({ ...prev, [name]: value }));
+    const getRegisterErrorMessage = (error: unknown): string => {
+        if (axios.isAxiosError<ApiErrorResponse>(error)) {
+            return error.response?.data?.message || 'Error al conectar con el servidor';
         }
+
+        return 'Error al conectar con el servidor';
     };
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const handleTextChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = event.target;
+
+        if (errors.length > 0) {
+            setErrors([]);
+        }
+
+        setFormData((previousValue) => ({
+            ...previousValue,
+            [name]: value,
+        }));
+    };
+
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = event.target.files?.[0];
+
+        if (!selectedFile) {
+            return;
+        }
+
+        if (errors.length > 0) {
+            setErrors([]);
+        }
+
+        setProfileFileName(selectedFile.name);
+        setPreviewUrl(URL.createObjectURL(selectedFile));
+    };
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
         const newErrors: string[] = [];
 
-        if (!formData.name.trim()) newErrors.push('El nombre es requerido.');
-        if (!formData.username.trim()) newErrors.push('El usuario es requerido.');
-        if (!formData.email.trim()) newErrors.push('El correo es requerido.');
-        if (!formData.password) newErrors.push('La contraseña es requerida.');
+        if (!formData.name.trim()) {
+            newErrors.push('El nombre es requerido.');
+        }
+
+        if (!formData.username.trim()) {
+            newErrors.push('El usuario es requerido.');
+        }
+
+        if (!formData.email.trim()) {
+            newErrors.push('El correo es requerido.');
+        }
+
+        if (!formData.password) {
+            newErrors.push('La contraseña es requerida.');
+        }
+
         if (formData.password !== formData.confirmPassword) {
             newErrors.push('Las contraseñas no coinciden.');
         }
@@ -63,178 +136,424 @@ export const Register = () => {
             Swal.fire(
                 '¡Registrado!',
                 'Usuario creado con éxito. Por favor inicia sesión.',
-                'success'
+                'success',
             );
             navigate('/auth/login');
-        } catch (error: any) {
-            const msg = error?.response?.data?.message || 'Error al conectar con el servidor';
-            Swal.fire('Error', msg, 'error');
+        } catch (error) {
+            const message = getRegisterErrorMessage(error);
+            Swal.fire('Error', message, 'error');
         }
     };
 
     useEffect(() => {
         return () => {
-            if (previewUrl) URL.revokeObjectURL(previewUrl);
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
         };
     }, [previewUrl]);
 
     return (
-        <div className='primary-color-container'>
-            <header className="layout-header primary-color-container">
-                <div className="titulo-nav px-0 col-12 d-flex flex-column">
-                    <div className="titulo mx-5 text-black d-flex flex-column flex-md-row justify-content-md-between align-items-md-center">
-                        <div className="titulo text-center text-md-start d-flex flex-column flex-md-row justify-content-between mt-3 w-100">
-                            <h2 className="mb-0">Ero Cras Oficial - Admin</h2>
-                            {/* <Link
-                                className="btn general_btn mt-3 mt-md-0 mb-md-2 fw-bold fs-6 fs-md-5"
-                                to="/"
+        <MuiAppThemeProvider>
+            <Box
+                sx={{
+                    minHeight: '100vh',
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflowX: 'hidden',
+                    background:
+                        'linear-gradient(135deg, color-mix(in srgb, var(--color-background) 94%, var(--color-primary) 6%) 0%, var(--color-background) 55%, color-mix(in srgb, var(--color-background) 92%, var(--color-accent) 8%) 100%)',
+                    color: 'var(--color-text)',
+                }}
+            >
+                <AppBar
+                    position="sticky"
+                    elevation={0}
+                    sx={{
+                        background:
+                            'linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 92%, #000 8%) 0%, var(--color-primary) 55%, var(--color-accent) 100%)',
+                        borderBottom: '1px solid color-mix(in srgb, var(--color-border) 60%, transparent)',
+                    }}
+                >
+                    <Toolbar
+                        sx={{
+                            minHeight: '72px !important',
+                            px: {
+                                xs: 1.5,
+                                sm: 2,
+                                md: 3,
+                            },
+                            gap: 1.25,
+                        }}
+                    >
+                        <Avatar
+                            src="/images/erocrasLogo.png"
+                            alt="Ero Cras Oficial"
+                            sx={{
+                                width: 44,
+                                height: 44,
+                                border: '1px solid rgba(255, 255, 255, 0.28)',
+                                bgcolor: 'rgba(255, 255, 255, 0.18)',
+                                color: 'var(--color-button-text)',
+                                fontWeight: 950,
+                            }}
+                        >
+                            EC
+                        </Avatar>
+
+                        <Box sx={{ minWidth: 0, flex: 1 }}>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 950,
+                                    lineHeight: 1.1,
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    color: 'var(--color-button-text)',
+                                }}
                             >
-                                Ir al Inicio
-                            </Link> */}
-                        </div>
-                    </div>
-                </div>
-            </header>
+                                Ero Cras Oficial - Admin
+                            </Typography>
 
-            <main className="layout-main primary-color-container mx-3">
-                <Container className="mt-2 d-flex flex-column justify-content-center col-12 col-md-6">
-                    <Image
-                        src={'/images/erocrasLogo.png'}
-                        roundedCircle
-                        height={100}
-                        width={100}
-                        alt={`Ero Cras Official`}
-                        style={{ objectFit: 'cover', border: '3px solid purple', margin: '.3rem' }}
-                        className="text-center mx-auto mb-3"
-                    />
-                    <h3>Registrar Usuario</h3>
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    display: {
+                                        xs: 'none',
+                                        sm: 'block',
+                                    },
+                                    color: 'color-mix(in srgb, var(--color-button-text) 86%, transparent)',
+                                    fontWeight: 800,
+                                }}
+                            >
+                                Registro de usuario
+                            </Typography>
+                        </Box>
+                    </Toolbar>
+                </AppBar>
 
-                    <Form className='p-4' onSubmit={handleSubmit}>
-                        <Form.Group className="mb-2" controlId="formName">
-                            <Form.Label>Nombre</Form.Label>
-                            <Form.Control
+                <Box
+                    component="main"
+                    sx={{
+                        flex: 1,
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        px: {
+                            xs: 1.5,
+                            sm: 2,
+                            md: 3,
+                        },
+                        py: {
+                            xs: 3,
+                            md: 5,
+                        },
+                    }}
+                >
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            width: '100%',
+                            maxWidth: 720,
+                            p: {
+                                xs: 2,
+                                sm: 3,
+                                md: 4,
+                            },
+                            borderRadius: 2,
+                            backgroundColor: 'color-mix(in srgb, var(--color-card) 86%, transparent)',
+                            border: '1px solid color-mix(in srgb, var(--color-border) 88%, transparent)',
+                            color: 'var(--color-text)',
+                            boxShadow: '0 18px 60px rgba(15, 23, 42, 0.12)',
+                            overflow: 'hidden',
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                textAlign: 'center',
+                                mb: 3,
+                            }}
+                        >
+                            <Avatar
+                                src={previewUrl || '/images/erocrasLogo.png'}
+                                alt="Ero Cras Oficial"
+                                sx={{
+                                    width: {
+                                        xs: 104,
+                                        md: 122,
+                                    },
+                                    height: {
+                                        xs: 104,
+                                        md: 122,
+                                    },
+                                    mb: 2,
+                                    border: '3px solid var(--color-primary)',
+                                    boxShadow: '0 14px 38px rgba(15, 23, 42, 0.18)',
+                                }}
+                            />
+
+                            <Typography
+                                component="h1"
+                                sx={{
+                                    fontSize: {
+                                        xs: '1.7rem',
+                                        md: '2rem',
+                                    },
+                                    fontWeight: 950,
+                                    lineHeight: 1.1,
+                                }}
+                            >
+                                Registrar Usuario
+                            </Typography>
+
+                            <Typography
+                                sx={{
+                                    mt: 0.75,
+                                    color: 'var(--color-secondary-text)',
+                                    fontWeight: 700,
+                                }}
+                            >
+                                Crea tu cuenta para acceder al panel del coro.
+                            </Typography>
+                        </Box>
+
+                        <Box
+                            component="form"
+                            onSubmit={handleSubmit}
+                            sx={{
+                                display: 'grid',
+                                gridTemplateColumns: {
+                                    xs: '1fr',
+                                    md: 'repeat(2, minmax(0, 1fr))',
+                                },
+                                gap: 2,
+                            }}
+                        >
+                            <TextField
                                 type="text"
                                 name="name"
+                                label="Nombre"
                                 placeholder="Nombre Completo"
                                 value={formData.name}
-                                onChange={handleChange}
+                                onChange={handleTextChange}
                                 required
+                                autoComplete="name"
                             />
-                        </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="formUsername">
-                            <Form.Label>Usuario</Form.Label>
-                            <Form.Control
+                            <TextField
                                 type="text"
                                 name="username"
+                                label="Usuario"
                                 placeholder="Usuario"
                                 value={formData.username}
-                                onChange={handleChange}
+                                onChange={handleTextChange}
                                 required
+                                autoComplete="username"
                             />
-                        </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="formEmail">
-                            <Form.Label>Correo</Form.Label>
-                            <Form.Control
+                            <TextField
                                 type="email"
                                 name="email"
+                                label="Correo"
                                 placeholder="Correo electrónico"
                                 value={formData.email}
-                                onChange={handleChange}
+                                onChange={handleTextChange}
                                 required
+                                autoComplete="email"
                             />
-                        </Form.Group>
 
-                        {/* 🆕 Código de coro opcional */}
-                        <Form.Group className="mb-3" controlId="formChoirCode">
-                            <Form.Label>Código de Coro (Opcional)</Form.Label>
-                            <Form.Control
+                            <TextField
                                 type="text"
                                 name="choirCode"
+                                label="Código de Coro (Opcional)"
                                 placeholder="Ej. eroc1"
                                 value={formData.choirCode}
-                                onChange={handleChange}
+                                onChange={handleTextChange}
+                                helperText="Déjalo vacío para registrarte en el coro principal."
                             />
-                            <Form.Text className="text-muted">
-                                Déjalo vacío para registrarte en el coro principal de Ero Cras.
-                                Usa el código sólo si te lo compartieron para otro coro.
-                            </Form.Text>
-                        </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="formPassword">
-                            <Form.Label>Contraseña</Form.Label>
-                            <Form.Control
-                                type="password"
+                            <TextField
+                                type={showPassword ? 'text' : 'password'}
                                 name="password"
+                                label="Contraseña"
                                 placeholder="Contraseña"
                                 value={formData.password}
-                                onChange={handleChange}
+                                onChange={handleTextChange}
                                 required
+                                autoComplete="new-password"
+                                slotProps={{
+                                    input: {
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    aria-label={
+                                                        showPassword
+                                                            ? 'Ocultar contraseña'
+                                                            : 'Mostrar contraseña'
+                                                    }
+                                                    onClick={() => setShowPassword((currentValue) => !currentValue)}
+                                                    edge="end"
+                                                >
+                                                    {showPassword ? (
+                                                        <VisibilityOffRoundedIcon />
+                                                    ) : (
+                                                        <VisibilityRoundedIcon />
+                                                    )}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    },
+                                }}
                             />
-                        </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="formConfirmPassword">
-                            <Form.Label>Repetir Contraseña</Form.Label>
-                            <Form.Control
-                                type="password"
+                            <TextField
+                                type={showConfirmPassword ? 'text' : 'password'}
                                 name="confirmPassword"
+                                label="Repetir Contraseña"
                                 placeholder="Repetir Contraseña"
                                 value={formData.confirmPassword}
-                                onChange={handleChange}
+                                onChange={handleTextChange}
                                 required
+                                autoComplete="new-password"
+                                slotProps={{
+                                    input: {
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    aria-label={
+                                                        showConfirmPassword
+                                                            ? 'Ocultar confirmación de contraseña'
+                                                            : 'Mostrar confirmación de contraseña'
+                                                    }
+                                                    onClick={() =>
+                                                        setShowConfirmPassword((currentValue) => !currentValue)
+                                                    }
+                                                    edge="end"
+                                                >
+                                                    {showConfirmPassword ? (
+                                                        <VisibilityOffRoundedIcon />
+                                                    ) : (
+                                                        <VisibilityRoundedIcon />
+                                                    )}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    },
+                                }}
                             />
-                        </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="formFile">
-                            <Form.Label>Foto de perfil (Opcional)</Form.Label>
-                            <Form.Control
-                                type="file"
-                                name="file"
-                                accept="image/*"
-                                onChange={handleChange}
-                            />
-                        </Form.Group>
+                            <Box
+                                sx={{
+                                    gridColumn: '1 / -1',
+                                }}
+                            >
+                                <Button
+                                    variant="outlined"
+                                    component="label"
+                                    fullWidth
+                                    sx={{
+                                        py: 1.15,
+                                        borderRadius: 1.5,
+                                        justifyContent: 'center',
+                                        fontWeight: 950,
+                                    }}
+                                >
+                                    {profileFileName || 'Seleccionar foto de perfil (Opcional)'}
+                                    <input
+                                        hidden
+                                        type="file"
+                                        name="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                    />
+                                </Button>
 
-                        {previewUrl && (
-                            <div className="text-center mb-3">
-                                <Image
-                                    src={previewUrl}
-                                    roundedCircle
-                                    width={100}
-                                    height={100}
-                                    style={{ objectFit: 'cover' }}
-                                />
-                            </div>
-                        )}
+                                <Typography
+                                    sx={{
+                                        mt: 0.75,
+                                        color: 'var(--color-secondary-text)',
+                                        fontSize: '0.82rem',
+                                        fontWeight: 700,
+                                        textAlign: 'center',
+                                    }}
+                                >
+                                    La imagen se usa como vista previa local.
+                                </Typography>
+                            </Box>
 
-                        {errors.length > 0 && (
-                            <div className="alert alert-danger">
-                                <ul className="mb-0">
-                                    {errors.map((error, i) => (
-                                        <li key={i}>{error}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
+                            {errors.length > 0 && (
+                                <Alert
+                                    severity="error"
+                                    sx={{
+                                        gridColumn: '1 / -1',
+                                        borderRadius: 1.5,
+                                        fontWeight: 700,
+                                    }}
+                                >
+                                    <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
+                                        {errors.map((errorItem) => (
+                                            <li key={errorItem}>{errorItem}</li>
+                                        ))}
+                                    </Box>
+                                </Alert>
+                            )}
 
-                        <div className="text-center mb-2">
-                            <Button type="submit" className="general_btn">
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                endIcon={<AppRegistrationRoundedIcon />}
+                                sx={{
+                                    gridColumn: '1 / -1',
+                                    justifySelf: {
+                                        xs: 'stretch',
+                                        sm: 'center',
+                                    },
+                                    minWidth: {
+                                        sm: 220,
+                                    },
+                                    py: 1.15,
+                                    borderRadius: 1.5,
+                                    fontWeight: 950,
+                                }}
+                            >
                                 Registrar
                             </Button>
-                        </div>
+                        </Box>
 
-                        <p className="d-flex flex-column text-center mb-0">
-                            ¿Ya tienes cuenta?
-                            <Link className="derecha" to="/auth/login">
+                        <Typography
+                            sx={{
+                                mt: 3,
+                                textAlign: 'center',
+                                color: 'var(--color-secondary-text)',
+                                fontWeight: 700,
+                            }}
+                        >
+                            ¿Ya tienes cuenta?{' '}
+                            <Box
+                                component={RouterLink}
+                                to="/auth/login"
+                                sx={{
+                                    color: 'var(--color-primary)',
+                                    fontWeight: 950,
+                                    '&:hover': {
+                                        color: 'var(--color-accent)',
+                                    },
+                                }}
+                            >
                                 Iniciar Sesión
-                            </Link>
-                        </p>
-                    </Form>
-                </Container>
-            </main>
+                            </Box>
+                        </Typography>
+                    </Paper>
+                </Box>
 
-            <AdminFooter />
-        </div>
+                <AdminFooter />
+            </Box>
+        </MuiAppThemeProvider>
     );
 };

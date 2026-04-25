@@ -1,17 +1,44 @@
+// src/components/announcements/AdminEditAnnouncement.tsx
+
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Button, Spinner } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import type { JSONContent } from '@tiptap/react';
 
+import {
+    Alert,
+    Avatar,
+    Box,
+    Button,
+    CircularProgress,
+    FormControlLabel,
+    Paper,
+    Switch,
+    TextField,
+    Typography,
+} from '@mui/material';
+
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import CampaignRoundedIcon from '@mui/icons-material/CampaignRounded';
+import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
+import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
+
 import { useAnnouncementStore } from '../../store/admin/useAnnouncementStore';
 import type { CreateAnnouncementPayload } from '../../types/annoucement';
-
 import { emptyEditorContent } from '../../utils/editorDefaults';
 import { parseText } from '../../utils/handleTextTipTap';
 import { TiptapEditor } from '../tiptap-components/TiptapEditor';
 
-type InputEvent = ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
+type AnnouncementContent = CreateAnnouncementPayload['content'];
+
+const buildAnnouncementContentPayload = (editorContent: JSONContent): AnnouncementContent => {
+    const parsedContent = parseText(editorContent);
+
+    return {
+        type: parsedContent.type ?? 'doc',
+        content: parsedContent.content ?? [],
+    };
+};
 
 export const AdminEditAnnouncement = () => {
     const navigate = useNavigate();
@@ -23,7 +50,7 @@ export const AdminEditAnnouncement = () => {
         title: '',
         content: emptyEditorContent,
         isPublic: true,
-        file: undefined
+        file: undefined,
     };
 
     const [formData, setFormData] = useState<CreateAnnouncementPayload>(defaultFormData);
@@ -31,160 +58,514 @@ export const AdminEditAnnouncement = () => {
     const [errors, setErrors] = useState<string[]>([]);
     const [initialLoading, setInitialLoading] = useState(true);
 
-    const handleContentChange = (newContent: JSONContent) => {
-        setFormData(prev => ({ ...prev, content: newContent as any }));
-    };
-
-    const handleChange = (e: InputEvent) => {
-        const target = e.target as HTMLInputElement;
-        const { name, value, type, files, checked } = target;
-
-        setFormData(prev => {
-            if (name === 'file' && files && files[0]) {
-                const file = files[0];
-                setPreviewUrl(URL.createObjectURL(file));
-                return { ...prev, file: file };
-            }
-            if (type === 'checkbox') {
-                return { ...prev, [name]: checked };
-            }
-            return { ...prev, [name]: value };
-        });
-    };
-
     useEffect(() => {
         const loadData = async () => {
-            if (id) {
+            if (!id) {
+                setInitialLoading(false);
+                return;
+            }
+
+            try {
                 const announcement = await getAnnouncement(id);
+
                 if (announcement) {
                     setFormData({
                         title: announcement.title,
-                        content: (parseText(announcement.content) as any) || emptyEditorContent,
+                        content: buildAnnouncementContentPayload(parseText(announcement.content)),
                         isPublic: announcement.isPublic,
-                        file: undefined
+                        file: undefined,
                     });
-                    if (announcement.imageUrl) {
-                        setPreviewUrl(announcement.imageUrl);
-                    }
-                }
-            }
-            setInitialLoading(false);
-        };
-        loadData();
-    }, [id]);
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+                    setPreviewUrl(announcement.imageUrl || null);
+                }
+            } catch {
+                Swal.fire('Error', 'No se pudo cargar el aviso', 'error');
+            } finally {
+                setInitialLoading(false);
+            }
+        };
+
+        void loadData();
+    }, [id, getAnnouncement]);
+
+    useEffect(() => {
+        return () => {
+            if (previewUrl?.startsWith('blob:')) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
+
+    const handleTextChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = event.target;
+
+        setFormData((previousValue) => ({
+            ...previousValue,
+            [name]: value,
+        }));
+    };
+
+    const handlePublicChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setFormData((previousValue) => ({
+            ...previousValue,
+            isPublic: event.target.checked,
+        }));
+    };
+
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = event.target.files?.[0];
+
+        if (!selectedFile) {
+            return;
+        }
+
+        if (previewUrl?.startsWith('blob:')) {
+            URL.revokeObjectURL(previewUrl);
+        }
+
+        setPreviewUrl(URL.createObjectURL(selectedFile));
+
+        setFormData((previousValue) => ({
+            ...previousValue,
+            file: selectedFile,
+        }));
+    };
+
+    const handleContentChange = (newContent: JSONContent) => {
+        setFormData((previousValue) => ({
+            ...previousValue,
+            content: buildAnnouncementContentPayload(newContent),
+        }));
+    };
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
 
         const newErrors: string[] = [];
-        if (!formData.title.trim()) newErrors.push('El título es requerido.');
+
+        if (!formData.title.trim()) {
+            newErrors.push('El título es requerido.');
+        }
 
         if (newErrors.length > 0) {
             setErrors(newErrors);
             return;
         }
 
+        if (!id) {
+            return;
+        }
+
         try {
-            if (id) {
-                await editAnnouncement(id, formData);
-                Swal.fire('Actualizado', '✅ El aviso fue actualizado exitosamente.', 'success');
-                navigate('/admin/announcements');
-            }
-        } catch (error) {
+            await editAnnouncement(id, formData);
+
+            Swal.fire('Actualizado', '✅ El aviso fue actualizado exitosamente.', 'success');
+            navigate('/admin/announcements');
+        } catch {
             Swal.fire('Error', 'No se pudo actualizar el aviso', 'error');
         }
     };
 
-    useEffect(() => {
-        return () => {
-            if (previewUrl) URL.revokeObjectURL(previewUrl);
-        };
-    }, [previewUrl]);
-
-    if (initialLoading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
+    if (initialLoading) {
+        return (
+            <Box
+                sx={{
+                    minHeight: 360,
+                    display: 'grid',
+                    placeItems: 'center',
+                    color: 'var(--color-text)',
+                }}
+            >
+                <Box sx={{ textAlign: 'center' }}>
+                    <CircularProgress />
+                    <Typography sx={{ mt: 2, fontWeight: 800 }}>
+                        Cargando aviso...
+                    </Typography>
+                </Box>
+            </Box>
+        );
+    }
 
     return (
-        <article className="m-3 col-md-8 mx-auto">
-            <div className="form-canto">
-                <h3>Editar Aviso</h3>
+        <Box
+            component="section"
+            sx={{
+                width: '100%',
+                minHeight: 0,
+                height: '100%',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                overflow: 'hidden',
+            }}
+        >
+            <Paper
+                elevation={0}
+                sx={{
+                    flexShrink: 0,
+                    p: {
+                        xs: 1.5,
+                        md: 2,
+                    },
+                    borderRadius: 2,
+                    background:
+                        'linear-gradient(145deg, color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%) 0%, color-mix(in srgb, var(--color-card) 78%, transparent) 100%)',
+                    border: '1px solid color-mix(in srgb, var(--color-border) 38%, transparent)',
+                    boxShadow:
+                        'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 14%, transparent), 0 12px 38px rgba(15, 23, 42, 0.06)',
+                    color: 'var(--color-text)',
+                    overflow: 'hidden',
+                }}
+            >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: {
+                            xs: 'column',
+                            sm: 'row',
+                        },
+                        alignItems: {
+                            xs: 'stretch',
+                            sm: 'center',
+                        },
+                        justifyContent: 'space-between',
+                        gap: 1.5,
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: {
+                                xs: 'center',
+                                sm: 'flex-start',
+                            },
+                            gap: 1.25,
+                            textAlign: {
+                                xs: 'center',
+                                sm: 'left',
+                            },
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                width: 44,
+                                height: 44,
+                                display: 'grid',
+                                placeItems: 'center',
+                                borderRadius: 1.5,
+                                color: 'var(--color-button-text)',
+                                background:
+                                    'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)',
+                                boxShadow:
+                                    '0 10px 24px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.24)',
+                                flexShrink: 0,
+                            }}
+                        >
+                            <CampaignRoundedIcon />
+                        </Box>
 
-                <Form onSubmit={handleSubmit} encType="multipart/form-data">
-                    <Form.Group className="mb-3" controlId="formTitle">
-                        <Form.Label>Título</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="title"
-                            placeholder="Título del aviso"
-                            value={formData.title}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Form.Group>
+                        <Box sx={{ minWidth: 0 }}>
+                            <Typography
+                                component="h1"
+                                sx={{
+                                    m: 0,
+                                    fontSize: {
+                                        xs: '1.55rem',
+                                        md: '2rem',
+                                    },
+                                    fontWeight: 950,
+                                    lineHeight: 1.1,
+                                }}
+                            >
+                                Editar Aviso
+                            </Typography>
 
-                    <Form.Group className="mb-3">
-                        <Form.Label>Descripción</Form.Label>
-                        <TiptapEditor
-                            content={parseText(formData.content)}
-                            onChange={handleContentChange}
-                        />
-                    </Form.Group>
+                            <Typography
+                                sx={{
+                                    mt: 0.4,
+                                    color: 'var(--color-secondary-text)',
+                                    fontWeight: 800,
+                                    fontSize: '0.9rem',
+                                }}
+                            >
+                                Actualiza título, contenido, imagen y visibilidad del aviso.
+                            </Typography>
+                        </Box>
+                    </Box>
 
-                    <Form.Group className="mb-3" controlId="formPublic">
-                        <Form.Check
-                            type="checkbox"
-                            name="isPublic"
-                            label="¿Publicado?"
-                            checked={formData.isPublic}
-                            onChange={handleChange}
-                        />
-                    </Form.Group>
+                    <Button
+                        variant="outlined"
+                        startIcon={<ArrowBackRoundedIcon />}
+                        onClick={() => navigate('/admin/announcements')}
+                        disabled={loading}
+                        sx={{
+                            borderRadius: 1.5,
+                            px: 2,
+                            py: 0.9,
+                            fontWeight: 950,
+                        }}
+                    >
+                        Volver
+                    </Button>
+                </Box>
+            </Paper>
 
-                    <Form.Group className="mb-3" controlId="formFile">
-                        <Form.Label>Imagen del aviso</Form.Label>
-                        <Form.Control
-                            type="file"
-                            name="file"
-                            accept="image/*"
-                            onChange={handleChange}
-                        />
-                    </Form.Group>
-
-                    {previewUrl && (
-                        <div className="text-center mb-4">
-                            <p className="fw-bold mb-2">Vista previa:</p>
-                            <img
-                                src={previewUrl}
-                                alt="Vista previa"
-                                className="img-fluid rounded"
-                                style={{ maxHeight: '150px' }}
+            <Paper
+                elevation={0}
+                sx={{
+                    flex: 1,
+                    minHeight: 0,
+                    p: {
+                        xs: 1,
+                        sm: 1.25,
+                        md: 2,
+                    },
+                    borderRadius: 2,
+                    background:
+                        'linear-gradient(145deg, color-mix(in srgb, var(--color-card) 86%, var(--color-primary) 14%) 0%, color-mix(in srgb, var(--color-card) 76%, transparent) 100%)',
+                    border: '1px solid color-mix(in srgb, var(--color-border) 38%, transparent)',
+                    boxShadow:
+                        'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 14%, transparent), 0 12px 42px rgba(15, 23, 42, 0.06)',
+                    color: 'var(--color-text)',
+                    overflow: 'hidden',
+                }}
+            >
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    encType="multipart/form-data"
+                    sx={{
+                        height: '100%',
+                        minHeight: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: {
+                            xs: 1.5,
+                            md: 2,
+                        },
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
+                        '&::-webkit-scrollbar': {
+                            display: 'none',
+                        },
+                        p: '0 !important',
+                        m: '0 !important',
+                        backgroundColor: 'transparent !important',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: {
+                                xs: '1fr',
+                                lg: 'minmax(0, 1fr) 280px',
+                            },
+                            gap: {
+                                xs: 2,
+                                lg: 3,
+                            },
+                            alignItems: 'start',
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 1.5,
+                            }}
+                        >
+                            <TextField
+                                type="text"
+                                name="title"
+                                label="Título"
+                                placeholder="Título del aviso"
+                                value={formData.title}
+                                onChange={handleTextChange}
+                                disabled={loading}
+                                required
                             />
-                        </div>
-                    )}
 
-                    {errors.length > 0 && (
-                        <div className="alert alert-danger">
-                            <ul className="mb-0">
-                                {errors.map((error, i) => (
-                                    <li key={i}>{error}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                            <Box>
+                                <Typography sx={{ mb: 1, fontWeight: 950 }}>
+                                    Descripción
+                                </Typography>
 
-                    <div className="text-center">
-                        <Button type="submit" className="general_btn" disabled={loading}>
-                            {loading ? <Spinner animation="border" size="sm" /> : 'Guardar cambios'}
-                        </Button>
+                                <TiptapEditor
+                                    content={parseText(formData.content)}
+                                    onChange={handleContentChange}
+                                />
+                            </Box>
+
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    p: 1.5,
+                                    borderRadius: 1.5,
+                                    backgroundColor:
+                                        'color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%)',
+                                    border:
+                                        '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                                    boxShadow: 'inset 0 1px 16px rgba(15, 23, 42, 0.035)',
+                                }}
+                            >
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={formData.isPublic}
+                                            onChange={handlePublicChange}
+                                            name="isPublic"
+                                            disabled={loading}
+                                        />
+                                    }
+                                    label={
+                                        <Box>
+                                            <Typography sx={{ fontWeight: 950 }}>
+                                                ¿Publicado?
+                                            </Typography>
+
+                                            <Typography
+                                                sx={{
+                                                    color: 'var(--color-secondary-text)',
+                                                    fontWeight: 700,
+                                                    fontSize: '0.85rem',
+                                                }}
+                                            >
+                                                Si está activo, el aviso podrá mostrarse en el sidebar.
+                                            </Typography>
+                                        </Box>
+                                    }
+                                    sx={{
+                                        m: 0,
+                                        alignItems: 'center',
+                                        gap: 1,
+                                    }}
+                                />
+                            </Paper>
+
+                            {errors.length > 0 && (
+                                <Alert severity="error" sx={{ borderRadius: 1.5, fontWeight: 700 }}>
+                                    <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
+                                        {errors.map((errorItem) => (
+                                            <li key={errorItem}>{errorItem}</li>
+                                        ))}
+                                    </Box>
+                                </Alert>
+                            )}
+                        </Box>
+
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 1.5,
+                                borderRadius: 2,
+                                backgroundColor:
+                                    'color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%)',
+                                border:
+                                    '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                                boxShadow:
+                                    'inset 0 1px 0 color-mix(in srgb, var(--color-button-text) 12%, transparent), 0 10px 28px rgba(15, 23, 42, 0.05)',
+                                alignSelf: 'start',
+                                textAlign: 'center',
+                            }}
+                        >
+                            <Typography sx={{ mb: 1, fontWeight: 950 }}>
+                                Imagen del aviso
+                            </Typography>
+
+                            <Avatar
+                                src={previewUrl || undefined}
+                                alt="Vista previa"
+                                variant="rounded"
+                                sx={{
+                                    width: 170,
+                                    height: 170,
+                                    mx: 'auto',
+                                    mb: 1.5,
+                                    borderRadius: 2,
+                                    bgcolor: 'var(--color-primary)',
+                                    color: 'var(--color-button-text)',
+                                    fontSize: '2.5rem',
+                                    fontWeight: 950,
+                                    border: '3px solid color-mix(in srgb, var(--color-border) 60%, transparent)',
+                                }}
+                            >
+                                A
+                            </Avatar>
+
+                            <Button
+                                variant="outlined"
+                                component="label"
+                                startIcon={<CloudUploadRoundedIcon />}
+                                disabled={loading}
+                                sx={{
+                                    width: '100%',
+                                    borderRadius: 1.5,
+                                    py: 0.9,
+                                    fontWeight: 950,
+                                }}
+                            >
+                                Cambiar imagen
+                                <input hidden type="file" name="file" accept="image/*" onChange={handleFileChange} />
+                            </Button>
+                        </Paper>
+                    </Box>
+
+                    <Box
+                        sx={{
+                            mt: 'auto',
+                            flexShrink: 0,
+                            display: 'flex',
+                            flexDirection: {
+                                xs: 'column-reverse',
+                                sm: 'row',
+                            },
+                            justifyContent: 'flex-end',
+                            gap: 1,
+                            pt: 1,
+                        }}
+                    >
                         <Button
-                            className="ms-2"
-                            variant="secondary"
+                            variant="outlined"
+                            startIcon={<ArrowBackRoundedIcon />}
                             onClick={() => navigate('/admin/announcements')}
+                            disabled={loading}
+                            sx={{
+                                borderRadius: 1.5,
+                                px: 2.5,
+                                py: 0.9,
+                                fontWeight: 950,
+                            }}
                         >
                             Cancelar
                         </Button>
-                    </div>
-                </Form>
-            </div>
-        </article>
+
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={loading}
+                            endIcon={
+                                loading ? (
+                                    <CircularProgress size={18} sx={{ color: 'var(--color-button-text)' }} />
+                                ) : (
+                                    <SaveRoundedIcon />
+                                )
+                            }
+                            sx={{
+                                borderRadius: 1.5,
+                                px: 2.5,
+                                py: 0.9,
+                                fontWeight: 950,
+                            }}
+                        >
+                            {loading ? 'Guardando...' : 'Guardar cambios'}
+                        </Button>
+                    </Box>
+                </Box>
+            </Paper>
+        </Box>
     );
 };
