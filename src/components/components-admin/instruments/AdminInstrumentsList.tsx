@@ -93,8 +93,14 @@ const SectionHeader = ({ title, subtitle, icon, action }: SectionHeaderProps) =>
                 >
                     <Box
                         sx={{
-                            width: 44,
-                            height: 44,
+                            width: {
+                                xs: 40,
+                                md: 50,
+                            },
+                            height: {
+                                xs: 40,
+                                md: 50,
+                            },
                             display: 'grid',
                             placeItems: 'center',
                             borderRadius: 1.5,
@@ -115,7 +121,7 @@ const SectionHeader = ({ title, subtitle, icon, action }: SectionHeaderProps) =>
                             sx={{
                                 m: 0,
                                 fontSize: {
-                                    xs: '1.55rem',
+                                    xs: '1.3rem',
                                     md: '2rem',
                                 },
                                 fontWeight: 950,
@@ -130,7 +136,10 @@ const SectionHeader = ({ title, subtitle, icon, action }: SectionHeaderProps) =>
                                 mt: 0.4,
                                 color: 'var(--color-secondary-text)',
                                 fontWeight: 800,
-                                fontSize: '0.9rem',
+                                fontSize: {
+                                    xs: '0.8rem',
+                                    md: '1rem',
+                                },
                             }}
                         >
                             {subtitle}

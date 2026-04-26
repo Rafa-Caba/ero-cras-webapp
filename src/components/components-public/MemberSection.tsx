@@ -52,7 +52,7 @@ const MemberSection = () => {
                 sx={{
                     width: '100%',
                     p: {
-                        xs: 1.5,
+                        xs: 1,
                         sm: 2,
                         md: 3,
                     },
@@ -71,12 +71,12 @@ const MemberSection = () => {
                     component="h1"
                     sx={{
                         mb: {
-                            xs: 2,
+                            xs: 1.5,
                             md: 3,
                         },
                         textAlign: 'center',
                         fontSize: {
-                            xs: '1.7rem',
+                            xs: '1.45rem',
                             md: '2rem',
                         },
                         fontWeight: 950,
@@ -92,16 +92,17 @@ const MemberSection = () => {
                             width: '100%',
                             display: 'grid',
                             gridTemplateColumns: {
-                                xs: '1fr',
+                                xs: 'repeat(2, minmax(0, 1fr))',
                                 sm: 'repeat(2, minmax(0, 1fr))',
                                 md: 'repeat(3, minmax(0, 1fr))',
                                 lg: 'repeat(4, minmax(0, 1fr))',
                             },
                             gap: {
-                                xs: 2,
+                                xs: 1,
+                                sm: 2,
                                 md: 2.5,
                             },
-                            justifyItems: 'center',
+                            justifyItems: 'stretch',
                         }}
                     >
                         {members.map((member) => {
@@ -121,13 +122,19 @@ const MemberSection = () => {
                                     elevation={0}
                                     sx={{
                                         width: '100%',
-                                        maxWidth: 280,
                                         height: '100%',
-                                        p: 2,
-                                        borderRadius: 2,
+                                        p: {
+                                            xs: 1,
+                                            sm: 1.5,
+                                            md: 2,
+                                        },
+                                        borderRadius: {
+                                            xs: 1.5,
+                                            md: 2,
+                                        },
                                         backgroundColor:
                                             'color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%)',
-                                        border: '1px solid var(--color-border)',
+                                        // border: '1px solid var(--color-border)',
                                         color: 'var(--color-text)',
                                         boxShadow: '0 12px 32px rgba(15, 23, 42, 0.08)',
                                         transition: 'transform 0.18s ease, box-shadow 0.18s ease',
@@ -143,7 +150,11 @@ const MemberSection = () => {
                                             flexDirection: 'column',
                                             alignItems: 'center',
                                             textAlign: 'center',
-                                            gap: 1.25,
+                                            gap: {
+                                                xs: 0.85,
+                                                md: 1.25,
+                                            },
+                                            minWidth: 0,
                                         }}
                                     >
                                         <Avatar
@@ -151,11 +162,13 @@ const MemberSection = () => {
                                             alt={member.name}
                                             sx={{
                                                 width: {
-                                                    xs: 116,
+                                                    xs: 90,
+                                                    sm: 116,
                                                     md: 160,
                                                 },
                                                 height: {
-                                                    xs: 116,
+                                                    xs: 90,
+                                                    sm: 116,
                                                     md: 160,
                                                 },
                                                 border: '3px solid color-mix(in srgb, var(--color-primary) 72%, white)',
@@ -163,13 +176,18 @@ const MemberSection = () => {
                                             }}
                                         />
 
-                                        <Box>
+                                        <Box sx={{ width: '100%', minWidth: 0 }}>
                                             <Typography
                                                 component="h2"
                                                 sx={{
-                                                    fontSize: '1.15rem',
+                                                    fontSize: {
+                                                        xs: '0.86rem',
+                                                        sm: '1.05rem',
+                                                        md: '1.15rem',
+                                                    },
                                                     fontWeight: 950,
                                                     lineHeight: 1.15,
+                                                    overflowWrap: 'anywhere',
                                                 }}
                                             >
                                                 {member.name}
@@ -177,10 +195,18 @@ const MemberSection = () => {
 
                                             <Typography
                                                 sx={{
-                                                    mt: 0.75,
-                                                    fontSize: '0.95rem',
+                                                    mt: {
+                                                        xs: 0.1,
+                                                        md: 0.75,
+                                                    },
+                                                    fontSize: {
+                                                        xs: '0.76rem',
+                                                        sm: '0.86rem',
+                                                        md: '0.95rem',
+                                                    },
                                                     fontWeight: 800,
                                                     color: 'var(--color-secondary-text)',
+                                                    overflowWrap: 'anywhere',
                                                 }}
                                             >
                                                 {instrumentText}
@@ -189,8 +215,11 @@ const MemberSection = () => {
                                             {member.voice && (
                                                 <Typography
                                                     sx={{
-                                                        mt: 0.35,
-                                                        fontSize: '0.9rem',
+                                                        mt: 0.1,
+                                                        fontSize: {
+                                                            xs: '0.76rem',
+                                                            md: '0.9rem',
+                                                        },
                                                         fontWeight: 800,
                                                         color: 'var(--color-primary)',
                                                     }}

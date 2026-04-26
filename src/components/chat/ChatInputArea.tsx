@@ -36,6 +36,47 @@ export const ChatInputArea = ({
     editorRef,
     loading = false,
 }: Props) => {
+    const actionButtons = (
+        <>
+            <IconButton
+                aria-label="Adjuntar archivo"
+                onClick={onAttachClick}
+                disabled={loading}
+                sx={{
+                    width: 40,
+                    height: 40,
+                    color: 'var(--color-button-text)',
+                    backgroundColor: 'var(--color-secondary)',
+                    '&:hover': {
+                        backgroundColor:
+                            'color-mix(in srgb, var(--color-secondary) 85%, #000 15%)',
+                    },
+                }}
+            >
+                <AttachFileRoundedIcon />
+            </IconButton>
+
+            <Button
+                variant="contained"
+                endIcon={<SendRoundedIcon />}
+                onClick={onSend}
+                disabled={loading}
+                sx={{
+                    minHeight: 40,
+                    borderRadius: 1.5,
+                    px: {
+                        xs: 1.5,
+                        md: 2.5,
+                    },
+                    fontWeight: 950,
+                    whiteSpace: 'nowrap',
+                }}
+            >
+                {loading ? 'Enviando...' : 'Enviar'}
+            </Button>
+        </>
+    );
+
     return (
         <Paper
             elevation={0}
@@ -55,6 +96,14 @@ export const ChatInputArea = ({
                 overflow: 'visible',
             }}
         >
+            <input
+                hidden
+                type="file"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.zip,.rar,.mp3,.wav,.mp4,.mov,.webm"
+                ref={fileInputRef}
+                onChange={onFileSelect}
+            />
+
             <Box
                 sx={{
                     width: '100%',
@@ -70,55 +119,23 @@ export const ChatInputArea = ({
                     ref={editorRef}
                     content={messageContent}
                     onChange={setMessageContent}
+                    mobileActions={actionButtons}
                 />
             </Box>
 
             <Box
                 sx={{
-                    display: 'flex',
+                    display: {
+                        xs: 'none',
+                        md: 'flex',
+                    },
                     justifyContent: 'flex-end',
                     alignItems: 'center',
                     gap: 1,
                     flexWrap: 'wrap',
                 }}
             >
-                <IconButton
-                    aria-label="Adjuntar archivo"
-                    onClick={onAttachClick}
-                    disabled={loading}
-                    sx={{
-                        color: 'var(--color-button-text)',
-                        backgroundColor: 'var(--color-secondary)',
-                        '&:hover': {
-                            backgroundColor:
-                                'color-mix(in srgb, var(--color-secondary) 85%, #000 15%)',
-                        },
-                    }}
-                >
-                    <AttachFileRoundedIcon />
-                </IconButton>
-
-                <input
-                    hidden
-                    type="file"
-                    accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.zip,.rar,.mp3,.wav,.mp4,.mov,.webm"
-                    ref={fileInputRef}
-                    onChange={onFileSelect}
-                />
-
-                <Button
-                    variant="contained"
-                    endIcon={<SendRoundedIcon />}
-                    onClick={onSend}
-                    disabled={loading}
-                    sx={{
-                        borderRadius: 1.5,
-                        px: 2.5,
-                        fontWeight: 950,
-                    }}
-                >
-                    {loading ? 'Enviando...' : 'Enviar'}
-                </Button>
+                {actionButtons}
             </Box>
         </Paper>
     );

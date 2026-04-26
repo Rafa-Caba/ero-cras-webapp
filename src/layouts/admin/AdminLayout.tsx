@@ -8,8 +8,8 @@ import {
     AppBar,
     Avatar,
     Box,
-    BottomNavigation,
-    BottomNavigationAction,
+    // BottomNavigation, // Reactivar si quieres volver a usar bottom nav móvil
+    // BottomNavigationAction, // Reactivar si quieres volver a usar bottom nav móvil
     Chip,
     CircularProgress,
     Drawer,
@@ -68,7 +68,7 @@ const collapsedDrawerWidth = 86;
 const rightRailWidth = 300;
 const headerHeight = 76;
 const footerHeight = 58;
-const bottomNavHeight = 74;
+// const bottomNavHeight = 74; // Reactivar si quieres volver a usar bottom nav móvil
 
 const AdminLayout = () => {
     const navigate = useNavigate();
@@ -210,7 +210,12 @@ const AdminLayout = () => {
     }, [canEdit, choirCode, isAdmin, isSuperAdmin]);
 
     const visibleNavigationItems = navigationItems.filter((item) => item.visible);
-    const bottomNavigationItems = visibleNavigationItems.filter((item) => item.showInBottomNav);
+
+    /*
+        Reactivar si quieres volver a usar bottom nav móvil.
+
+        const bottomNavigationItems = visibleNavigationItems.filter((item) => item.showInBottomNav);
+    */
 
     const isActive = (path: string) => {
         if (path === '/admin') {
@@ -220,7 +225,11 @@ const AdminLayout = () => {
         return location.pathname === path || location.pathname.startsWith(`${path}/`);
     };
 
-    const bottomNavigationValue = bottomNavigationItems.find((item) => isActive(item.path))?.path || '/admin';
+    /*
+        Reactivar si quieres volver a usar bottom nav móvil.
+
+        const bottomNavigationValue = bottomNavigationItems.find((item) => isActive(item.path))?.path || '/admin';
+    */
 
     const handleNavigate = (path: string) => {
         navigate(path);
@@ -706,7 +715,7 @@ const AdminLayout = () => {
                             xl: 2,
                         },
                         pb: {
-                            xs: `${bottomNavHeight + 24}px`,
+                            xs: 2,
                             xl: 2,
                         },
                         transition: (theme: Theme) =>
@@ -778,54 +787,58 @@ const AdminLayout = () => {
                     </Box>
                 </Box>
 
-                {!isDesktop && (
-                    <Paper
-                        elevation={10}
-                        sx={{
-                            position: 'fixed',
-                            left: 12,
-                            right: 12,
-                            bottom: 12,
-                            zIndex: (theme: Theme) => theme.zIndex.appBar + 1,
-                            borderRadius: 2,
-                            overflow: 'hidden',
-                            backgroundColor: 'var(--color-card)',
-                            border: '1px solid var(--color-border)',
-                            boxShadow: '0 14px 40px rgba(15, 23, 42, 0.22)',
-                        }}
-                    >
-                        <BottomNavigation
-                            value={bottomNavigationValue}
-                            onChange={(_event, newValue: string) => handleNavigate(newValue)}
-                            showLabels
+                {/*
+                    Reactivar si quieres volver a usar bottom nav móvil.
+
+                    {!isDesktop && (
+                        <Paper
+                            elevation={10}
                             sx={{
-                                height: bottomNavHeight,
+                                position: 'fixed',
+                                left: 12,
+                                right: 12,
+                                bottom: 12,
+                                zIndex: (theme: Theme) => theme.zIndex.appBar + 1,
+                                borderRadius: 2,
+                                overflow: 'hidden',
                                 backgroundColor: 'var(--color-card)',
-                                '& .MuiBottomNavigationAction-root': {
-                                    color: 'var(--color-secondary-text)',
-                                    minWidth: 0,
-                                    px: 0.5,
-                                },
-                                '& .Mui-selected': {
-                                    color: 'var(--color-primary)',
-                                },
-                                '& .MuiBottomNavigationAction-label': {
-                                    fontSize: '0.72rem',
-                                    fontWeight: 800,
-                                },
+                                border: '1px solid var(--color-border)',
+                                boxShadow: '0 14px 40px rgba(15, 23, 42, 0.22)',
                             }}
                         >
-                            {bottomNavigationItems.map((item) => (
-                                <BottomNavigationAction
-                                    key={item.path}
-                                    label={item.label}
-                                    value={item.path}
-                                    icon={item.icon}
-                                />
-                            ))}
-                        </BottomNavigation>
-                    </Paper>
-                )}
+                            <BottomNavigation
+                                value={bottomNavigationValue}
+                                onChange={(_event, newValue: string) => handleNavigate(newValue)}
+                                showLabels
+                                sx={{
+                                    height: bottomNavHeight,
+                                    backgroundColor: 'var(--color-card)',
+                                    '& .MuiBottomNavigationAction-root': {
+                                        color: 'var(--color-secondary-text)',
+                                        minWidth: 0,
+                                        px: 0.5,
+                                    },
+                                    '& .Mui-selected': {
+                                        color: 'var(--color-primary)',
+                                    },
+                                    '& .MuiBottomNavigationAction-label': {
+                                        fontSize: '0.72rem',
+                                        fontWeight: 800,
+                                    },
+                                }}
+                            >
+                                {bottomNavigationItems.map((item) => (
+                                    <BottomNavigationAction
+                                        key={item.path}
+                                        label={item.label}
+                                        value={item.path}
+                                        icon={item.icon}
+                                    />
+                                ))}
+                            </BottomNavigation>
+                        </Paper>
+                    )}
+                */}
 
                 <Box
                     component="footer"

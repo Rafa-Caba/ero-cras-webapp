@@ -602,8 +602,7 @@ export const AdminInstrumentForm = () => {
                                     borderRadius: 2,
                                     border:
                                         '2px dashed color-mix(in srgb, var(--color-border) 60%, transparent)',
-                                    display: 'grid',
-                                    placeItems: 'center',
+                                    position: 'relative',
                                     overflow: 'hidden',
                                     backgroundColor:
                                         'color-mix(in srgb, var(--color-card) 80%, var(--color-primary) 20%)',
@@ -615,20 +614,35 @@ export const AdminInstrumentForm = () => {
                                         src={previewUrl}
                                         alt="Vista previa del icono"
                                         sx={{
+                                            position: 'absolute',
+                                            // top: '50%',
+                                            // left: '50%',
                                             width: '100%',
                                             height: '100%',
+                                            maxWidth: '100%',
+                                            maxHeight: '100%',
                                             objectFit: 'contain',
+                                            objectPosition: 'center',
+                                            // transform: 'translate(-50%, -50%)',
                                             display: 'block',
+                                            m: 0,
+                                            p: 0,
+                                            border: 0,
                                         }}
                                     />
                                 ) : (
                                     <Box
                                         sx={{
+                                            position: 'absolute',
+                                            inset: 0,
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'center',
+                                            justifyContent: 'center',
                                             gap: 0.75,
                                             color: 'var(--color-secondary-text)',
+                                            lineHeight: 1.2,
+                                            p: 1,
                                         }}
                                     >
                                         <MusicNoteRoundedIcon sx={{ fontSize: 42 }} />

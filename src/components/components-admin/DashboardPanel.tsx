@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Button,
-    Chip,
+    // Chip,
     CircularProgress,
     Divider,
     Paper,
@@ -241,12 +241,24 @@ export const AdminDashboardPanel = () => {
             component="section"
             sx={{
                 width: '100%',
-                minHeight: '100%',
+                height: '100%',
+                minHeight: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: {
                     xs: 1.5,
                     md: 2,
+                },
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                '&::-webkit-scrollbar': {
+                    display: 'none',
+                },
+                pb: {
+                    xs: 1,
+                    md: 0,
                 },
             }}
         >
@@ -289,11 +301,11 @@ export const AdminDashboardPanel = () => {
                             fontWeight: 800,
                         }}
                     >
-                        Resumen general del panel administrativo.
+                        Panel administrativo.
                     </Typography>
                 </Box>
 
-                <Chip
+                {/* <Chip
                     label={`Coro actual: ${choirName}`}
                     sx={{
                         alignSelf: {
@@ -311,7 +323,7 @@ export const AdminDashboardPanel = () => {
                             textOverflow: 'ellipsis',
                         },
                     }}
-                />
+                /> */}
             </Box>
 
             <Box
@@ -331,29 +343,29 @@ export const AdminDashboardPanel = () => {
                 }}
             >
                 <StatCard
-                    title="Usuarios del coro"
+                    title="Usuarios"
                     value={users.length}
-                    subtitle="En esta administración"
+                    subtitle="Activos"
                     icon={<PeopleRoundedIcon />}
                 />
 
                 <StatCard
-                    title="Temas de color"
+                    title="Temas"
                     value={themes.length}
-                    subtitle="Disponibles para este sitio"
+                    subtitle="Disponibles"
                     icon={<PaletteRoundedIcon />}
                 />
 
                 <StatCard
-                    title="Imágenes en galería"
+                    title="Imágenes"
                     value={images.length}
-                    subtitle="Inicio, menús y galería"
+                    subtitle="Galería"
                     icon={<CollectionsRoundedIcon />}
                 />
 
                 {isSuperAdmin && (
                     <StatCard
-                        title="Coros configurados"
+                        title="Coros"
                         value={choirsList.length}
                         icon={<AccountTreeRoundedIcon />}
                     >
@@ -403,7 +415,10 @@ export const AdminDashboardPanel = () => {
             <Paper
                 elevation={0}
                 sx={{
-                    flex: 1,
+                    flex: {
+                        xs: '0 0 auto',
+                        md: 1,
+                    },
                     minHeight: {
                         xs: 320,
                         md: 0,
@@ -427,20 +442,28 @@ export const AdminDashboardPanel = () => {
             >
                 <Box
                     sx={{
-                        flex: 1,
-                        minHeight: 0,
-                        display: 'grid',
-                        placeItems: 'center',
+                        flex: {
+                            xs: '0 0 auto',
+                            md: 1,
+                        },
+                        minHeight: {
+                            xs: 260,
+                            md: 320,
+                        },
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         borderRadius: 1.5,
                         backgroundColor:
                             'color-mix(in srgb, var(--color-card) 88%, var(--color-primary) 12%)',
-                        border: '1px dashed color-mix(in srgb, var(--color-border) 38%, transparent)',
+                        // border: '1px dashed color-mix(in srgb, var(--color-border) 38%, transparent)',
                         boxShadow: 'inset 0 1px 18px rgba(15, 23, 42, 0.035)',
                         overflow: 'hidden',
                         p: {
                             xs: 1.5,
                             md: 2,
                         },
+                        lineHeight: 0,
                     }}
                 >
                     {startImage ? (
@@ -449,16 +472,22 @@ export const AdminDashboardPanel = () => {
                             src={startImage.imageUrl}
                             alt={startImage.title || 'Imagen de inicio'}
                             sx={{
-                                width: '100%',
-                                height: '100%',
+                                width: 'auto',
+                                height: 'auto',
+                                maxWidth: '100%',
                                 maxHeight: {
-                                    xs: 280,
+                                    xs: 260,
                                     md: '42vh',
                                 },
                                 objectFit: 'contain',
+                                objectPosition: 'center',
                                 display: 'block',
+                                m: 0,
+                                p: 0,
+                                verticalAlign: 'middle',
                                 borderRadius: 1.5,
                                 filter: 'drop-shadow(0 16px 32px rgba(15, 23, 42, 0.08))',
+                                flexShrink: 0,
                             }}
                         />
                     ) : (
@@ -474,6 +503,7 @@ export const AdminDashboardPanel = () => {
                                 justifyContent: 'center',
                                 textAlign: 'center',
                                 color: 'var(--color-secondary-text)',
+                                lineHeight: 1.2,
                             }}
                         >
                             <ImageRoundedIcon sx={{ fontSize: 92 }} />

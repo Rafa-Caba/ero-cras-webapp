@@ -6,6 +6,7 @@ import {
     useImperativeHandle,
     useRef,
     useState,
+    type ReactNode,
 } from 'react';
 
 import {
@@ -41,6 +42,7 @@ export interface TiptapChatEditorHandle {
 interface TiptapChatEditorProps {
     content: JSONContent | null;
     onChange: (content: JSONContent) => void;
+    mobileActions?: ReactNode;
 }
 
 interface ToolbarButtonsProps {
@@ -154,7 +156,7 @@ const ToolbarButtons = ({
 };
 
 export const TiptapChatEditor = forwardRef<TiptapChatEditorHandle, TiptapChatEditorProps>(
-    ({ content, onChange }, ref) => {
+    ({ content, onChange, mobileActions }, ref) => {
         const [showEmojis, setShowEmojis] = useState(false);
         const [showMobileTools, setShowMobileTools] = useState(false);
 
@@ -247,132 +249,106 @@ export const TiptapChatEditor = forwardRef<TiptapChatEditorHandle, TiptapChatEdi
                     overflow: 'visible',
                 }}
             >
-                <Box
-                    sx={{
-                        display: 'grid',
-                        gridTemplateColumns: {
-                            xs: 'auto auto',
-                            md: 'minmax(0, 1fr) auto',
-                        },
-                        gap: 1,
-                        justifyContent: {
-                            xs: 'flex-end',
-                            md: 'stretch',
-                        },
-                        alignItems: 'start',
-                        overflow: 'visible',
-                    }}
-                >
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            minWidth: 0,
-                            p: 0.5,
-                            borderRadius: 1.5,
-                            backgroundColor: 'var(--color-background)',
-                            border:
-                                '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
-                            display: {
-                                xs: 'none',
-                                md: 'flex',
-                            },
-                            flexWrap: 'wrap',
-                            gap: 0.5,
-                            overflow: 'hidden',
-                        }}
-                    >
-                        <ToolbarButtons editor={editor} />
-                    </Paper>
-
-                    <Tooltip title="Formato de texto">
-                        <IconButton
-                            type="button"
-                            onClick={() => setShowMobileTools(true)}
-                            sx={{
-                                display: {
-                                    xs: 'inline-flex',
-                                    md: 'none',
-                                },
-                                color: 'var(--color-primary)',
-                                backgroundColor:
-                                    'color-mix(in srgb, var(--color-background) 86%, var(--color-primary) 14%)',
-                                border:
-                                    '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
-                                '&:hover': {
-                                    backgroundColor:
-                                        'color-mix(in srgb, var(--color-background) 78%, var(--color-primary) 22%)',
-                                },
-                            }}
-                        >
-                            <MoreHorizRoundedIcon />
-                        </IconButton>
-                    </Tooltip>
-
+                {!isMobile && (
                     <Box
-                        ref={emojiRef}
                         sx={{
-                            position: 'relative',
-                            flexShrink: 0,
+                            display: 'grid',
+                            gridTemplateColumns: 'minmax(0, 1fr) auto',
+                            gap: 1,
+                            alignItems: 'start',
                             overflow: 'visible',
                         }}
                     >
-                        <Tooltip title="Insertar emoji">
-                            <IconButton
-                                type="button"
-                                onClick={handleToggleEmojiPicker}
-                                sx={{
-                                    color: showEmojis
-                                        ? 'var(--color-button-text)'
-                                        : 'var(--color-primary)',
-                                    backgroundColor: showEmojis
-                                        ? 'var(--color-primary)'
-                                        : 'color-mix(in srgb, var(--color-background) 86%, var(--color-primary) 14%)',
-                                    border:
-                                        '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
-                                    '&:hover': {
-                                        backgroundColor: showEmojis
-                                            ? 'color-mix(in srgb, var(--color-primary) 84%, #000 16%)'
-                                            : 'color-mix(in srgb, var(--color-background) 78%, var(--color-primary) 22%)',
-                                    },
-                                }}
-                            >
-                                <EmojiEmotionsRoundedIcon />
-                            </IconButton>
-                        </Tooltip>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                minWidth: 0,
+                                p: 0.5,
+                                borderRadius: 1.5,
+                                backgroundColor: 'var(--color-background)',
+                                border:
+                                    '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 0.5,
+                                overflow: 'hidden',
+                            }}
+                        >
+                            <ToolbarButtons editor={editor} />
+                        </Paper>
 
-                        {showEmojis && (
-                            <Paper
-                                elevation={0}
-                                sx={{
-                                    position: 'absolute',
-                                    zIndex: 20,
-                                    bottom: 'calc(100% + 8px)',
-                                    right: 0,
-                                    borderRadius: 2,
-                                    overflow: 'hidden',
-                                    border:
-                                        '1px solid color-mix(in srgb, var(--color-border) 42%, transparent)',
-                                    boxShadow: '0 18px 52px rgba(15, 23, 42, 0.22)',
-                                    backgroundColor: 'var(--color-card)',
-                                }}
-                            >
-                                <EmojiPicker
-                                    onEmojiClick={handleEmojiClick}
-                                    height={350}
-                                    width={300}
-                                    lazyLoadEmojis
-                                    previewConfig={{ showPreview: false }}
-                                />
-                            </Paper>
-                        )}
+                        <Box
+                            ref={emojiRef}
+                            sx={{
+                                position: 'relative',
+                                flexShrink: 0,
+                                overflow: 'visible',
+                            }}
+                        >
+                            <Tooltip title="Insertar emoji">
+                                <IconButton
+                                    type="button"
+                                    onClick={handleToggleEmojiPicker}
+                                    sx={{
+                                        color: showEmojis
+                                            ? 'var(--color-button-text)'
+                                            : 'var(--color-primary)',
+                                        backgroundColor: showEmojis
+                                            ? 'var(--color-primary)'
+                                            : 'color-mix(in srgb, var(--color-background) 86%, var(--color-primary) 14%)',
+                                        border:
+                                            '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                                        '&:hover': {
+                                            backgroundColor: showEmojis
+                                                ? 'color-mix(in srgb, var(--color-primary) 84%, #000 16%)'
+                                                : 'color-mix(in srgb, var(--color-background) 78%, var(--color-primary) 22%)',
+                                        },
+                                    }}
+                                >
+                                    <EmojiEmotionsRoundedIcon />
+                                </IconButton>
+                            </Tooltip>
+
+                            {showEmojis && (
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        position: 'absolute',
+                                        zIndex: 20,
+                                        bottom: 'calc(100% + 8px)',
+                                        right: 0,
+                                        borderRadius: 2,
+                                        overflow: 'hidden',
+                                        border:
+                                            '1px solid color-mix(in srgb, var(--color-border) 42%, transparent)',
+                                        boxShadow: '0 18px 52px rgba(15, 23, 42, 0.22)',
+                                        backgroundColor: 'var(--color-card)',
+                                    }}
+                                >
+                                    <EmojiPicker
+                                        onEmojiClick={handleEmojiClick}
+                                        height={350}
+                                        width={300}
+                                        lazyLoadEmojis
+                                        previewConfig={{ showPreview: false }}
+                                    />
+                                </Paper>
+                            )}
+                        </Box>
                     </Box>
-                </Box>
+                )}
 
                 <Paper
                     elevation={0}
                     sx={{
-                        minHeight: 72,
-                        maxHeight: 150,
+                        minHeight: {
+                            xs: 64,
+                            md: 72,
+                        },
+                        maxHeight: {
+                            xs: 120,
+                            md: 150,
+                        },
                         borderRadius: 1.5,
                         backgroundColor: 'var(--color-background)',
                         border:
@@ -380,8 +356,14 @@ export const TiptapChatEditor = forwardRef<TiptapChatEditorHandle, TiptapChatEdi
                         color: 'var(--color-text)',
                         overflow: 'hidden',
                         '& .tiptap-chat-editor-content': {
-                            minHeight: 72,
-                            maxHeight: 150,
+                            minHeight: {
+                                xs: 64,
+                                md: 72,
+                            },
+                            maxHeight: {
+                                xs: 120,
+                                md: 150,
+                            },
                             height: 'auto',
                             overflowY: 'auto',
                             overflowX: 'hidden',
@@ -433,6 +415,126 @@ export const TiptapChatEditor = forwardRef<TiptapChatEditorHandle, TiptapChatEdi
                 >
                     <EditorContent editor={editor} />
                 </Paper>
+
+                {isMobile && (
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 1,
+                            minWidth: 0,
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.75,
+                                minWidth: 0,
+                            }}
+                        >
+                            <Tooltip title="Formato de texto">
+                                <IconButton
+                                    type="button"
+                                    onClick={() => setShowMobileTools(true)}
+                                    sx={{
+                                        width: 40,
+                                        height: 40,
+                                        color: 'var(--color-primary)',
+                                        backgroundColor:
+                                            'color-mix(in srgb, var(--color-background) 86%, var(--color-primary) 14%)',
+                                        border:
+                                            '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                                        '&:hover': {
+                                            backgroundColor:
+                                                'color-mix(in srgb, var(--color-background) 78%, var(--color-primary) 22%)',
+                                        },
+                                    }}
+                                >
+                                    <MoreHorizRoundedIcon />
+                                </IconButton>
+                            </Tooltip>
+
+                            <Box
+                                ref={emojiRef}
+                                sx={{
+                                    position: 'relative',
+                                    flexShrink: 0,
+                                    overflow: 'visible',
+                                }}
+                            >
+                                <Tooltip title="Insertar emoji">
+                                    <IconButton
+                                        type="button"
+                                        onClick={handleToggleEmojiPicker}
+                                        sx={{
+                                            width: 40,
+                                            height: 40,
+                                            color: showEmojis
+                                                ? 'var(--color-button-text)'
+                                                : 'var(--color-primary)',
+                                            backgroundColor: showEmojis
+                                                ? 'var(--color-primary)'
+                                                : 'color-mix(in srgb, var(--color-background) 86%, var(--color-primary) 14%)',
+                                            border:
+                                                '1px solid color-mix(in srgb, var(--color-border) 34%, transparent)',
+                                            '&:hover': {
+                                                backgroundColor: showEmojis
+                                                    ? 'color-mix(in srgb, var(--color-primary) 84%, #000 16%)'
+                                                    : 'color-mix(in srgb, var(--color-background) 78%, var(--color-primary) 22%)',
+                                            },
+                                        }}
+                                    >
+                                        <EmojiEmotionsRoundedIcon />
+                                    </IconButton>
+                                </Tooltip>
+
+                                {showEmojis && (
+                                    <Paper
+                                        elevation={0}
+                                        sx={{
+                                            position: 'absolute',
+                                            zIndex: 20,
+                                            bottom: 'calc(100% + 8px)',
+                                            left: 0,
+                                            borderRadius: 2,
+                                            overflow: 'hidden',
+                                            border:
+                                                '1px solid color-mix(in srgb, var(--color-border) 42%, transparent)',
+                                            boxShadow: '0 18px 52px rgba(15, 23, 42, 0.22)',
+                                            backgroundColor: 'var(--color-card)',
+                                            maxWidth: 'calc(100vw - 32px)',
+                                        }}
+                                    >
+                                        <EmojiPicker
+                                            onEmojiClick={handleEmojiClick}
+                                            height={350}
+                                            width={300}
+                                            lazyLoadEmojis
+                                            previewConfig={{ showPreview: false }}
+                                        />
+                                    </Paper>
+                                )}
+                            </Box>
+                        </Box>
+
+                        {mobileActions && (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'flex-end',
+                                    gap: 1,
+                                    minWidth: 0,
+                                    flexShrink: 0,
+                                }}
+                            >
+                                {mobileActions}
+                            </Box>
+                        )}
+                    </Box>
+                )}
 
                 <Dialog
                     open={showMobileTools && isMobile}

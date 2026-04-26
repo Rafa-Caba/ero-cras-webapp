@@ -24,7 +24,7 @@ import {
 } from '@mui/material';
 import type { Theme } from '@mui/material/styles';
 
-import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
+// import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import ContactMailRoundedIcon from '@mui/icons-material/ContactMailRounded';
@@ -46,7 +46,10 @@ interface PublicNavigationItem {
 
 const drawerWidth = 292;
 const bottomNavHeight = 74;
-const sideRailWidth = 170;
+const sideRailWidth = 230;
+const mobileHeaderHeight = 72;
+const desktopHeaderHeight = 118;
+const publicFooterHeight = 58;
 
 const reservedPublicSegments = ['members', 'songs', 'about', 'contact', 'blog', 'admin', 'auth'];
 
@@ -79,6 +82,8 @@ const PublicLayout = () => {
 
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
+    const headerHeight = isDesktop ? desktopHeaderHeight : mobileHeaderHeight;
+
     useEffect(() => {
         void fetchSettings();
         void fetchGallery();
@@ -107,8 +112,8 @@ const PublicLayout = () => {
             ? firstPathSegment
             : null;
 
-    const basePath = choirKey ? `/${choirKey}` : '';
-    const homePath = choirKey ? `/${choirKey}` : '/';
+    const basePath = choirKey ? `/${choirKey}` : 'ero1';
+    const homePath = choirKey ? `/${choirKey}` : '/ero1';
 
     const publicTitle = `${settings?.webTitle || 'Ero Cras'} Oficial`;
     const compactTitle = getCompactTitle(publicTitle);
@@ -247,7 +252,20 @@ const PublicLayout = () => {
                 </IconButton>
             </Toolbar>
 
-            <Box sx={{ flex: 1, overflowY: 'auto', px: 1.25, py: 1.5 }}>
+            <Box
+                sx={{
+                    flex: 1,
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    px: 1.25,
+                    py: 1.5,
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    '&::-webkit-scrollbar': {
+                        display: 'none',
+                    },
+                }}
+            >
                 <List disablePadding>
                     {navigationItems.map((item) => {
                         const selected = isActive(item.path);
@@ -307,7 +325,7 @@ const PublicLayout = () => {
 
                 <Divider sx={{ my: 2, borderColor: 'var(--color-border)' }} />
 
-                {fromAdmin ? (
+                {fromAdmin && (
                     <Button
                         fullWidth
                         variant="outlined"
@@ -325,27 +343,6 @@ const PublicLayout = () => {
                     >
                         Volver al Admin
                     </Button>
-                ) : (
-                    <Button
-                        fullWidth
-                        variant="contained"
-                        startIcon={<AdminPanelSettingsRoundedIcon />}
-                        onClick={() => {
-                            navigate('/admin');
-                            setMobileDrawerOpen(false);
-                        }}
-                        sx={{
-                            borderRadius: 1.5,
-                            backgroundColor: 'var(--color-button)',
-                            color: 'var(--color-button-text)',
-                            fontWeight: 900,
-                            '&:hover': {
-                                backgroundColor: 'color-mix(in srgb, var(--color-button) 86%, #000 14%)',
-                            },
-                        }}
-                    >
-                        Ir al Admin
-                    </Button>
                 )}
             </Box>
         </Box>
@@ -356,9 +353,9 @@ const PublicLayout = () => {
             <Box
                 className="public-mui-shell"
                 sx={{
-                    minHeight: '100vh',
+                    height: '100vh',
                     width: '100%',
-                    overflowX: 'hidden',
+                    overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'column',
                     background:
@@ -367,14 +364,19 @@ const PublicLayout = () => {
                 }}
             >
                 <AppBar
-                    position="sticky"
+                    position="fixed"
                     elevation={0}
                     sx={{
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        width: '100%',
                         background:
                             'linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 92%, #000 8%) 0%, var(--color-primary) 55%, var(--color-accent) 100%)',
                         color: 'var(--color-button-text)',
                         borderBottom: '1px solid color-mix(in srgb, var(--color-border) 60%, transparent)',
                         boxShadow: '0 8px 24px rgba(15, 23, 42, 0.12)',
+                        zIndex: (theme: Theme) => theme.zIndex.drawer + 2,
                     }}
                 >
                     <Toolbar
@@ -455,7 +457,7 @@ const PublicLayout = () => {
                             </Button>
                         )}
 
-                        {isDesktop && !fromAdmin && (
+                        {/* {isDesktop && !fromAdmin && (
                             <Button
                                 variant="outlined"
                                 startIcon={<AdminPanelSettingsRoundedIcon />}
@@ -473,7 +475,7 @@ const PublicLayout = () => {
                             >
                                 Admin
                             </Button>
-                        )}
+                        )} */}
 
                         {!isDesktop && fromAdmin && (
                             <Button
@@ -575,10 +577,18 @@ const PublicLayout = () => {
                 <Box
                     component="main"
                     sx={{
+                        position: 'fixed',
+                        top: `${headerHeight}px`,
+                        left: 0,
+                        right: 0,
+                        bottom: {
+                            xs: `${bottomNavHeight + 20}px`,
+                            md: `${publicFooterHeight}px`,
+                        },
                         width: '100%',
-                        flex: 1,
                         display: 'flex',
                         flexDirection: 'column',
+                        overflow: 'hidden',
                         px: {
                             xs: 0,
                             sm: 1,
@@ -590,7 +600,7 @@ const PublicLayout = () => {
                             md: 2,
                         },
                         pb: {
-                            xs: `${bottomNavHeight + 18}px`,
+                            xs: 0,
                             md: 2,
                         },
                     }}
@@ -601,6 +611,7 @@ const PublicLayout = () => {
                             maxWidth: '1840px',
                             mx: 'auto',
                             flex: 1,
+                            minHeight: 0,
                             display: 'grid',
                             gridTemplateColumns: {
                                 xs: '1fr',
@@ -611,6 +622,7 @@ const PublicLayout = () => {
                                 xl: 1.5,
                             },
                             alignItems: 'stretch',
+                            overflow: 'hidden',
                         }}
                     >
                         {showSideRails && (
@@ -650,10 +662,8 @@ const PublicLayout = () => {
                             sx={{
                                 width: '100%',
                                 minWidth: 0,
-                                minHeight: {
-                                    xs: '72vh',
-                                    md: '100%',
-                                },
+                                height: '100%',
+                                minHeight: 0,
                                 display: 'flex',
                                 flexDirection: 'column',
                                 p: {
@@ -675,7 +685,13 @@ const PublicLayout = () => {
                                     xs: 'none',
                                     sm: '0 12px 42px rgba(15, 23, 42, 0.07)',
                                 },
-                                overflow: 'hidden',
+                                overflowY: 'auto',
+                                overflowX: 'hidden',
+                                scrollbarWidth: 'none',
+                                msOverflowStyle: 'none',
+                                '&::-webkit-scrollbar': {
+                                    display: 'none',
+                                },
                                 '& > *': {
                                     flex: 1,
                                     minHeight: 0,
@@ -776,11 +792,16 @@ const PublicLayout = () => {
 
                 <Box
                     sx={{
-                        mt: 'auto',
-                        pb: {
-                            xs: `${bottomNavHeight + 8}px`,
-                            md: 0,
+                        position: 'fixed',
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        minHeight: publicFooterHeight,
+                        display: {
+                            xs: 'none',
+                            md: 'block',
                         },
+                        zIndex: (theme: Theme) => theme.zIndex.drawer + 1,
                     }}
                 >
                     <Footer />

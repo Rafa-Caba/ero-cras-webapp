@@ -39,6 +39,31 @@ export const SongModal = ({ show, onHide, categoryName, songs }: SongModalProps)
             slotProps={{
                 paper: {
                     sx: {
+                        width: {
+                            xs: 'calc(100vw - 24px)',
+                            sm: 'calc(100vw - 40px)',
+                            md: '100%',
+                        },
+                        maxWidth: {
+                            xs: 'calc(100vw - 24px)',
+                            sm: 'calc(100vw - 40px)',
+                            md: '900px',
+                        },
+                        height: {
+                            xs: 'calc(100dvh - 24px)',
+                            sm: 'calc(100dvh - 40px)',
+                            md: 'auto',
+                        },
+                        maxHeight: {
+                            xs: 'calc(100dvh - 24px)',
+                            sm: 'calc(100dvh - 40px)',
+                            md: 'calc(100dvh - 64px)',
+                        },
+                        m: {
+                            xs: 1.5,
+                            sm: 2.5,
+                            md: 4,
+                        },
                         borderRadius: {
                             xs: 1.5,
                             md: 2,
@@ -48,12 +73,15 @@ export const SongModal = ({ show, onHide, categoryName, songs }: SongModalProps)
                         border: '1px solid var(--color-border)',
                         boxShadow: '0 24px 70px rgba(15, 23, 42, 0.24)',
                         overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column',
                     },
                 },
             }}
         >
             <DialogTitle
                 sx={{
+                    flexShrink: 0,
                     px: {
                         xs: 2,
                         md: 3,
@@ -111,12 +139,21 @@ export const SongModal = ({ show, onHide, categoryName, songs }: SongModalProps)
             <DialogContent
                 dividers
                 sx={{
+                    flex: 1,
+                    minHeight: 0,
                     p: {
                         xs: 1.25,
                         md: 2,
                     },
                     backgroundColor: 'var(--color-card)',
                     borderColor: 'var(--color-border)',
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    '&::-webkit-scrollbar': {
+                        display: 'none',
+                    },
                 }}
             >
                 {songs.length > 0 ? (
@@ -186,6 +223,12 @@ export const SongModal = ({ show, onHide, categoryName, songs }: SongModalProps)
                                         width: '100%',
                                         minWidth: 0,
                                         overflowX: 'auto',
+                                        overflowY: 'hidden',
+                                        scrollbarWidth: 'none',
+                                        msOverflowStyle: 'none',
+                                        '&::-webkit-scrollbar': {
+                                            display: 'none',
+                                        },
                                     }}
                                 >
                                     <TiptapViewer content={parseText(song.content)} />
@@ -222,6 +265,7 @@ export const SongModal = ({ show, onHide, categoryName, songs }: SongModalProps)
 
             <DialogActions
                 sx={{
+                    flexShrink: 0,
                     px: {
                         xs: 2,
                         md: 3,
