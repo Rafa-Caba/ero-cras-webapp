@@ -32,6 +32,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import Heading from '@tiptap/extension-heading';
+import TextAlign from '@tiptap/extension-text-align';
 import EmojiPicker from 'emoji-picker-react';
 import type { EmojiClickData } from 'emoji-picker-react';
 
@@ -51,9 +52,24 @@ interface ToolbarButtonsProps {
     onAfterAction?: () => void;
 }
 
+type TextAlignment = 'left' | 'center' | 'right';
+type ButtonVariant = 'text' | 'outlined' | 'contained';
+
 const emptyChatContent: JSONContent = {
     type: 'doc',
     content: [{ type: 'paragraph' }],
+};
+
+const isLeftAlignActive = (editor: Editor): boolean => {
+    return !editor.isActive({ textAlign: 'center' }) && !editor.isActive({ textAlign: 'right' });
+};
+
+const getAlignButtonVariant = (editor: Editor, alignment: TextAlignment): ButtonVariant => {
+    if (alignment === 'left') {
+        return isLeftAlignActive(editor) ? 'contained' : 'outlined';
+    }
+
+    return editor.isActive({ textAlign: alignment }) ? 'contained' : 'outlined';
 };
 
 const ToolbarButtons = ({
@@ -135,6 +151,36 @@ const ToolbarButtons = ({
             <Button
                 type="button"
                 size="small"
+                variant={getAlignButtonVariant(editor, 'left')}
+                onClick={() => runAction(() => editor.chain().focus().setTextAlign('left').run())}
+                sx={buttonSx}
+            >
+                Izq
+            </Button>
+
+            <Button
+                type="button"
+                size="small"
+                variant={getAlignButtonVariant(editor, 'center')}
+                onClick={() => runAction(() => editor.chain().focus().setTextAlign('center').run())}
+                sx={buttonSx}
+            >
+                Centro
+            </Button>
+
+            <Button
+                type="button"
+                size="small"
+                variant={getAlignButtonVariant(editor, 'right')}
+                onClick={() => runAction(() => editor.chain().focus().setTextAlign('right').run())}
+                sx={buttonSx}
+            >
+                Der
+            </Button>
+
+            <Button
+                type="button"
+                size="small"
                 variant={editor.isActive('bulletList') ? 'contained' : 'outlined'}
                 onClick={() => runAction(() => editor.chain().focus().toggleBulletList().run())}
                 sx={buttonSx}
@@ -168,6 +214,10 @@ export const TiptapChatEditor = forwardRef<TiptapChatEditorHandle, TiptapChatEdi
                 StarterKit.configure({ heading: false }),
                 Heading.configure({ levels: [1, 2] }),
                 Underline,
+                TextAlign.configure({
+                    types: ['heading', 'paragraph'],
+                    defaultAlignment: 'left',
+                }),
                 Placeholder.configure({ placeholder: 'Escribe tu mensaje…' }),
             ],
             content: content ?? emptyChatContent,
@@ -375,6 +425,7 @@ export const TiptapChatEditor = forwardRef<TiptapChatEditorHandle, TiptapChatEdi
                             color: 'var(--color-text)',
                             fontSize: '0.94rem',
                             lineHeight: 1.45,
+                            textAlign: 'left',
                             scrollbarWidth: 'none',
                             msOverflowStyle: 'none',
                         },

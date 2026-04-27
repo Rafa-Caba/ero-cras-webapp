@@ -16,6 +16,7 @@ import {
     MenuItem,
     Paper,
     Typography,
+    useMediaQuery,
 } from '@mui/material';
 
 import EmojiEmotionsRoundedIcon from '@mui/icons-material/EmojiEmotionsRounded';
@@ -81,6 +82,7 @@ export const ChatBubble = ({
     onReply,
 }: Props) => {
     const { user } = useAuth();
+    const isMobile = useMediaQuery('(max-width: 768px)');
 
     const [showEmojiModal, setShowEmojiModal] = useState(false);
     const [floatingEmoji, setFloatingEmoji] = useState<string | null>(null);
@@ -146,46 +148,48 @@ export const ChatBubble = ({
                 sx={{
                     display: 'flex',
                     alignItems: 'flex-end',
-                    gap: 1,
+                    gap: isMobile ? 0 : 1,
                     flexDirection: isOwn ? 'row-reverse' : 'row',
                     maxWidth: '100%',
                     minWidth: 0,
                 }}
             >
-                {!isSameAuthor ? (
-                    <Button
-                        type="button"
-                        onClick={() => onAvatarClick(msg.author.imageUrl || '')}
-                        sx={{
-                            minWidth: 0,
-                            p: 0,
-                            mb: 0.5,
-                            borderRadius: '50%',
-                            flexShrink: 0,
-                        }}
-                    >
-                        <Avatar
-                            src={msg.author.imageUrl || '/images/default-user.png'}
-                            alt={msg.author.name}
+                {!isMobile && (
+                    !isSameAuthor ? (
+                        <Button
+                            type="button"
+                            onClick={() => onAvatarClick(msg.author.imageUrl || '')}
                             sx={{
-                                width: 34,
-                                height: 34,
-                                bgcolor: 'var(--color-primary)',
-                                color: 'var(--color-button-text)',
-                                fontWeight: 950,
-                                boxShadow: '0 8px 18px rgba(15, 23, 42, 0.16)',
+                                minWidth: 0,
+                                p: 0,
+                                mb: 0.5,
+                                borderRadius: '50%',
+                                flexShrink: 0,
                             }}
                         >
-                            {msg.author.name.slice(0, 1).toUpperCase()}
-                        </Avatar>
-                    </Button>
-                ) : (
-                    <Box
-                        sx={{
-                            width: 34,
-                            flexShrink: 0,
-                        }}
-                    />
+                            <Avatar
+                                src={msg.author.imageUrl || '/images/default-user.png'}
+                                alt={msg.author.name}
+                                sx={{
+                                    width: 34,
+                                    height: 34,
+                                    bgcolor: 'var(--color-primary)',
+                                    color: 'var(--color-button-text)',
+                                    fontWeight: 950,
+                                    boxShadow: '0 8px 18px rgba(15, 23, 42, 0.16)',
+                                }}
+                            >
+                                {msg.author.name.slice(0, 1).toUpperCase()}
+                            </Avatar>
+                        </Button>
+                    ) : (
+                        <Box
+                            sx={{
+                                width: 34,
+                                flexShrink: 0,
+                            }}
+                        />
+                    )
                 )}
 
                 <Box
@@ -196,7 +200,7 @@ export const ChatBubble = ({
                     sx={{
                         minWidth: 0,
                         maxWidth: {
-                            xs: 'calc(100vw - 96px)',
+                            xs: 'calc(100vw - 36px)',
                             md: 560,
                         },
                     }}
@@ -229,13 +233,16 @@ export const ChatBubble = ({
                                 overflow: 'hidden',
                             }}
                         >
-                            {!isSameAuthor && !isOwn && (
+                            {!isSameAuthor && (
                                 <Typography
                                     sx={{
                                         mb: 0.5,
-                                        color: 'var(--color-primary)',
+                                        color: isOwn
+                                            ? 'rgba(255,255,255,0.9)'
+                                            : 'var(--color-primary)',
                                         fontWeight: 950,
                                         fontSize: '0.78rem',
+                                        textAlign: isOwn ? 'right' : 'left',
                                     }}
                                 >
                                     {formatName(msg.author.name)}
@@ -271,7 +278,6 @@ export const ChatBubble = ({
                                         sx={{
                                             flex: 1,
                                             minWidth: 0,
-                                            textAlign: 'left',
                                         }}
                                     >
                                         <Typography
@@ -460,7 +466,7 @@ export const ChatBubble = ({
                                         minWidth: 0,
                                         width: '100%',
                                         maxWidth: 320,
-                                        justifyContent: 'flex-start',
+                                        justifyContent: isOwn ? 'flex-end' : 'flex-start',
                                         gap: 1,
                                         borderRadius: 1.5,
                                         textTransform: 'none',
@@ -476,7 +482,6 @@ export const ChatBubble = ({
                                     <Box
                                         sx={{
                                             minWidth: 0,
-                                            textAlign: 'left',
                                         }}
                                     >
                                         <Typography
@@ -510,8 +515,7 @@ export const ChatBubble = ({
                                 <Box
                                     sx={{
                                         mt: msg.fileUrl ? 0.75 : 0,
-                                        textAlign: isOwn ? 'right' : 'left',
-                                        '& .ProseMirror, & p': {
+                                        '& .ProseMirror, & .tiptap, & p, & span, & div': {
                                             color: isOwn ? 'var(--color-button-text)' : 'var(--color-text)',
                                         },
                                         '& p': {
@@ -556,7 +560,7 @@ export const ChatBubble = ({
                                         height: 18,
                                         minWidth: 18,
                                         p: 0,
-                                        ml: 0.25,
+                                        ml: 'auto',
                                         color: isOwn
                                             ? 'rgba(255,255,255,0.86)'
                                             : 'var(--color-secondary-text)',
