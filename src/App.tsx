@@ -27,6 +27,9 @@ import { Dashboard } from './pages/admin/Dashboard';
 // --- Choirs ---
 import { ChoirList } from './pages/admin/choir/ChoirList';
 import { ChoirForm } from './pages/admin/choir/ChoirForm';
+import { AdminChoirDetail } from './components/choirs/AdminChoirDetail';
+import { ChoirUserForm } from './components/choirs/ChoirUserForm';
+import { ChoirUserEditForm } from './components/choirs/ChoirUserEditForm';
 
 // Users
 import { UsersList } from './pages/admin/user/UsersList';
@@ -134,6 +137,9 @@ function App() {
                     <Route path="choirs" element={<ChoirList />} />
                     <Route path="choirs/new" element={<ChoirForm />} />
                     <Route path="choirs/edit/:id" element={<ChoirForm />} />
+                    <Route path="choirs/view/:id" element={<AdminChoirDetail />} />
+                    <Route path="choirs/view/:choirId/users/new" element={<ChoirUserForm />} />
+                    <Route path="choirs/view/:choirId/users/edit/:userId" element={<ChoirUserEditForm />} />
 
                     {/* Users */}
                     <Route path="users" element={<UsersList />} />

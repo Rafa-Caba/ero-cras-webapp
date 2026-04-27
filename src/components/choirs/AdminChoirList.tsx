@@ -28,6 +28,7 @@ import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 
 import { useChoirsStore } from '../../store/admin/useChoirsStore';
 
@@ -232,77 +233,34 @@ export const AdminChoirList = () => {
                             flex: 1,
                             minHeight: 0,
                             overflow: 'auto',
+                            scrollbarWidth: 'none',
+                            msOverflowStyle: 'none',
+                            '&::-webkit-scrollbar': {
+                                display: 'none',
+                            },
                         }}
                     >
                         <Table stickyHeader>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell
-                                        sx={{
-                                            width: 92,
-                                            backgroundColor:
-                                                'color-mix(in srgb, var(--color-card) 82%, var(--color-primary) 18%)',
-                                            color: 'var(--color-text)',
-                                            fontWeight: 950,
-                                            borderBottom:
-                                                '1px solid color-mix(in srgb, var(--color-border) 42%, transparent)',
-                                        }}
-                                    >
-                                        Logo
-                                    </TableCell>
-
-                                    <TableCell
-                                        sx={{
-                                            backgroundColor:
-                                                'color-mix(in srgb, var(--color-card) 82%, var(--color-primary) 18%)',
-                                            color: 'var(--color-text)',
-                                            fontWeight: 950,
-                                            borderBottom:
-                                                '1px solid color-mix(in srgb, var(--color-border) 42%, transparent)',
-                                        }}
-                                    >
-                                        Nombre
-                                    </TableCell>
-
-                                    <TableCell
-                                        sx={{
-                                            backgroundColor:
-                                                'color-mix(in srgb, var(--color-card) 82%, var(--color-primary) 18%)',
-                                            color: 'var(--color-text)',
-                                            fontWeight: 950,
-                                            borderBottom:
-                                                '1px solid color-mix(in srgb, var(--color-border) 42%, transparent)',
-                                        }}
-                                    >
-                                        Código
-                                    </TableCell>
-
-                                    <TableCell
-                                        sx={{
-                                            backgroundColor:
-                                                'color-mix(in srgb, var(--color-card) 82%, var(--color-primary) 18%)',
-                                            color: 'var(--color-text)',
-                                            fontWeight: 950,
-                                            borderBottom:
-                                                '1px solid color-mix(in srgb, var(--color-border) 42%, transparent)',
-                                        }}
-                                    >
-                                        Estado
-                                    </TableCell>
-
-                                    <TableCell
-                                        align="right"
-                                        sx={{
-                                            backgroundColor:
-                                                'color-mix(in srgb, var(--color-card) 82%, var(--color-primary) 18%)',
-                                            color: 'var(--color-text)',
-                                            fontWeight: 950,
-                                            borderBottom:
-                                                '1px solid color-mix(in srgb, var(--color-border) 42%, transparent)',
-                                        }}
-                                    >
-                                        Acciones
-                                    </TableCell>
+                                    {['Logo', 'Nombre', 'Código', 'Estado', 'Acciones'].map((label) => (
+                                        <TableCell
+                                            key={label}
+                                            align={label === 'Acciones' ? 'right' : 'left'}
+                                            sx={{
+                                                width: label === 'Logo' ? 92 : 'auto',
+                                                backgroundColor:
+                                                    'color-mix(in srgb, var(--color-card) 82%, var(--color-primary) 18%)',
+                                                color: 'var(--color-text)',
+                                                fontWeight: 950,
+                                                borderBottom:
+                                                    '1px solid color-mix(in srgb, var(--color-border) 42%, transparent)',
+                                                whiteSpace: 'nowrap',
+                                            }}
+                                        >
+                                            {label}
+                                        </TableCell>
+                                    ))}
                                 </TableRow>
                             </TableHead>
 
@@ -405,8 +363,8 @@ export const AdminChoirList = () => {
                                                             : 'var(--color-text)',
                                                         backgroundColor: choir.isActive
                                                             ? '#16a34a'
-                                                            : 'color-mix(in srgb, var(--color-card) 76%, var(--color-border) 24%)',
-                                                        fontWeight: 900,
+                                                            : 'color-mix(in srgb, var(--color-card) 74%, var(--color-border) 26%)',
+                                                        fontWeight: 950,
                                                     }}
                                                 />
                                             </TableCell>
@@ -425,6 +383,25 @@ export const AdminChoirList = () => {
                                                         gap: 0.75,
                                                     }}
                                                 >
+                                                    <Tooltip title="Ver coro">
+                                                        <IconButton
+                                                            component={RouterLink}
+                                                            to={`/admin/choirs/view/${choir.id}`}
+                                                            aria-label={`Ver coro ${choir.name}`}
+                                                            sx={{
+                                                                color: 'var(--color-primary)',
+                                                                backgroundColor:
+                                                                    'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                                                                '&:hover': {
+                                                                    backgroundColor:
+                                                                        'color-mix(in srgb, var(--color-primary) 18%, transparent)',
+                                                                },
+                                                            }}
+                                                        >
+                                                            <VisibilityRoundedIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+
                                                     <Tooltip title="Editar coro">
                                                         <IconButton
                                                             component={RouterLink}
@@ -474,16 +451,12 @@ export const AdminChoirList = () => {
                 {totalPages > 1 && (
                     <Box
                         sx={{
-                            px: 2,
-                            py: 1.5,
+                            flexShrink: 0,
                             display: 'flex',
-                            alignItems: 'center',
                             justifyContent: 'center',
+                            alignItems: 'center',
                             gap: 1,
-                            borderTop:
-                                '1px solid color-mix(in srgb, var(--color-border) 36%, transparent)',
-                            backgroundColor:
-                                'color-mix(in srgb, var(--color-card) 84%, var(--color-primary) 16%)',
+                            p: 1.5,
                         }}
                     >
                         <Button
@@ -493,19 +466,13 @@ export const AdminChoirList = () => {
                             onClick={() => setCurrentPage(currentPage - 1)}
                             sx={{
                                 borderRadius: 1.5,
-                                fontWeight: 900,
+                                fontWeight: 950,
                             }}
                         >
                             Anterior
                         </Button>
 
-                        <Typography
-                            sx={{
-                                px: 1,
-                                color: 'var(--color-secondary-text)',
-                                fontWeight: 900,
-                            }}
-                        >
+                        <Typography sx={{ fontWeight: 900 }}>
                             Página {currentPage} de {totalPages}
                         </Typography>
 
@@ -516,7 +483,7 @@ export const AdminChoirList = () => {
                             onClick={() => setCurrentPage(currentPage + 1)}
                             sx={{
                                 borderRadius: 1.5,
-                                fontWeight: 900,
+                                fontWeight: 950,
                             }}
                         >
                             Siguiente
