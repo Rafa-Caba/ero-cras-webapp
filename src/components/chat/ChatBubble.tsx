@@ -103,6 +103,7 @@ export const ChatBubble = ({
     const replyPreview = isReplyPreview(msg.replyTo) ? msg.replyTo : null;
     const timeLabel = getMessageTimeLabel(msg);
     const shouldShowReactions = showMobileReaction || hasReacted || Boolean(msg.reactions && msg.reactions.length > 0);
+    const hasReplyPreview = Boolean(replyPreview);
 
     const handleEmojiSelect = async (emoji: string) => {
         setFloatingEmoji(emoji);
@@ -142,7 +143,8 @@ export const ChatBubble = ({
                 justifyContent: isOwn ? 'flex-end' : 'flex-start',
                 ml: isOwn ? 'auto' : 0,
                 mr: isOwn ? 0 : 'auto',
-                mb: 2,
+                mb: shouldShowReactions ? 3 : 2,
+                overflow: 'visible',
             }}
         >
             <Box
@@ -153,6 +155,7 @@ export const ChatBubble = ({
                     flexDirection: isOwn ? 'row-reverse' : 'row',
                     maxWidth: '100%',
                     minWidth: 0,
+                    overflow: 'visible',
                 }}
             >
                 {!isMobile && (
@@ -199,17 +202,13 @@ export const ChatBubble = ({
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     sx={{
-                        minWidth: 0,
-                        width: 'fit-content',
-                        maxWidth: {
-                            xs: '80%',
-                            md: 560,
-                        },
+                        overflow: 'visible',
                     }}
                 >
                     <Box
                         sx={{
                             position: 'relative',
+                            overflow: 'visible',
                         }}
                         onClick={() => {
                             if (window.innerWidth <= 768) {
@@ -221,6 +220,15 @@ export const ChatBubble = ({
                             elevation={0}
                             sx={{
                                 position: 'relative',
+                                minWidth: {
+                                    xs: hasReplyPreview ? 190 : 50,
+                                    sm: hasReplyPreview ? 220 : 120,
+                                },
+                                width: 'fit-content',
+                                maxWidth: {
+                                    xs: '80vw',
+                                    md: 560,
+                                },
                                 p: 1,
                                 px: 1.25,
                                 borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
@@ -258,7 +266,8 @@ export const ChatBubble = ({
                                         p: 0.75,
                                         display: 'flex',
                                         alignItems: 'stretch',
-                                        borderRadius: 1.25,
+                                        minWidth: 0,
+                                        maxWidth: '100%',
                                         backgroundColor: isOwn
                                             ? 'rgba(255,255,255,0.16)'
                                             : 'color-mix(in srgb, var(--color-card) 82%, var(--color-primary) 18%)',
@@ -270,6 +279,7 @@ export const ChatBubble = ({
                                             borderRadius: 999,
                                             mr: 1,
                                             alignSelf: 'stretch',
+                                            flexShrink: 0,
                                             backgroundColor: isOwn
                                                 ? 'var(--color-button-text)'
                                                 : 'var(--color-primary)',
@@ -290,6 +300,9 @@ export const ChatBubble = ({
                                                     ? 'var(--color-button-text)'
                                                     : 'var(--color-primary)',
                                                 textAlign: 'left',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap',
                                             }}
                                         >
                                             {replyPreview.username || 'Usuario'}
@@ -305,7 +318,8 @@ export const ChatBubble = ({
                                                 display: '-webkit-box',
                                                 WebkitLineClamp: 2,
                                                 WebkitBoxOrient: 'vertical',
-                                                overflowWrap: 'anywhere',
+                                                overflowWrap: 'break-word',
+                                                wordBreak: 'normal',
                                                 textAlign: 'left',
                                             }}
                                         >
@@ -333,15 +347,9 @@ export const ChatBubble = ({
                                         src={msg.fileUrl}
                                         alt={msg.filename || 'Imagen del mensaje'}
                                         sx={{
-                                            width: {
-                                                xs: 200,
-                                                md: 280
-                                            },
+                                            width: 180,
                                             maxWidth: '100%',
-                                            height: {
-                                                xs: 150,
-                                                md: 220
-                                            },
+                                            height: 150,
                                             objectFit: 'cover',
                                             display: 'block',
                                             borderRadius: 1.5,
@@ -371,7 +379,10 @@ export const ChatBubble = ({
                                 >
                                     <Box
                                         sx={{
-                                            width: '100%',
+                                            width: {
+                                                xs: 220,
+                                                md: 300
+                                            },
                                             maxWidth: '100%',
                                             height: 150,
                                             overflow: 'hidden',
@@ -454,7 +465,8 @@ export const ChatBubble = ({
                                                 color: isOwn
                                                     ? 'rgba(255,255,255,0.82)'
                                                     : 'var(--color-secondary-text)',
-                                                overflowWrap: 'anywhere',
+                                                overflowWrap: 'break-word',
+                                                wordBreak: 'normal',
                                             }}
                                         >
                                             {msg.filename}
@@ -475,7 +487,7 @@ export const ChatBubble = ({
                                         p: 1,
                                         minWidth: 0,
                                         width: '100%',
-                                        maxWidth: 320,
+                                        maxWidth: 220,
                                         justifyContent: isOwn ? 'flex-end' : 'flex-start',
                                         gap: 1,
                                         borderRadius: 1.5,
@@ -525,8 +537,23 @@ export const ChatBubble = ({
                                 <Box
                                     sx={{
                                         mt: msg.fileUrl ? 0.75 : 0,
-                                        '& .ProseMirror, & .tiptap, & p, & span, & div': {
+                                        display: 'inline-block',
+                                        width: 'auto',
+                                        maxWidth: '100%',
+                                        minWidth: 0,
+                                        color: isOwn ? 'var(--color-button-text)' : 'var(--color-text)',
+                                        '& .ProseMirror, & .tiptap': {
                                             color: isOwn ? 'var(--color-button-text)' : 'var(--color-text)',
+                                            whiteSpace: 'normal',
+                                            overflowWrap: 'break-word',
+                                            wordBreak: 'normal',
+                                            textAlign: 'left',
+                                        },
+                                        '& .ProseMirror *, & .tiptap *': {
+                                            color: isOwn ? 'var(--color-button-text)' : 'var(--color-text)',
+                                            overflowWrap: 'break-word',
+                                            wordBreak: 'normal',
+                                            textAlign: 'left',
                                         },
                                         '& p': {
                                             m: 0,
@@ -591,11 +618,16 @@ export const ChatBubble = ({
 
                         {shouldShowReactions && (
                             <Box
+                                onClick={(event) => event.stopPropagation()}
                                 sx={{
+                                    position: 'absolute',
+                                    zIndex: 5,
+                                    bottom: -18,
+                                    right: isOwn ? 8 : 'auto',
+                                    left: isOwn ? 'auto' : 8,
                                     display: 'flex',
                                     justifyContent: isOwn ? 'flex-end' : 'flex-start',
-                                    mt: -1,
-                                    mx: 1,
+                                    pointerEvents: 'auto',
                                 }}
                             >
                                 <ChatReactions messageId={msg.id} reactions={msg.reactions || []} />
