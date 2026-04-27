@@ -102,6 +102,7 @@ export const ChatBubble = ({
     const isSameAuthor = Boolean(previous?.author && previous.author.id === msg.author.id);
     const replyPreview = isReplyPreview(msg.replyTo) ? msg.replyTo : null;
     const timeLabel = getMessageTimeLabel(msg);
+    const shouldShowReactions = showMobileReaction || hasReacted || Boolean(msg.reactions && msg.reactions.length > 0);
 
     const handleEmojiSelect = async (emoji: string) => {
         setFloatingEmoji(emoji);
@@ -141,7 +142,7 @@ export const ChatBubble = ({
                 justifyContent: isOwn ? 'flex-end' : 'flex-start',
                 ml: isOwn ? 'auto' : 0,
                 mr: isOwn ? 0 : 'auto',
-                mb: 1.5,
+                mb: 2,
             }}
         >
             <Box
@@ -199,8 +200,9 @@ export const ChatBubble = ({
                     animate={{ opacity: 1, y: 0 }}
                     sx={{
                         minWidth: 0,
+                        width: 'fit-content',
                         maxWidth: {
-                            xs: 'calc(100vw - 36px)',
+                            xs: '80%',
                             md: 560,
                         },
                     }}
@@ -287,6 +289,7 @@ export const ChatBubble = ({
                                                 color: isOwn
                                                     ? 'var(--color-button-text)'
                                                     : 'var(--color-primary)',
+                                                textAlign: 'left',
                                             }}
                                         >
                                             {replyPreview.username || 'Usuario'}
@@ -303,6 +306,7 @@ export const ChatBubble = ({
                                                 WebkitLineClamp: 2,
                                                 WebkitBoxOrient: 'vertical',
                                                 overflowWrap: 'anywhere',
+                                                textAlign: 'left',
                                             }}
                                         >
                                             {replyPreview.textPreview || ''}
@@ -329,9 +333,15 @@ export const ChatBubble = ({
                                         src={msg.fileUrl}
                                         alt={msg.filename || 'Imagen del mensaje'}
                                         sx={{
-                                            width: 210,
+                                            width: {
+                                                xs: 200,
+                                                md: 280
+                                            },
                                             maxWidth: '100%',
-                                            height: 150,
+                                            height: {
+                                                xs: 150,
+                                                md: 220
+                                            },
                                             objectFit: 'cover',
                                             display: 'block',
                                             borderRadius: 1.5,
@@ -361,7 +371,7 @@ export const ChatBubble = ({
                                 >
                                     <Box
                                         sx={{
-                                            width: 210,
+                                            width: '100%',
                                             maxWidth: '100%',
                                             height: 150,
                                             overflow: 'hidden',
@@ -579,12 +589,13 @@ export const ChatBubble = ({
                             )}
                         </Paper>
 
-                        {(showMobileReaction || hasReacted || (msg.reactions && msg.reactions.length > 0)) && (
+                        {shouldShowReactions && (
                             <Box
                                 sx={{
                                     display: 'flex',
                                     justifyContent: isOwn ? 'flex-end' : 'flex-start',
-                                    mt: 0.5,
+                                    mt: -1,
+                                    mx: 1,
                                 }}
                             >
                                 <ChatReactions messageId={msg.id} reactions={msg.reactions || []} />
