@@ -32,7 +32,7 @@ import { useAuth } from '../../context/AuthContext';
 
 export const UserMenu = () => {
     const navigate = useNavigate();
-    const { user, updateUser, logout } = useAuth();
+    const { user, updateUser, logout, isSuperAdmin } = useAuth();
 
     const { updateMyTheme } = useUsersStore();
     const { themes, fetchThemes } = useThemeStore();
@@ -187,12 +187,15 @@ export const UserMenu = () => {
                     <ListItemText primary="Cambiar tema del admin" />
                 </MenuItem>
 
-                <MenuItem onClick={() => handleNavigate('/admin/public-test')}>
-                    <ListItemIcon>
-                        <ScienceRoundedIcon fontSize="small" sx={{ color: 'var(--color-primary)' }} />
-                    </ListItemIcon>
-                    <ListItemText primary="Entorno de pruebas" />
-                </MenuItem>
+                {isSuperAdmin && (<>
+                    <MenuItem onClick={() => handleNavigate('/admin/public-test')}>
+                        <ListItemIcon>
+                            <ScienceRoundedIcon fontSize="small" sx={{ color: 'var(--color-primary)' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="Entorno de pruebas" />
+                    </MenuItem>
+                </>
+                )}
 
                 <Divider sx={{ borderColor: 'color-mix(in srgb, var(--color-border) 36%, transparent)' }} />
 

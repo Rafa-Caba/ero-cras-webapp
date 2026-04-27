@@ -4,6 +4,7 @@ import { Box, Paper, Typography, useMediaQuery } from '@mui/material';
 
 import '../../assets/styles/layout/_main.scss';
 import { MyCarousel } from '../../components/components-public/MyCarousel';
+import { useSettingsStore } from '../../store/public';
 
 const acronymLabels = [
     'Sabiduría',
@@ -15,8 +16,19 @@ const acronymLabels = [
     'Emmanuel',
 ];
 
+const reservedPublicSegments = ['members', 'songs', 'about', 'contact', 'blog', 'admin', 'auth'];
+
 export const HomePage = () => {
     const isMobile = useMediaQuery('(max-width:768px)');
+    const { settings } = useSettingsStore();
+
+    const firstPathSegment = location.pathname.match(/^\/([^/?#]+)/)?.[1] || null;
+    const choirKey =
+        firstPathSegment && !reservedPublicSegments.includes(firstPathSegment)
+            ? firstPathSegment
+            : null;
+
+    const publicTitle = `${settings?.webTitle || 'Ero Cras'}`;
 
     return (
         <Box
@@ -79,70 +91,70 @@ export const HomePage = () => {
                             color: 'var(--color-text)',
                         }}
                     >
-                        {isMobile ? 'Ero Cras' : 'Ero Cras:'}
+                        {isMobile ? publicTitle : choirKey === 'eroc1' ? `${publicTitle}: ` : publicTitle}
                     </Typography>
 
-                    {!isMobile && (
-                        <Box
-                            sx={{
-                                width: '100%',
-                                display: 'flex',
-                                flexWrap: {
-                                    md: 'wrap',
-                                    lg: 'nowrap',
-                                },
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                gap: 0,
-                            }}
-                        >
-                            {acronymLabels.map((item) => (
-                                <Typography
-                                    key={item}
-                                    component="span"
-                                    sx={{
-                                        px: 1,
-                                        py: 0.5,
-                                        fontSize: {
-                                            md: '0.9rem',
-                                            lg: '0.96rem',
-                                        },
-                                        fontWeight: 700,
-                                        color: 'var(--color-text)',
-                                        borderLeft: '2px solid color-mix(in srgb, var(--color-border) 85%, var(--color-primary) 15%)',
-                                        '&:last-of-type': {
-                                            borderRight: '2px solid color-mix(in srgb, var(--color-border) 85%, var(--color-primary) 15%)',
-                                        },
-                                        whiteSpace: {
-                                            md: 'normal',
-                                            lg: 'nowrap',
-                                        },
-                                        textAlign: 'center',
-                                    }}
-                                >
-                                    {item}
-                                </Typography>
-                            ))}
-                        </Box>
-                    )}
-
-                    {isMobile && (
-                        <Typography
-                            component="p"
-                            sx={{
-                                m: 0,
-                                px: 1.5,
-                                py: 0.5,
-                                borderLeft: '2px solid color-mix(in srgb, var(--color-border) 85%, var(--color-primary) 15%)',
-                                borderRight: '2px solid color-mix(in srgb, var(--color-border) 85%, var(--color-primary) 15%)',
-                                fontSize: '0.92rem',
-                                fontWeight: 800,
-                                color: 'var(--color-secondary-text)',
-                                textAlign: 'center',
-                            }}
-                        >
-                            E · R · O · C · R · A · S
-                        </Typography>
+                    {choirKey === 'eroc1' && (
+                        !isMobile ? (
+                            <Box
+                                sx={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    flexWrap: {
+                                        md: 'wrap',
+                                        lg: 'nowrap',
+                                    },
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    gap: 0,
+                                }}
+                            >
+                                {acronymLabels.map((item) => (
+                                    <Typography
+                                        key={item}
+                                        component="span"
+                                        sx={{
+                                            px: 1,
+                                            py: 0.5,
+                                            fontSize: {
+                                                md: '0.9rem',
+                                                lg: '0.96rem',
+                                            },
+                                            fontWeight: 700,
+                                            color: 'var(--color-text)',
+                                            borderLeft: '2px solid color-mix(in srgb, var(--color-border) 85%, var(--color-primary) 15%)',
+                                            '&:last-of-type': {
+                                                borderRight: '2px solid color-mix(in srgb, var(--color-border) 85%, var(--color-primary) 15%)',
+                                            },
+                                            whiteSpace: {
+                                                md: 'normal',
+                                                lg: 'nowrap',
+                                            },
+                                            textAlign: 'center',
+                                        }}
+                                    >
+                                        {item}
+                                    </Typography>
+                                ))}
+                            </Box>
+                        ) : (
+                            <Typography
+                                component="p"
+                                sx={{
+                                    m: 0,
+                                    px: 1.5,
+                                    py: 0.5,
+                                    borderLeft: '2px solid color-mix(in srgb, var(--color-border) 85%, var(--color-primary) 15%)',
+                                    borderRight: '2px solid color-mix(in srgb, var(--color-border) 85%, var(--color-primary) 15%)',
+                                    fontSize: '0.92rem',
+                                    fontWeight: 800,
+                                    color: 'var(--color-secondary-text)',
+                                    textAlign: 'center',
+                                }}
+                            >
+                                E · R · O · C · R · A · S
+                            </Typography>
+                        )
                     )}
                 </Box>
             </Paper>

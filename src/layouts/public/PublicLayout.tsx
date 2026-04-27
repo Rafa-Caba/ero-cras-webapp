@@ -53,6 +53,51 @@ const publicFooterHeight = 58;
 
 const reservedPublicSegments = ['members', 'songs', 'about', 'contact', 'blog', 'admin', 'auth'];
 
+const brandTitleStorageKey = 'ero-cras-brand-title';
+const brandLogoStorageKey = 'ero-cras-brand-logo';
+
+const readLocalStorageValue = (key: string): string => {
+    if (typeof window === 'undefined') {
+        return '';
+    }
+
+    try {
+        return window.localStorage.getItem(key) || '';
+    } catch {
+        return '';
+    }
+};
+
+const writeLocalStorageValue = (key: string, value: string): void => {
+    if (typeof window === 'undefined' || value.trim() === '') {
+        return;
+    }
+
+    try {
+        window.localStorage.setItem(key, value);
+    } catch {
+        return;
+    }
+};
+
+const setDocumentFavicon = (href: string): void => {
+    if (typeof document === 'undefined' || href.trim() === '') {
+        return;
+    }
+
+    const existingFavicon = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
+
+    if (existingFavicon) {
+        existingFavicon.href = href;
+        return;
+    }
+
+    const favicon = document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.href = href;
+    document.head.appendChild(favicon);
+};
+
 const getCompactTitle = (title: string) => {
     const words = title
         .replace(/[^a-zA-ZÀ-ÿ0-9\s]/g, ' ')
@@ -61,7 +106,7 @@ const getCompactTitle = (title: string) => {
         .filter(Boolean);
 
     if (words.length === 0) {
-        return 'EC';
+        return '';
     }
 
     return words
@@ -81,8 +126,21 @@ const PublicLayout = () => {
     const showSideRails = useMediaQuery('(min-width:1200px)');
 
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+    const [cachedWebTitle, setCachedWebTitle] = useState<string>(() => readLocalStorageValue(brandTitleStorageKey));
+    const [cachedLogoUrl, setCachedLogoUrl] = useState<string>(() => readLocalStorageValue(brandLogoStorageKey));
 
     const headerHeight = isDesktop ? desktopHeaderHeight : mobileHeaderHeight;
+
+    const logoImage = images.find((image) => image.imageLogo);
+    const leftMenuImage = images.find((image) => image.imageLeftMenu);
+    const rightMenuImage = images.find((image) => image.imageRightMenu);
+
+    const realWebTitle = settings?.webTitle?.trim() || '';
+    const realLogoUrl = logoImage?.imageUrl?.trim() || '';
+    const resolvedWebTitle = realWebTitle || cachedWebTitle;
+    const resolvedLogoUrl = realLogoUrl || cachedLogoUrl;
+    const publicTitle = resolvedWebTitle ? `${resolvedWebTitle} Oficial` : 'Cargando sitio...';
+    const compactTitle = getCompactTitle(publicTitle);
 
     useEffect(() => {
         void fetchSettings();
@@ -90,19 +148,24 @@ const PublicLayout = () => {
     }, [fetchGallery, fetchSettings]);
 
     useEffect(() => {
-        if (settings?.webTitle) {
-            document.title = settings.webTitle;
-        } else {
-            document.title = 'Ero Cras Oficial';
+        if (resolvedWebTitle) {
+            document.title = resolvedWebTitle;
         }
 
-        const logoImage = images.find((image) => image.imageLogo);
-        const favicon = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
-
-        if (favicon && logoImage) {
-            favicon.href = logoImage.imageUrl || '/images/erocrasLogo.png';
+        if (realWebTitle && realWebTitle !== cachedWebTitle) {
+            setCachedWebTitle(realWebTitle);
+            writeLocalStorageValue(brandTitleStorageKey, realWebTitle);
         }
-    }, [settings, images]);
+
+        if (resolvedLogoUrl) {
+            setDocumentFavicon(resolvedLogoUrl);
+        }
+
+        if (realLogoUrl && realLogoUrl !== cachedLogoUrl) {
+            setCachedLogoUrl(realLogoUrl);
+            writeLocalStorageValue(brandLogoStorageKey, realLogoUrl);
+        }
+    }, [cachedLogoUrl, cachedWebTitle, realLogoUrl, realWebTitle, resolvedLogoUrl, resolvedWebTitle]);
 
     const fromAdmin = new URLSearchParams(location.search).get('fromAdmin') === 'true';
 
@@ -114,13 +177,6 @@ const PublicLayout = () => {
 
     const basePath = choirKey ? `/${choirKey}` : 'ero1';
     const homePath = choirKey ? `/${choirKey}` : '/ero1';
-
-    const publicTitle = `${settings?.webTitle || 'Ero Cras'} Oficial`;
-    const compactTitle = getCompactTitle(publicTitle);
-
-    const logoImage = images.find((image) => image.imageLogo);
-    const leftMenuImage = images.find((image) => image.imageLeftMenu);
-    const rightMenuImage = images.find((image) => image.imageRightMenu);
 
     const navigationItems = useMemo<PublicNavigationItem[]>(() => {
         return [
@@ -203,7 +259,7 @@ const PublicLayout = () => {
                 }}
             >
                 <Avatar
-                    src={logoImage?.imageUrl}
+                    src={resolvedLogoUrl || undefined}
                     alt={publicTitle}
                     sx={{
                         width: 44,
@@ -408,7 +464,7 @@ const PublicLayout = () => {
                         )}
 
                         <Avatar
-                            src={logoImage?.imageUrl}
+                            src={resolvedLogoUrl || undefined}
                             alt={publicTitle}
                             sx={{
                                 width: { xs: 40, md: 46 },

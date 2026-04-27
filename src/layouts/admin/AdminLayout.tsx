@@ -8,8 +8,8 @@ import {
     AppBar,
     Avatar,
     Box,
-    // BottomNavigation, // Reactivar si quieres volver a usar bottom nav móvil
-    // BottomNavigationAction, // Reactivar si quieres volver a usar bottom nav móvil
+    // BottomNavigation, // Enable again if you want to use the mobile bottom nav
+    // BottomNavigationAction, // Enable again if you want to use the mobile bottom nav
     Chip,
     CircularProgress,
     Drawer,
@@ -63,12 +63,57 @@ interface AdminNavigationItem {
     showInBottomNav: boolean;
 }
 
-const drawerWidth = 292;
+const drawerWidth = 280;
 const collapsedDrawerWidth = 86;
-const rightRailWidth = 300;
+const rightRailWidth = 270;
 const headerHeight = 76;
 const footerHeight = 58;
-// const bottomNavHeight = 74; // Reactivar si quieres volver a usar bottom nav móvil
+// const bottomNavHeight = 74; // Enable again if you want to use the mobile bottom nav
+
+const brandTitleStorageKey = 'ero-cras-brand-title';
+const brandLogoStorageKey = 'ero-cras-brand-logo';
+
+const readLocalStorageValue = (key: string): string => {
+    if (typeof window === 'undefined') {
+        return '';
+    }
+
+    try {
+        return window.localStorage.getItem(key) || '';
+    } catch {
+        return '';
+    }
+};
+
+const writeLocalStorageValue = (key: string, value: string): void => {
+    if (typeof window === 'undefined' || value.trim() === '') {
+        return;
+    }
+
+    try {
+        window.localStorage.setItem(key, value);
+    } catch {
+        return;
+    }
+};
+
+const setDocumentFavicon = (href: string): void => {
+    if (typeof document === 'undefined' || href.trim() === '') {
+        return;
+    }
+
+    const existingFavicon = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
+
+    if (existingFavicon) {
+        existingFavicon.href = href;
+        return;
+    }
+
+    const favicon = document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.href = href;
+    document.head.appendChild(favicon);
+};
 
 const AdminLayout = () => {
     const navigate = useNavigate();
@@ -76,28 +121,64 @@ const AdminLayout = () => {
 
     const { user, loading, isAdmin, canEdit, isSuperAdmin } = useAuth();
     const { settings, fetchSettings } = useAdminSettingsStore();
-    const { images } = useGalleryStore();
+    const { images, fetchGallery } = useGalleryStore();
 
     const isDesktop = useMediaQuery('(min-width:1200px)');
     const showRightRail = useMediaQuery('(min-width:1400px)');
 
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
     const [desktopDrawerCollapsed, setDesktopDrawerCollapsed] = useState(false);
+    const [cachedWebTitle, setCachedWebTitle] = useState<string>(() => readLocalStorageValue(brandTitleStorageKey));
+    const [cachedLogoUrl, setCachedLogoUrl] = useState<string>(() => readLocalStorageValue(brandLogoStorageKey));
 
     const isAuthenticated = Boolean(user);
     const activeDrawerWidth = desktopDrawerCollapsed ? collapsedDrawerWidth : drawerWidth;
 
+    const logoImage = images.find((image) => image.imageLogo);
+    const realWebTitle = settings?.webTitle?.trim() || '';
+    const realLogoUrl = logoImage?.imageUrl?.trim() || '';
+    const resolvedWebTitle = realWebTitle || cachedWebTitle;
+    const resolvedLogoUrl = realLogoUrl || cachedLogoUrl;
+    const layoutTitle = resolvedWebTitle || 'Cargando sitio...';
+    const layoutLogoFallback = resolvedWebTitle
+        ? resolvedWebTitle
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((word) => word.charAt(0).toUpperCase())
+            .join('')
+        : '';
+
+    useEffect(() => {
+        if (resolvedWebTitle) {
+            document.title = resolvedWebTitle;
+        }
+
+        if (realWebTitle && realWebTitle !== cachedWebTitle) {
+            setCachedWebTitle(realWebTitle);
+            writeLocalStorageValue(brandTitleStorageKey, realWebTitle);
+        }
+
+        if (resolvedLogoUrl) {
+            setDocumentFavicon(resolvedLogoUrl);
+        }
+
+        if (realLogoUrl && realLogoUrl !== cachedLogoUrl) {
+            setCachedLogoUrl(realLogoUrl);
+            writeLocalStorageValue(brandLogoStorageKey, realLogoUrl);
+        }
+    }, [cachedLogoUrl, cachedWebTitle, realLogoUrl, realWebTitle, resolvedLogoUrl, resolvedWebTitle]);
+
     useEffect(() => {
         if (!loading && isAuthenticated) {
             void fetchSettings();
+            void fetchGallery();
         }
-    }, [loading, isAuthenticated, fetchSettings]);
+    }, [loading, isAuthenticated, fetchSettings, fetchGallery]);
 
     const choirCode = user?.choirCode || 'eroc1';
     const choirName = user?.choirName || '';
     const choirLabel = choirName || choirCode || 'Coro asignado';
-
-    const leftMenuImage = images.find((image) => image.imageLogo);
 
     const navigationItems = useMemo<AdminNavigationItem[]>(() => {
         return [
@@ -211,12 +292,6 @@ const AdminLayout = () => {
 
     const visibleNavigationItems = navigationItems.filter((item) => item.visible);
 
-    /*
-        Reactivar si quieres volver a usar bottom nav móvil.
-
-        const bottomNavigationItems = visibleNavigationItems.filter((item) => item.showInBottomNav);
-    */
-
     const isActive = (path: string) => {
         if (path === '/admin') {
             return location.pathname === '/admin';
@@ -224,12 +299,6 @@ const AdminLayout = () => {
 
         return location.pathname === path || location.pathname.startsWith(`${path}/`);
     };
-
-    /*
-        Reactivar si quieres volver a usar bottom nav móvil.
-
-        const bottomNavigationValue = bottomNavigationItems.find((item) => isActive(item.path))?.path || '/admin';
-    */
 
     const handleNavigate = (path: string) => {
         navigate(path);
@@ -275,8 +344,8 @@ const AdminLayout = () => {
                 }}
             >
                 <Avatar
-                    src={leftMenuImage?.imageUrl}
-                    alt={settings?.webTitle || 'Ero Cras'}
+                    src={resolvedLogoUrl || undefined}
+                    alt={layoutTitle}
                     sx={{
                         width: 46,
                         height: 46,
@@ -286,7 +355,7 @@ const AdminLayout = () => {
                         flexShrink: 0,
                     }}
                 >
-                    EC
+                    {layoutLogoFallback}
                 </Avatar>
 
                 {!collapsed && (
@@ -302,7 +371,7 @@ const AdminLayout = () => {
                                 textOverflow: 'ellipsis',
                             }}
                         >
-                            {settings?.webTitle || 'Ero Cras'}
+                            {layoutTitle}
                         </Typography>
 
                         <Typography
@@ -537,7 +606,7 @@ const AdminLayout = () => {
                                         textOverflow: 'ellipsis',
                                     }}
                                 >
-                                    {settings?.webTitle || 'Ero Cras'} - Admin
+                                    {layoutTitle} - Admin
                                 </Typography>
 
                                 <Chip
@@ -788,7 +857,7 @@ const AdminLayout = () => {
                 </Box>
 
                 {/*
-                    Reactivar si quieres volver a usar bottom nav móvil.
+                    Enable again if you want to use the mobile bottom nav.
 
                     {!isDesktop && (
                         <Paper

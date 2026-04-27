@@ -135,8 +135,9 @@ const SectionHeader = ({ title, subtitle, icon, action }: SectionHeaderProps) =>
 
 export const AdminGallery = () => {
     const [searchParams] = useSearchParams();
+
     const [loadingLocal, setLoadingLocal] = useState(true);
-    const { canEdit } = useAuth();
+    const { user, canEdit } = useAuth();
 
     const {
         images,
@@ -225,6 +226,7 @@ export const AdminGallery = () => {
     };
 
     const isLoading = loadingLocal || loading;
+    const choirName = user?.choirName || '';
 
     return (
         <Box
@@ -238,7 +240,7 @@ export const AdminGallery = () => {
             }}
         >
             <SectionHeader
-                title="Galería Ero Cras"
+                title={`Galería ${choirName}`}
                 subtitle="Administra imágenes, logos, menús laterales y medios públicos."
                 icon={<CollectionsRoundedIcon />}
                 action={
