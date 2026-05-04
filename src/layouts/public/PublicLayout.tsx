@@ -123,7 +123,7 @@ const PublicLayout = () => {
     const { images, fetchGallery } = useGalleryStore();
 
     const isDesktop = useMediaQuery('(min-width:900px)');
-    const showSideRails = useMediaQuery('(min-width:1200px)');
+    const showSideRails = useMediaQuery('(min-width:1100px)');
 
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
     const [cachedWebTitle, setCachedWebTitle] = useState<string>(() => readLocalStorageValue(brandTitleStorageKey));
@@ -664,7 +664,7 @@ const PublicLayout = () => {
                     <Box
                         sx={{
                             width: '100%',
-                            maxWidth: '1840px',
+                            maxWidth: '2160px',
                             mx: 'auto',
                             flex: 1,
                             minHeight: 0,

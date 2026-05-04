@@ -309,8 +309,8 @@ export const SongsSection = () => {
                 <Box
                     sx={{
                         mt: {
-                            xs: 4,
-                            md: 5,
+                            xs: 8,
+                            md: 10,
                         },
                         display: 'flex',
                         justifyContent: 'center',
@@ -318,7 +318,7 @@ export const SongsSection = () => {
                 >
                     <Box
                         component="img"
-                        src="images_members/coro-dibujo.png"
+                        src="/images/coro-dibujo.png"
                         alt="Dibujo coro"
                         sx={{
                             width: '100%',
